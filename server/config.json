@@ -1,7 +1,7 @@
 {
   "restApiRoot": "/api",
   "host": "0.0.0.0",
-  "domain": "http://localhost:3000",
+  "domain": "http://104.217.253.15:3000",
   "siteDomain": "http://104.217.253.15/vobbleApp/Vobble-webApp",
   "thumbUrl": "C:/FFmpeg/bin/",
   "programFFmpegName": [
