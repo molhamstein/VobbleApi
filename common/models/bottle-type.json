@@ -1,0 +1,30 @@
+{
+  "name": "bottleType",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "name": {
+      "type": "string",
+      "required": true
+    },
+    "cover": {
+      "type": "string"
+    },
+    "icon": {
+      "type": "string"
+    }
+  },
+  "validations": [],
+  "relations": {
+    "bottles": {
+      "type": "hasMany",
+      "model": "bottle",
+      "foreignKey": "bottleTypeId"
+    }
+  },
+  "acls": [],
+  "methods": {}
+}

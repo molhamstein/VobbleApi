@@ -1,0 +1,24 @@
+{
+  "name": "bottleUserseen",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {},
+  "validations": [],
+  "relations": {
+    "bottles": {
+      "type": "hasMany",
+      "model": "bottle",
+      "foreignKey": "bottleId"
+    },
+    "users": {
+      "type": "hasMany",
+      "model": "user",
+      "foreignKey": "userId"
+    }
+  },
+  "acls": [],
+  "methods": {}
+}
