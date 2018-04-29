@@ -37,7 +37,7 @@ module.exports = function (Uploadfile) {
                 ffmpeg(src + "/" + folderName + "/" + file.name)
                     .screenshot({
                         count: 1,
-                        filename: file.name.substring(0, file.name.lastIndexOf('.')) + "_thumb.png",
+                        filename: file.name.substring(0, file.name.lastIndexOf('.')) + "_thumb.PNG",
                         folder: src + '/thumb/',
                         size: '320x240'
                     });
@@ -52,7 +52,7 @@ module.exports = function (Uploadfile) {
                 });
             }
             // this for download
-            files.push({ 'file': urlFileRootSave + file.name, 'thumble': urlThumbRootSave + file.name.substring(0, file.name.lastIndexOf('.')) + "_thumb.png" });
+            files.push({ 'file': urlFileRootSave + file.name, 'thumble': urlThumbRootSave + file.name.substring(0, file.name.lastIndexOf('.')) + "_thumb.PNG" });
 
             // this for view
             // files.push({ 'file': src + folderName + "/" + file.name, 'thumble': src + "thumb/" + file.name.substring(0, file.name.lastIndexOf('.')) + "_thumb.png" });
