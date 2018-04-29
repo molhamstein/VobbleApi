@@ -45,7 +45,7 @@ module.exports = function (Uploadfile) {
             // cheack type of file from folder name request            
             else if (folderName == "images") {
                 thumb({
-                    source: src + folderName + "/" + file.name.substring(0, file.name.lastIndexOf('.')) + ".png",// could be a filename: dest/path/image.jpg
+                    source: src + "/" + folderName + "/" + file.name,// could be a filename: dest/path/image.jpg
                     destination: src + 'thumb/',
                     concurrency: 4
                 }, function (files, err, stdout, stderr) {
