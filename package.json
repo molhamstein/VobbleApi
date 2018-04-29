@@ -17,7 +17,6 @@
     "cls-hooked": "^4.2.2",
     "compression": "^1.0.3",
     "cors": "^2.5.2",
-    "ffmpeg": "3.2.4",
     "ffprobe": "^1.1.0",
     "fluent-ffmpeg": "^2.1.2",
     "helmet": "^3.10.0",
