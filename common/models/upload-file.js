@@ -27,10 +27,10 @@ module.exports = function (Uploadfile) {
         // ulr save thumble
         var urlThumbRootSave = urlFileRoot + '/' + "thumb" + '/download/'
 
-
-        ffmpeg.setFfmpegPath(path.join(config.thumbUrl + config.programFFmpegName[0]));
-        ffmpeg.setFfprobePath(path.join(config.thumbUrl + config.programFFmpegName[1]));
-
+        if (process.env.NODE_ENV != undefined) {
+            ffmpeg.setFfmpegPath(path.join(config.thumbUrl + config.programFFmpegName[0]));
+            ffmpeg.setFfprobePath(path.join(config.thumbUrl + config.programFFmpegName[1]));
+        }
         result.result.files.file.forEach((file) => {
             // cheack type of file from folder name request
             if (folderName == "videos") {
