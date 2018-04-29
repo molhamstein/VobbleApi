@@ -56,11 +56,15 @@ module.exports = async function (app) {
 
       await bottleType.create([
         {
-          "name": "firstType",
-          "image": null
+          "name": "Main",
+          "cover": null
         }, {
-          "name": "secondeType",
-          "image": null
+          "name": "Love",
+          "cover": null
+        },
+         {
+          "name": "فضفضة",
+          "cover": null
         }
       ])
 
