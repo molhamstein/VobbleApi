@@ -46,7 +46,7 @@ module.exports = function (Uploadfile) {
             else if (folderName == "images") {
                 thumb({
                     source: src + "/" + folderName + "/" + file.name,// could be a filename: dest/path/image.jpg
-                    destination: src + 'thumb/',
+                    destination: src + '/thumb/',
                     concurrency: 4
                 }, function (files, err, stdout, stderr) {
                 });
