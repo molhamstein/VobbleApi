@@ -13,14 +13,29 @@
     "thumble": {
       "type": "string",
       "required": true
+    },
+    "createdAt": {
+      "type": "date",
+      "required": true,
+      "defaultFn": "now"
     }
+  },
+  "scope": {
+    "include": [
+      {
+        "relation": "owner"
+      },
+      {
+        "relation": "shore"
+      }
+    ]
   },
   "validations": [],
   "relations": {
-    "bottleType": {
+    "shore": {
       "type": "belongsTo",
-      "model": "bottleType",
-      "foreignKey": "bottleTypeId"
+      "model": "shore",
+      "foreignKey": "shoreId"
     },
     "owner": {
       "type": "belongsTo",
@@ -33,7 +48,7 @@
       "accessType": "*",
       "principalType": "ROLE",
       "principalId": "$everyone",
-      "permission": "DENY"
+      "permission": "ALLOW"
     },
     {
       "principalType": "ROLE",

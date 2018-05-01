@@ -1,7 +1,7 @@
 module.exports = async function (app) {
   var User = app.models.user;
   var Role = app.models.Role;
-  var bottleType = app.models.bottleType;
+  var shore = app.models.shore;
   var RoleMapping = app.models.RoleMapping;
   const FileContainer = app.models.FileContainer;
   const configPath = process.env.NODE_ENV === undefined ? '../../server/config.json' : `../../server/config.${process.env.NODE_ENV}.json`;
@@ -33,14 +33,18 @@ module.exports = async function (app) {
           password: 'password',
           emailVerified: true,
           status: "active",
-          gender: "male"
+          gender: "male",
+          image: "String",
+          username: "admin"
         },
         {
           email: 'customer1@vobble.com',
           password: 'password',
           emailVerified: true,
           status: "active",
-          gender: "male"
+          gender: "male",
+          image: "String",
+          username: "customer1"
 
         },
         {
@@ -48,23 +52,29 @@ module.exports = async function (app) {
           password: 'password',
           emailVerified: true,
           status: "active",
-          gender: "male"
+          gender: "male",
+          image: "String",
+          username: "customer2"
 
         }
       ]);
       // console.log('Created users:', users);
 
-      await bottleType.create([
+      await shore.create([
         {
-          "name": "Main",
-          "cover": null
-        }, {
-          "name": "Love",
-          "cover": null
+          name: "Main Shore",
+          icon: "http://104.217.253.15:9999/api/uploads/videos/download/1522568292031_shore.jpg",
+          cover: "http://104.217.253.15:9999/api/uploads/videos/download/1522568292031_shore.jpg",
         },
-         {
-          "name": "فضفضة",
-          "cover": null
+        {
+          name: "Love Shore",
+          icon: "http://104.217.253.15:9999/api/uploads/videos/download/1522568387594_shore2.jpg",
+          cover: "http://104.217.253.15:9999/api/uploads/videos/download/1522568387594_shore2.jpg",
+        },
+        {
+          name: "FadFed Shore",
+          icon: "http://104.217.253.15:9999/api/uploads/videos/download/1522568292031_shore.jpg",
+          cover: "http://104.217.253.15:9999/api/uploads/videos/download/1522568292031_shore.jpg",
         }
       ])
 

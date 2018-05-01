@@ -7,7 +7,7 @@ const configPath = process.env.NODE_ENV === undefined ?
 const config = require(configPath);
 
 
- // "siteDomain": "http://104.217.253.15/vobbleApp/Vobble-webApp",
+// "siteDomain": "http://104.217.253.15/vobbleApp/Vobble-webApp",
 
 module.exports = function (User) {
 
@@ -36,7 +36,7 @@ module.exports = function (User) {
         });
     }
 
-
+    // to Send Verfication email after register 
     User.afterRemote('create', function (context, user, next) {
         sendVerificationEmail(user, 'Thanks for registering.', '', function (err, res) {
             if (err)
@@ -55,6 +55,24 @@ module.exports = function (User) {
             next();
         }).catch(err => next(err));
     });
+
+    //send password reset link when requested
+    User.on('resetPasswordRequest', function (info) {
+        // let url = `${config.siteDomain}/login/reset-password?access_token=${info.accessToken.id}&user_id=${info.user.id}`;
+        let url = `${config.siteDomain}`+ `/login/reset-password?access_token=${info.accessToken.id}&user_id=${info.user.id}`;
+        ejs.renderFile(path.resolve(__dirname + "../../../server/views/reset-password-template.ejs"), { url: url }, function (err, html) {
+            if (err) return console.log('> error sending password reset email', err);
+            User.app.models.Email.send({
+                to: info.email,
+                from: 'dlaaalsite@gmail.com',
+                subject: 'Password reset',
+                html: html
+            }, function (err) {
+                if (err) return console.log('> error sending password reset email');
+            });
+        });
+    });
+
 
 
 };

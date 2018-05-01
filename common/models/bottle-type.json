@@ -1,5 +1,5 @@
 {
-  "name": "bottleType",
+  "name": "shore",
   "base": "PersistedModel",
   "idInjection": true,
   "options": {
@@ -22,7 +22,7 @@
     "bottles": {
       "type": "hasMany",
       "model": "bottle",
-      "foreignKey": "bottleTypeId"
+      "foreignKey": "shoreId"
     }
   },
   "acls": [],

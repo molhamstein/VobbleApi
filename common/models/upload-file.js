@@ -41,6 +41,8 @@ module.exports = function (Uploadfile) {
                         folder: src + '/thumb/',
                         size: '320x240'
                     });
+                files.push({ 'file': urlFileRootSave + file.name, 'thumbnail': urlThumbRootSave + file.name.substring(0, file.name.lastIndexOf('.')) + "_thumb.PNG" });
+
             }
             // cheack type of file from folder name request            
             else if (folderName == "images") {
@@ -50,9 +52,13 @@ module.exports = function (Uploadfile) {
                     concurrency: 4
                 }, function (files, err, stdout, stderr) {
                 });
+                var parts = file.name.split('.');
+                var extension = parts[parts.length - 1];
+                files.push({ 'file': urlFileRootSave + file.name, 'thumbnail': urlThumbRootSave + file.name.substring(0, file.name.lastIndexOf('.')) + "_thumb." + extension });
+
             }
             // this for download
-            files.push({ 'file': urlFileRootSave + file.name, 'thumble': urlThumbRootSave + file.name.substring(0, file.name.lastIndexOf('.')) + "_thumb.PNG" });
+            // files.push({ 'file': urlFileRootSave + file.name, 'thumble': urlThumbRootSave + file.name.substring(0, file.name.lastIndexOf('.')) + "_thumb.PNG" });
 
             // this for view
             // files.push({ 'file': src + folderName + "/" + file.name, 'thumble': src + "thumb/" + file.name.substring(0, file.name.lastIndexOf('.')) + "_thumb.png" });

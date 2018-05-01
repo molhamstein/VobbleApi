@@ -17,6 +17,18 @@
       "type": "string",
       "required": true
     },
+    "image": {
+      "type": "string",
+      "required": true
+    },
+    "bottlesCount": {
+      "type": "number",
+      "default": 0
+    },
+    "bottlesCountToday": {
+      "type": "number",
+      "default": 3
+    },
     "email": {
       "type": "string",
       "required": true
@@ -56,6 +68,13 @@
       "principalId": "$everyone",
       "permission": "ALLOW",
       "property": "login"
+    },
+    {
+      "accessType": "EXECUTE",
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW",
+      "property": "resetPassword"
     },
     {
       "principalType": "ROLE",
