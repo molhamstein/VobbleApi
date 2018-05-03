@@ -9,7 +9,6 @@ const LoopBackContext = require('loopback-context');
 app.use(LoopBackContext.perRequest());
 app.use(loopback.token());
 
-
 app.use(function (req, res, next) {
   // console("App Use");
   if (!req.accessToken) return next();

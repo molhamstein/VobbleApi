@@ -5,6 +5,16 @@
   "options": {
     "validateUpsert": true
   },
+  "scope": {
+    "include": [
+      {
+        "relation": "owner"
+      },
+      {
+        "relation": "shore"
+      }
+    ]
+  },
   "properties": {
     "file": {
       "type": "string",
@@ -19,16 +29,6 @@
       "required": true,
       "defaultFn": "now"
     }
-  },
-  "scope": {
-    "include": [
-      {
-        "relation": "owner"
-      },
-      {
-        "relation": "shore"
-      }
-    ]
   },
   "validations": [],
   "relations": {
@@ -48,7 +48,7 @@
       "accessType": "*",
       "principalType": "ROLE",
       "principalId": "$everyone",
-      "permission": "ALLOW"
+      "permission": "DENY"
     },
     {
       "principalType": "ROLE",

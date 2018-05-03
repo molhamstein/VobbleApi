@@ -12,6 +12,13 @@
     "emailVerified",
     "realm"
   ],
+  "scope": {
+    "include": [
+      {
+        "relation": "country"
+      }
+    ]
+  },
   "properties": {
     "gender": {
       "type": "string",
@@ -30,13 +37,15 @@
       "default": 3
     },
     "email": {
-      "type": "string",
-      "required": true
+      "type": "string"
     },
     "status": {
       "type": "string",
       "required": true,
       "default": "pending"
+    },
+    "typeLogIn": {
+      "type": "string"
     }
   },
   "validations": [],
@@ -49,6 +58,11 @@
       "options": {
         "disableInclude": true
       }
+    },
+    "country": {
+      "type": "belongsTo",
+      "model": "country",
+      "foreignKey": "ISOCode"
     }
   },
   "acls": [
@@ -95,6 +109,18 @@
       "property": "findById"
     },
     {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW",
+      "property": "findOrCreate"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW",
+      "property": "loginFacebook"
+    },
+    {
       "accessType": "*",
       "principalType": "ROLE",
       "principalId": "$owner",
@@ -107,5 +133,43 @@
       "permission": "ALLOW"
     }
   ],
-  "methods": {}
+  "methods": {
+    "loginFacebook": {
+      "accepts": [
+        {
+          "arg": "token",
+          "type": "string",
+          "required": true,
+          "description": ""
+        },
+        {
+          "arg": "email",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "arg": "name",
+          "type": "string",
+          "required": true,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "arg": "result",
+          "type": "object",
+          "root": true,
+          "description": ""
+        }
+      ],
+      "description": "",
+      "http": [
+        {
+          "path": "/facebookLogin",
+          "verb": "post"
+        }
+      ]
+    }
+  }
 }
