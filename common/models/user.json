@@ -45,7 +45,8 @@
       "default": "pending"
     },
     "typeLogIn": {
-      "type": "string"
+      "type": "string",
+      "default": "registration"
     }
   },
   "validations": [],
@@ -138,6 +139,67 @@
       "accepts": [
         {
           "arg": "token",
+          "type": "string",
+          "required": true,
+          "description": ""
+        },
+        {
+          "arg": "gender",
+          "type": "string",
+          "required": true,
+          "description": ""
+        },
+        {
+          "arg": "image",
+          "type": "string",
+          "required": true,
+          "description": ""
+        },
+        {
+          "arg": "email",
+          "type": "string",
+          "required": false,
+          "description": ""
+        },
+        {
+          "arg": "name",
+          "type": "string",
+          "required": true,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "arg": "result",
+          "type": "object",
+          "root": true,
+          "description": ""
+        }
+      ],
+      "description": "",
+      "http": [
+        {
+          "path": "/facebookLogin",
+          "verb": "post"
+        }
+      ]
+    },
+    "loginInstegram": {
+      "accepts": [
+        {
+          "arg": "token",
+          "type": "string",
+          "required": true,
+          "description": ""
+        },
+        {
+          "arg": "gender",
+          "type": "string",
+          "required": true,
+          "description": ""
+        },
+        {
+          "arg": "image",
           "type": "string",
           "required": true,
           "description": ""

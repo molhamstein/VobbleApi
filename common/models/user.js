@@ -80,7 +80,7 @@ module.exports = function (User) {
      * @param {Function(Error, object)} callback
      */
 
-    User.loginFacebook = function (token, email, name, callback) {
+    User.loginFacebook = function (token, gender,image,email, name, callback) {
         var result;
         // TODO
         User.findOne({ where: { username: name, typeLogIn: "facebook" } }, function (err, oneUser) {
@@ -88,8 +88,8 @@ module.exports = function (User) {
                 callback(err, null);
             if (oneUser == null) {
                 User.create({
-                    gender: "male",
-                    image: "String",
+                    gender: gender,
+                    image: image,
                     username: name,
                     password: "123",
                     typeLogIn: "facebook"
@@ -99,10 +99,7 @@ module.exports = function (User) {
                     User.app.models.AccessToken.create({
                         userId: newUser.id
                     }, function (err, newToken) {
-                        console.log("New Tocken")
-                        console.log(newToken)
                         callback(null, newToken);
-
                     })
 
                 })
@@ -110,28 +107,43 @@ module.exports = function (User) {
                 User.app.models.AccessToken.findOne({ userId: oneUser.id }, function (err, token) {
                     if (err)
                         callback(err, null);
-                    console.log("Old Tocken")
-                    console.log(token)
                     callback(null, token);
                 });
             }
-            // User.app.models.AccessToken.findOne({
-            //     userId: user.id
-            // }, function (err, userToken) {
-            //     if (userToken == null) {
-            //         User.app.models.AccessToken.findOrCreate({
-            //             userId: user.id
-            //         }, function (err, newToken) {
-            //             console.log("New Tocken")
-            //             console.log(newToken)
-            //         })
-            //     }
-            //     //     else {
-            //     //         console.log("old token");
-            //     //         console.log(userToken);
-            //     //     }
-            // });
         });
-        // callback(null, result);
     };
+
+        User.loginInstegram = function (token, gender,image,email, name, callback) {
+        var result;
+        // TODO
+        User.findOne({ where: { username: name, typeLogIn: "instegram" } }, function (err, oneUser) {
+            if (err)
+                callback(err, null);
+            if (oneUser == null) {
+                User.create({
+                    gender: gender,
+                    image: image,
+                    username: name,
+                    password: "123",
+                    typeLogIn: "instegram"
+                }, function (err, newUser) {
+                    if (err)
+                        callback(err, null);
+                    User.app.models.AccessToken.create({
+                        userId: newUser.id
+                    }, function (err, newToken) {
+                        callback(null, newToken);
+                    })
+
+                })
+            } else {
+                User.app.models.AccessToken.findOne({ userId: oneUser.id }, function (err, token) {
+                    if (err)
+                        callback(err, null);
+                    callback(null, token);
+                });
+            }
+        });
+    };
+
 };
