@@ -1,0 +1,58 @@
+{
+  "name": "product",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "scope": {
+    "include": [
+      {
+        "relation": "typeGoods"
+      }
+    ]
+  },
+  "properties": {
+    "name_ar": {
+      "type": "string",
+      "required": true
+    },
+    "name_en": {
+      "type": "string",
+      "required": true
+    },
+    "price": {
+      "type": "string",
+      "required": true
+    },
+    "description": {
+      "type": "string",
+      "required": true
+    },
+    "icon": {
+      "type": "string",
+      "required": true
+    },
+    "androidProduct": {
+      "type": "string"
+    },
+    "appleProduct": {
+      "type": "string"
+    }
+  },
+  "validations": [],
+  "relations": {
+    "typeGoods": {
+      "type": "belongsTo",
+      "model": "typeGoods",
+      "foreignKey": "typeGoodsId"
+    },
+    "items": {
+      "type": "hasMany",
+      "model": "item",
+      "foreignKey": "productId"
+    }
+  },
+  "acls": [],
+  "methods": {}
+}

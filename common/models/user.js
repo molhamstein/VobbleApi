@@ -80,14 +80,15 @@ module.exports = function (User) {
      * @param {Function(Error, object)} callback
      */
 
-    User.loginFacebook = function (token, gender,image,email, name, callback) {
+    User.loginFacebook = function (socialId, token, gender, image, email, name, callback) {
         var result;
         // TODO
-        User.findOne({ where: { username: name, typeLogIn: "facebook" } }, function (err, oneUser) {
+        User.findOne({ where: { socialId: socialId, typeLogIn: "facebook" } }, function (err, oneUser) {
             if (err)
                 callback(err, null);
             if (oneUser == null) {
                 User.create({
+                    socialId: socialId,
                     gender: gender,
                     image: image,
                     username: name,
@@ -111,16 +112,17 @@ module.exports = function (User) {
                 });
             }
         });
-    };
+    }
 
-        User.loginInstegram = function (token, gender,image,email, name, callback) {
+    User.loginInstegram = function (socialId, token, gender, image, email, name, callback) {
         var result;
         // TODO
-        User.findOne({ where: { username: name, typeLogIn: "instegram" } }, function (err, oneUser) {
+        User.findOne({ where: { socialId: socialId, typeLogIn: "instegram" } }, function (err, oneUser) {
             if (err)
                 callback(err, null);
             if (oneUser == null) {
                 User.create({
+                    socialId: socialId,
                     gender: gender,
                     image: image,
                     username: name,

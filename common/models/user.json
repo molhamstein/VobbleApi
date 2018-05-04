@@ -47,6 +47,9 @@
     "typeLogIn": {
       "type": "string",
       "default": "registration"
+    },
+    "socialId": {
+      "type": "string"
     }
   },
   "validations": [],
@@ -64,6 +67,11 @@
       "type": "belongsTo",
       "model": "country",
       "foreignKey": "ISOCode"
+    },
+    "items": {
+      "type": "hasMany",
+      "model": "item",
+      "foreignKey": "ownerId"
     }
   },
   "acls": [
@@ -138,6 +146,12 @@
     "loginFacebook": {
       "accepts": [
         {
+          "arg": "socialId",
+          "type": "string",
+          "required": true,
+          "description": ""
+        },
+        {
           "arg": "token",
           "type": "string",
           "required": true,
@@ -187,6 +201,12 @@
     "loginInstegram": {
       "accepts": [
         {
+          "arg": "socialId",
+          "type": "string",
+          "required": true,
+          "description": ""
+        },
+        {
           "arg": "token",
           "type": "string",
           "required": true,
@@ -228,7 +248,7 @@
       "description": "",
       "http": [
         {
-          "path": "/facebookLogin",
+          "path": "/instegramLogin",
           "verb": "post"
         }
       ]

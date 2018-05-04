@@ -81,5 +81,17 @@
   "country": {
     "dataSource": "db",
     "public": true
+  },
+  "typeGoods": {
+    "dataSource": "db",
+    "public": true
+  },
+  "product": {
+    "dataSource": "db",
+    "public": true
+  },
+  "item": {
+    "dataSource": "db",
+    "public": true
   }
 }

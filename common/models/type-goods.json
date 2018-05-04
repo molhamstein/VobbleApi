@@ -1,5 +1,5 @@
 {
-  "name": "shore",
+  "name": "typeGoods",
   "base": "PersistedModel",
   "idInjection": true,
   "options": {
@@ -13,20 +13,14 @@
     "name_en": {
       "type": "string",
       "required": true
-    },
-    "cover": {
-      "type": "string"
-    },
-    "icon": {
-      "type": "string"
     }
   },
   "validations": [],
   "relations": {
-    "bottles": {
+    "products": {
       "type": "hasMany",
-      "model": "bottle",
-      "foreignKey": "shoreId"
+      "model": "product",
+      "foreignKey": "typeGoodsId"
     }
   },
   "acls": [],

@@ -1,0 +1,42 @@
+{
+  "name": "item",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "storeType": {
+      "type": "string",
+      "required": true
+    },
+    "storeToken": {
+      "type": "string",
+      "required": true
+    },
+    "isConsumed": {
+      "type": "boolean",
+      "required": true
+    },
+    "isValid": {
+      "type": "boolean",
+      "required": true,
+      "default": true
+    }
+  },
+  "validations": [],
+  "relations": {
+    "product": {
+      "type": "belongsTo",
+      "model": "product",
+      "foreignKey": "productId"
+    },
+    "owner": {
+      "type": "belongsTo",
+      "model": "user",
+      "foreignKey": "ownerId"
+    }
+  },
+  "acls": [],
+  "methods": {}
+}

@@ -4,13 +4,33 @@ module.exports = async function (app) {
   var shore = app.models.shore;
   var country = app.models.country;
   var RoleMapping = app.models.RoleMapping;
+  var typeGoods = app.models.typeGoods;
+  var product = app.models.product;
+  var bottle = app.models.bottle;
   const FileContainer = app.models.FileContainer;
   const configPath = process.env.NODE_ENV === undefined ? '../../server/config.json' : `../../server/config.${process.env.NODE_ENV}.json`;
   const config = require(configPath);
   const imageBaseUrl = config.domain + '/api';
+  const images = [
+    imageBaseUrl + '/uploadFiles/images/download/user-default.jpg',
+    imageBaseUrl + '/uploadFiles/images/download/beach.jpg',
+    imageBaseUrl + '/uploadFiles/images/download/main.png',
+    imageBaseUrl + '/uploadFiles/images/download/love.jpg',
+    imageBaseUrl + '/uploadFiles/images/download/other.png',
+
+  ];
+  const files = [
+    imageBaseUrl + '/uploadFiles/videos/download/083246d0-4f2f-11e8-af28-93a1158274a61525392405437.mp4',
+    imageBaseUrl + '/uploadFiles/videos/download/1ed91300-4f2f-11e8-af28-93a1158274a61525392443440.mp4',
+    imageBaseUrl + '/uploadFiles/videos/download/d1b4bba0-4f2f-11e8-af28-93a1158274a61525392743514.mp4'
+  ]
 
 
-
+  const thumble = [
+    imageBaseUrl + '/uploadFiles/thumb/download/083246d0-4f2f-11e8-af28-93a1158274a61525392405437_thumb.PNG',
+    imageBaseUrl + '/uploadFiles/thumb/download/1ed91300-4f2f-11e8-af28-93a1158274a61525392443440_thumb.PNG',
+    imageBaseUrl + '/uploadFiles/thumb/download/d1b4bba0-4f2f-11e8-af28-93a1158274a61525392743514_thumb.PNG'
+  ]
 
   /*
   {
@@ -24,63 +44,6 @@ module.exports = async function (app) {
     const user = await User.find();
 
     if (user.length <= 0) {
-
-
-      let users = await User.create([
-        {
-          email: 'admin@vobble.com',
-          password: 'password',
-          emailVerified: true,
-          status: "active",
-          gender: "male",
-          image: "String",
-          username: "admin",
-          ISOCode:"CC"
-        },
-        {
-          email: 'customer1@vobble.com',
-          password: 'password',
-          emailVerified: true,
-          status: "active",
-          gender: "male",
-          image: "String",
-          username: "customer1",
-          ISOCode:"BF"          
-
-        },
-        {
-          email: 'customer2@vobble.com',
-          password: 'password',
-          emailVerified: true,
-          status: "active",
-          gender: "male",
-          image: "String",
-          username: "customer2",
-          ISOCode:"BD"
-          
-
-        }
-      ]);
-      // console.log('Created users:', users);
-
-      await shore.create([
-        {
-          name: "Main Shore",
-          icon: "http://104.217.253.15:9999/api/uploads/videos/download/1522568292031_shore.jpg",
-          cover: "http://104.217.253.15:9999/api/uploads/videos/download/1522568292031_shore.jpg",
-        },
-        {
-          name: "Love Shore",
-          icon: "http://104.217.253.15:9999/api/uploads/videos/download/1522568387594_shore2.jpg",
-          cover: "http://104.217.253.15:9999/api/uploads/videos/download/1522568387594_shore2.jpg",
-        },
-        {
-          name: "FadFed Shore",
-          icon: "http://104.217.253.15:9999/api/uploads/videos/download/1522568292031_shore.jpg",
-          cover: "http://104.217.253.15:9999/api/uploads/videos/download/1522568292031_shore.jpg",
-        }
-      ])
-
 
       await country.create(
         [
@@ -331,6 +294,71 @@ module.exports = async function (app) {
         ]
       )
 
+
+      let users = await User.create([
+        {
+          email: 'admin@vobble.com',
+          password: 'password',
+          emailVerified: true,
+          status: "active",
+          gender: "male",
+          image: images[0],
+          username: "admin",
+          ISOCode: "CC"
+        },
+        {
+          email: 'customer1@vobble.com',
+          password: 'password',
+          emailVerified: true,
+          status: "active",
+          gender: "male",
+          image: images[0],
+          username: "customer1",
+          ISOCode: "BF"
+
+        },
+        {
+          email: 'customer2@vobble.com',
+          password: 'password',
+          emailVerified: true,
+          status: "active",
+          gender: "male",
+          image: images[0],
+          username: "customer2",
+          ISOCode: "BD"
+
+
+        }
+      ]);
+      // console.log('Created users:', users);
+
+      let shores = await shore.create([
+        {
+          name_en: "Main Shore",
+          name_ar: "الشط الرئيسي",
+          icon: images[2],
+          cover: images[1],
+        },
+        {
+          name_en: "Love Shore",
+          name_ar: "شط الحب",
+          icon: images[3],
+          cover: images[1],
+        },
+        {
+          name_en: "FadFed Shore",
+          name_ar: "شط الفضفضى",
+          icon: images[4],
+          cover: images[1],
+        }
+      ]);
+      let loveShore = shores.find(o => o.name_en === 'Love Shore');
+      let fadfedShore = shores.find(o => o.name_en === 'FadFed Shore');
+      let mainShore = shores.find(o => o.name_en === 'Main Shore');
+
+
+
+
       // console.log('Created reports:', reports);
 
       let customer = users.find(o => o.email === 'customer1@vobble.com');
@@ -350,7 +378,122 @@ module.exports = async function (app) {
         });
       });
 
+      typesGood = await typeGoods.create(
+        [
+          {
+            "name_en": "Bottles Packs",
+            "name_ar": "زجاجات"
+          }, {
+            "name_en": "Filter By Gender",
+            "name_ar": "تصنيف حسب الجنس"
+          }, {
+            "name_en": "Filter By Country",
+            "name_ar": "تصنيف حسب البلد"
+          }
+        ]);
 
+      let bottleType = typesGood.find(o => o.name_en === 'Bottles Packs');
+      let genderType = typesGood.find(q => q.name_en === 'Filter By Gender');
+      let countryType = typesGood.find(s => s.name_en === 'Filter By Country');
+
+      await product.create([
+        {
+          "name_ar": "زجاجة واحدة",
+          "name_en": "1 bottles",
+          "price": "5000",
+          "description": "description",
+          "icon": "icon",
+          "androidProduct": "string",
+          "appleProduct": "string",
+          "typeGoodsId": bottleType.id
+        },
+        {
+          "name_ar": "3 زجاجات",
+          "name_en": "3 bottles",
+          "price": "9000",
+          "description": "description",
+          "icon": "icon",
+          "androidProduct": "string",
+          "appleProduct": "string",
+          "typeGoodsId": bottleType.id
+        },
+        {
+          "name_ar": "5 زجاجات",
+          "name_en": "5 bottles",
+          "price": "13000",
+          "description": "description",
+          "icon": "icon",
+          "androidProduct": "string",
+          "appleProduct": "string",
+          "typeGoodsId": bottleType.id
+        },
+        {
+          "name_ar": "فلترة لمدة 24 ساعة",
+          "name_en": "filter for 24 hours",
+          "price": "6000",
+          "description": "description",
+          "icon": "icon",
+          "androidProduct": "string",
+          "appleProduct": "string",
+          "typeGoodsId": genderType.id
+        },
+        {
+          "name_ar": "فلترة لمدة 48 ساعة",
+          "name_en": "filter for 24 hours",
+          "price": "10000",
+          "description": "description",
+          "icon": "icon",
+          "androidProduct": "string",
+          "appleProduct": "string",
+          "typeGoodsId": genderType.id
+        },
+        {
+          "name_ar": "فلترة لمدة 24 ساعة",
+          "name_en": "filter for 24 hours",
+          "price": "6000",
+          "description": "description",
+          "icon": "icon",
+          "androidProduct": "string",
+          "appleProduct": "string",
+          "typeGoodsId": genderType.id
+        },
+        {
+          "name_ar": "فلترة لمدة 48 ساعة",
+          "name_en": "filter for 24 hours",
+          "price": "10000",
+          "description": "description",
+          "icon": "icon",
+          "androidProduct": "string",
+          "appleProduct": "string",
+          "typeGoodsId": countryType.id
+        }
+      ])
+
+
+
+      await bottle.create([
+        {
+          "file": files[0],
+          "thumble": thumble[0],
+          "createdAt": "2018-05-03T23:56:42.924Z",
+          "shoreId": loveShore.id,
+          "ownerId": customer.id
+        }, {
+          "file": files[1],
+          "thumble": thumble[1],
+          "createdAt": "2018-05-03T23:56:42.924Z",
+          "shoreId": loveShore.id,
+          "ownerId": customer2.id
+        },
+        {
+          "file": files[2],
+          "thumble": thumble[2],
+          "createdAt": "2018-05-03T23:56:42.924Z",
+          "shoreId": mainShore.id,
+          "ownerId": customer.id
+        }
+
+      ])
       console.log('seedData: DONE!');
     }
 
