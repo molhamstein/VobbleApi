@@ -130,6 +130,12 @@
       "property": "loginFacebook"
     },
     {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW",
+      "property": "loginInstegram"
+    },
+    {
       "accessType": "*",
       "principalType": "ROLE",
       "principalId": "$owner",
