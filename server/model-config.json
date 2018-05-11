@@ -93,5 +93,13 @@
   "item": {
     "dataSource": "db",
     "public": true
+  },
+  "report-type": {
+    "dataSource": "db",
+    "public": true
+  },
+  "report": {
+    "dataSource": "db",
+    "public": true
   }
 }

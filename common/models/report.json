@@ -1,0 +1,48 @@
+{
+  "name": "report",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "scope": {
+    "include": [
+      {
+        "relation": "owner"
+      },
+      {
+        "relation": "bottle"
+      },
+      {
+        "relation": "report-type"
+      }
+    ]
+  },
+  "properties": {
+    "createdAt": {
+      "type": "date",
+      "required": true,
+      "defaultFn": "now"
+    }
+  },
+  "validations": [],
+  "relations": {
+    "bottle": {
+      "type": "belongsTo",
+      "model": "bottle",
+      "foreignKey": "bottleId"
+    },
+    "report-type": {
+      "type": "belongsTo",
+      "model": "report-type",
+      "foreignKey": "reportTypeId"
+    },
+    "owner": {
+      "type": "belongsTo",
+      "model": "user",
+      "foreignKey": "ownerId"
+    }
+  },
+  "acls": [],
+  "methods": {}
+}

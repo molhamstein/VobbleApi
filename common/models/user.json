@@ -50,6 +50,11 @@
     },
     "socialId": {
       "type": "string"
+    },
+    "createdAt": {
+      "type": "date",
+      "required": true,
+      "defaultFn": "now"
     }
   },
   "validations": [],
@@ -71,6 +76,11 @@
     "items": {
       "type": "hasMany",
       "model": "item",
+      "foreignKey": "ownerId"
+    },
+    "bottles": {
+      "type": "hasMany",
+      "model": "bottle",
       "foreignKey": "ownerId"
     }
   },

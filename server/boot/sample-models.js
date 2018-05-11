@@ -2,6 +2,7 @@ module.exports = async function (app) {
   var User = app.models.user;
   var Role = app.models.Role;
   var shore = app.models.shore;
+  var reportType = app.models.reportType;
   var country = app.models.country;
   var RoleMapping = app.models.RoleMapping;
   var typeGoods = app.models.typeGoods;
@@ -292,7 +293,29 @@ module.exports = async function (app) {
           { "name": "Zambia", "code": "ZM" },
           { "name": "Zimbabwe", "code": "ZW" }
         ]
-      )
+      );
+
+
+
+      let reportTypes = await reportType.create(
+        [
+          {
+            "reportName_en": "spam",
+            "reportName_ar": "مؤذي"
+          }, {
+            "reportName_en": "sexual content",
+            "reportName_ar": "محتوى جنسي"
+          }, {
+            "reportName_en": "promotional content",
+            "reportName_ar": "محتوى ترويجي"
+          }, {
+            "reportName_en": "wrong classification",
+            "reportName_ar": "تصنيف خاطئ"
+          }, {
+            "reportName_en": "illegal content",
+            "reportName_ar": "محتوى غير قانوني"
+          }
+        ]);
 
 
       let users = await User.create([
@@ -313,6 +336,7 @@ module.exports = async function (app) {
           status: "active",
           gender: "male",
           image: images[0],
+          createdAt: "2012-05-03T23:56:42.924Z",
           username: "customer1",
           ISOCode: "BF"
 
@@ -323,6 +347,7 @@ module.exports = async function (app) {
           emailVerified: true,
           status: "active",
           gender: "male",
+          createdAt: "2018-05-09T23:56:42.924Z",
           image: images[0],
           username: "customer2",
           ISOCode: "BD"
@@ -477,18 +502,22 @@ module.exports = async function (app) {
           "thumble": thumble[0],
           "createdAt": "2018-05-03T23:56:42.924Z",
           "shoreId": loveShore.id,
-          "ownerId": customer.id
+          "ownerId": customer.id,
+           "weight": 9920533014003,
+
         }, {
           "file": files[1],
           "thumble": thumble[1],
-          "createdAt": "2018-05-03T23:56:42.924Z",
+          "createdAt": "2018-01-03T23:56:42.924Z",
           "shoreId": loveShore.id,
-          "ownerId": customer2.id
+          "ownerId": customer2.id,
+           "weight": 10648712214003,
         },
         {
           "file": files[2],
           "thumble": thumble[2],
-          "createdAt": "2018-05-03T23:56:42.924Z",
+          "createdAt": "2015-05-03T23:56:42.924Z",
+          "weight": 9636449814003,
           "shoreId": mainShore.id,
           "ownerId": customer.id
         }

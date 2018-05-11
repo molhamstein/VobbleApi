@@ -1,28 +1,22 @@
 {
-  "name": "typeGoods",
+  "name": "report-type",
   "base": "PersistedModel",
   "idInjection": true,
   "options": {
     "validateUpsert": true
   },
   "properties": {
-    "name_ar": {
+    "reportName_en": {
       "type": "string",
       "required": true
     },
-    "name_en": {
+    "reportName_ar": {
       "type": "string",
       "required": true
     }
   },
   "validations": [],
-  "relations": {
-    "products": {
-      "type": "hasMany",
-      "model": "product",
-      "foreignKey": "typeGoodsId"
-    }
-  },
+  "relations": {},
   "acls": [],
   "methods": {}
 }

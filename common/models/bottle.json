@@ -28,6 +28,11 @@
       "type": "date",
       "required": true,
       "defaultFn": "now"
+    },
+    "weight": {
+      "type": "number",
+            "default": 3
+
     }
   },
   "validations": [],
@@ -60,6 +65,12 @@
       "principalType": "ROLE",
       "principalId": "$authenticated",
       "permission": "ALLOW",
+      "property": "getOneBottle"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
       "property": "create"
     },
     {
@@ -75,5 +86,44 @@
       "permission": "ALLOW"
     }
   ],
-  "methods": {}
+  "methods": {
+    "getOneBottle": {
+      "accepts": [
+        {
+          "arg": "gender",
+          "type": "string",
+          "required": false,
+          "description": "gender of owner bottle"
+        },
+        {
+          "arg": "ISOCode",
+          "type": "string",
+          "required": false,
+          "description": "ISOCode of owner bottle"
+        },
+        {
+          "arg": "req",
+          "type": "object",
+          "http": {
+            "source": "req"
+          }
+        }
+      ],
+      "returns": [
+        {
+          "arg": "result",
+          "type": "object",
+          "root": true,
+          "description": ""
+        }
+      ],
+      "description": "get one mthode with some logic",
+      "http": [
+        {
+          "path": "/getOneBottle",
+          "verb": "get"
+        }
+      ]
+    }
+  }
 }

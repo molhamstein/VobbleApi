@@ -100,12 +100,18 @@ module.exports = function (User) {
                     User.app.models.AccessToken.create({
                         userId: newUser.id
                     }, function (err, newToken) {
-                        callback(null, newToken);
+                        // newToken.include('user')
+                        User.app.models.AccessToken.findOne({ include: 'user', userId: newUser.id }, function (err, token) {
+                            if (err)
+                                callback(err, null);
+                            callback(null, token);
+                        });
                     })
 
                 })
-            } else {
-                User.app.models.AccessToken.findOne({ userId: oneUser.id }, function (err, token) {
+            }
+            else {
+                User.app.models.AccessToken.findOne({ include: 'user', userId: oneUser.id }, function (err, token) {
                     if (err)
                         callback(err, null);
                     callback(null, token);
