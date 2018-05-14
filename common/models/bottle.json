@@ -30,9 +30,7 @@
       "defaultFn": "now"
     },
     "weight": {
-      "type": "number",
-            "default": 3
-
+      "type": "number"
     }
   },
   "validations": [],
