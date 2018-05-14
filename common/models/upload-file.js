@@ -57,6 +57,9 @@ module.exports = function (Uploadfile) {
                 files.push({ 'file': urlFileRootSave + file.name, 'thumbnail': urlThumbRootSave + file.name.substring(0, file.name.lastIndexOf('.')) + "_thumb." + extension });
 
             }
+            else{
+                files.push({ 'file': urlFileRootSave + file.name });                
+            }
             // this for download
             // files.push({ 'file': urlFileRootSave + file.name, 'thumble': urlThumbRootSave + file.name.substring(0, file.name.lastIndexOf('.')) + "_thumb.PNG" });
 

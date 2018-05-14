@@ -81,12 +81,13 @@ module.exports = function (User) {
      */
 
     User.loginFacebook = function (socialId, token, gender, image, email, name, callback) {
-        var result;
-        // TODO
+        // check if user is new or old in the system 
         User.findOne({ where: { socialId: socialId, typeLogIn: "facebook" } }, function (err, oneUser) {
             if (err)
                 callback(err, null);
+            // new user
             if (oneUser == null) {
+                // creat the user in database with type face book
                 User.create({
                     socialId: socialId,
                     gender: gender,
@@ -97,24 +98,31 @@ module.exports = function (User) {
                 }, function (err, newUser) {
                     if (err)
                         callback(err, null);
+                    // create the token
                     User.app.models.AccessToken.create({
                         userId: newUser.id
                     }, function (err, newToken) {
-                        // newToken.include('user')
+                        // get the token with user of new user
                         User.app.models.AccessToken.findOne({ include: 'user', userId: newUser.id }, function (err, token) {
                             if (err)
                                 callback(err, null);
-                            callback(null, token);
+                            result = token;
+                            result.isNew = true;
+                            callback(null, result);
                         });
                     })
 
                 })
             }
+            // old user
             else {
+                // get the token with user
                 User.app.models.AccessToken.findOne({ include: 'user', userId: oneUser.id }, function (err, token) {
                     if (err)
                         callback(err, null);
-                    callback(null, token);
+                    result = token;
+                    result.isNew = false;
+                    callback(null, result);
                 });
             }
         });
@@ -140,15 +148,22 @@ module.exports = function (User) {
                     User.app.models.AccessToken.create({
                         userId: newUser.id
                     }, function (err, newToken) {
-                        callback(null, newToken);
+                        User.app.models.AccessToken.findOne({ include: 'user', userId: newUser.id }, function (err, token) {
+                            if (err)
+                                callback(err, null);
+                            result = token;
+                            result.isNew = true;
+                            callback(null, result);
+                        });
                     })
-
                 })
             } else {
-                User.app.models.AccessToken.findOne({ userId: oneUser.id }, function (err, token) {
+                User.app.models.AccessToken.findOne({ include: 'user', userId: oneUser.id }, function (err, token) {
                     if (err)
                         callback(err, null);
-                    callback(null, token);
+                    result = token;
+                    result.isNew = false;
+                    callback(null, result);
                 });
             }
         });

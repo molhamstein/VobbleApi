@@ -9,12 +9,16 @@ module.exports = function (Bottle) {
         if (context.res.locals.user.status !== 'active') {
             return next(errors.account.notActive());
         }
-        console.log("context.req.accessToken");
-        console.log(context);
+
 
         context.req.body.ownerId = context.req.accessToken.userId;
         let weight = 0
-        Bottle.app.models.bottleUserseen.findById(context.req.accessToken.userId, function (err, user) {
+        console.log(context.req.body.ownerId);
+        Bottle.app.models.User.findById(context.req.body.ownerId, function (err, user) {
+            if(err){
+                console.log(err);
+                next();
+            }            
             weight += Date.parse(new Date()) * 3;
             weight += Date.parse(user.createdAt) * 4;
             context.req.body.weight = weight;
@@ -31,6 +35,7 @@ module.exports = function (Bottle) {
     Bottle.afterRemote('create', function (context, result, next) {
         const user = context.res.locals.user;
         user.bottlesCount++;
+        user.bottlesCountToday--;
         user.save();
         next();
     });
@@ -57,7 +62,7 @@ module.exports = function (Bottle) {
         // while (whileVariable) {
         // console.log("T");
 
-        Bottle.find({ limit: 10, skip: 10 * countPagination, order: 'weight DESC' }, function (err, bottles) {
+        Bottle.find({ order: 'weight DESC' }, function (err, bottles) {
             if (err) {
                 callback(err, null);
                 whileVariable = false;
@@ -69,18 +74,7 @@ module.exports = function (Bottle) {
                 whileVariable = false;
 
             }
-            // while (index >= 0) {
-            //     var element = ranking[index];
-            //     element.owner(function (err, owner) {
-            //         if ((new String(req.accessToken.userId).valueOf() === new String(owner.id).valueOf()) || (filter.gender && filter.gender != owner.gender) || (filter.ISOCode && filter.ISOCode != owner.ISOCode) || (findInSeenUser(seenBottle, req.accessToken.userId, element.id))) {
-            //             console.log("Delete Object");
-            //             ranking.splice(index, 1);
-            //         }
-            //     });
-            //     index -= 1;
-            // }
-            // ranking.sort(compare);
-            console.log("SSSS");
+            ranking.sort(compare);
             ranking = removeInvalidBottle(bottles, req.accessToken.userId, seenBottle, filter);
             if (ranking[0]) {
                 var bottleUserseenObject = {

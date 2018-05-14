@@ -25,8 +25,7 @@
       "required": true
     },
     "image": {
-      "type": "string",
-      "required": true
+      "type": "string"
     },
     "bottlesCount": {
       "type": "number",

@@ -28,6 +28,7 @@
     "loopback-connector-mongodb": "^3.4.3",
     "loopback-context": "^3.3.0",
     "node-ffprobe": "^1.2.2",
+    "node-schedule": "^1.3.0",
     "node-thumbnail": "^0.14.0",
     "passport": "^0.4.0",
     "passport-facebook": "^2.1.1",

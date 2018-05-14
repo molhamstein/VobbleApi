@@ -3,7 +3,7 @@ require('cls-hooked');
 
 var loopback = require('loopback');
 var boot = require('loopback-boot');
-
+var schedule = require('node-schedule');
 var app = module.exports = loopback();
 const LoopBackContext = require('loopback-context');
 app.use(LoopBackContext.perRequest());
@@ -43,14 +43,25 @@ app.start = function () {
 };
 
 
+var j = schedule.scheduleJob('0 0 12 * * *', function () {
+
+  app.models.User.updateAll({}, {'bottlesCountToday': 3},  function(err, res){
+    // $set: { 'bottlesCountToday': 3 }, function(err, done) {
+      if (err)
+        console.log(err);
+      else
+        console.log('done');
+    
+    });
+  });
 
 
-// Bootstrap the application, configure models, datasources and middleware.
-// Sub-apps like REST API are mounted via boot scripts.
-boot(app, __dirname, function (err) {
-  if (err) throw err;
+  // Bootstrap the application, configure models, datasources and middleware.
+  // Sub-apps like REST API are mounted via boot scripts.
+  boot(app, __dirname, function (err) {
+    if (err) throw err;
 
-  // start the server if `$ node server.js`
-  if (require.main === module)
-    app.start();
-});
+    // start the server if `$ node server.js`
+    if (require.main === module)
+      app.start();
+  });
