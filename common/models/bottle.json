@@ -20,7 +20,12 @@
       "type": "string",
       "required": true
     },
-    "thumble": {
+    "status": {
+      "type": "string",
+      "required": true,
+      "default": "active"
+    },
+    "thumbnail": {
       "type": "string",
       "required": true
     },
@@ -98,6 +103,12 @@
           "type": "string",
           "required": false,
           "description": "ISOCode of owner bottle"
+        },
+        {
+          "arg": "shoreId",
+          "type": "string",
+          "required": false,
+          "description": "shore id of  bottle"
         },
         {
           "arg": "req",

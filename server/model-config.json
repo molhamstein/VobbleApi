@@ -76,7 +76,7 @@
   },
   "bottleUserseen": {
     "dataSource": "db",
-    "public": false
+    "public": true
   },
   "country": {
     "dataSource": "db",

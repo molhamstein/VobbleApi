@@ -499,23 +499,33 @@ module.exports = async function (app) {
       await bottle.create([
         {
           "file": files[0],
-          "thumble": thumble[0],
+          "thumbnail": thumble[0],
           "createdAt": "2018-05-03T23:56:42.924Z",
           "shoreId": loveShore.id,
           "ownerId": customer.id,
-           "weight": 9920533014003,
+          "weight": 9920533014003,
 
-        }, {
+        },
+        {
+          "file": files[0],
+          "thumbnail": thumble[0],
+          "createdAt": "2018-05-03T23:56:42.924Z",
+          "shoreId": loveShore.id,
+          "ownerId": customer.id,
+          "weight": 9920533014003,
+          "status": "deactivate"
+        },
+        {
           "file": files[1],
-          "thumble": thumble[1],
+          "thumbnail": thumble[1],
           "createdAt": "2018-01-03T23:56:42.924Z",
           "shoreId": loveShore.id,
           "ownerId": customer2.id,
-           "weight": 10648712214003,
+          "weight": 10648712214003,
         },
         {
           "file": files[2],
-          "thumble": thumble[2],
+          "thumbnail": thumble[2],
           "createdAt": "2015-05-03T23:56:42.924Z",
           "weight": 9636449814003,
           "shoreId": mainShore.id,

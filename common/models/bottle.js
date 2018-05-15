@@ -1,4 +1,5 @@
 'use strict';
+const errors = require('../../server/errors');
 
 module.exports = function (Bottle) {
 
@@ -13,12 +14,14 @@ module.exports = function (Bottle) {
 
         context.req.body.ownerId = context.req.accessToken.userId;
         let weight = 0
-        console.log(context.req.body.ownerId);
         Bottle.app.models.User.findById(context.req.body.ownerId, function (err, user) {
-            if(err){
+            if (err) {
                 console.log(err);
                 next();
-            }            
+            }
+            if (user.bottlesCountToday == 0) {
+                return next(errors.bottle.noAvailableBottleToday());
+            }
             weight += Date.parse(new Date()) * 3;
             weight += Date.parse(user.createdAt) * 4;
             context.req.body.weight = weight;
@@ -49,32 +52,33 @@ module.exports = function (Bottle) {
  * @param {Function(Error, object)} callback
  */
 
-    Bottle.getOneBottle = function (gender, ISOCode, req, callback) {
+    Bottle.getOneBottle = function (gender, ISOCode, shoreId, req, callback) {
         var result;
         var filter = {};
+        if (gender) {
+            filter.gender = gender;
+        }
+
+        if (ISOCode) {
+            filter.ISOCode = ISOCode;
+        }
+
+        if (shoreId) {
+            filter.shoreId = shoreId;
+        }
         var seenBottle = [];
         var countPagination = 0;
-        Bottle.app.models.bottleUserseen.find({}, function (err, bottles) {
+        Bottle.app.models.bottleUserseen.find({where: { userId: req.accessToken.userId }}, function (err, bottles) {
             seenBottle = bottles;
         })
         var whileVariable = true;
 
-        // while (whileVariable) {
-        // console.log("T");
-
-        Bottle.find({ order: 'weight DESC' }, function (err, bottles) {
+        Bottle.find({ where: { status: 'active' }, order: 'weight DESC' }, function (err, bottles) {
             if (err) {
                 callback(err, null);
                 whileVariable = false;
             }
             var ranking = bottles;
-            // var index = ranking.length - 1;
-            if (ranking.length == 0) {
-                callback(null, []);
-                whileVariable = false;
-
-            }
-            ranking.sort(compare);
             ranking = removeInvalidBottle(bottles, req.accessToken.userId, seenBottle, filter);
             if (ranking[0]) {
                 var bottleUserseenObject = {
@@ -85,38 +89,47 @@ module.exports = function (Bottle) {
                     .then()
                     .catch(err => console.log(err));
                 // console.log(ranking);
-                callback(null, ranking[0]);
+                callback(null, ranking);
                 whileVariable = false;
             }
             else {
-                callback(null, []);
+                callback(null, errors.bottle.noNewBottle());
             }
             countPagination++;
 
         });
-        // };
     };
 
 
     function removeInvalidBottle(ranking, userId, seenBottle, filter) {
         var index = ranking.length - 1;
+        var newRanking=[];
         while (index >= 0) {
             var element = ranking[index];
             element.owner(function (err, owner) {
-                if ((new String(userId).valueOf() === new String(owner.id).valueOf()) || (filter.gender && filter.gender != owner.gender) || (filter.ISOCode && filter.ISOCode != owner.ISOCode) || (findInSeenUser(seenBottle, userId, element.id))) {
-                    console.log("Delete Object");
-                    ranking.splice(index, 1);
-                }
+                element.shore(function (err, shore) {
+                    var numberOfSeenThisBottle=findInSeenUser(seenBottle, userId, element.id);
+                    if ((new String(userId).valueOf() === new String(owner.id).valueOf()) || (filter.gender && filter.gender != owner.gender) || (filter.ISOCode && filter.ISOCode != owner.ISOCode) || (filter.shoreId && filter.shoreId != shore.id)) {
+                        console.log("Delete Object");
+                        ranking.splice(index, 1);
+                    }else if(numberOfSeenThisBottle>0){
+                        ranking[index].numberRepeted=numberOfSeenThisBottle;
+                        newRanking.push(ranking[index]);
+                        ranking.splice(index, 1);
+                    }
+                })
             });
             index -= 1;
         }
+        newRanking.sort(compare);
+        ranking=ranking.concat(newRanking);
         return ranking;
     }
     // function for sort bottle depend of weight
     function compare(a, b) {
-        if (a.weight > b.weight)
+        if (a.numberRepeted < b.numberRepeted)
             return -1;
-        if (a.weight < b.weight)
+        if (a.numberRepeted > b.numberRepeted)
             return 1;
         return 0;
     }
@@ -126,26 +139,16 @@ module.exports = function (Bottle) {
     }
 
     function findInSeenUser(array, keyA, keyB) {
-        // console.log("array");
-        // console.log(array);
-
-        // console.log("keyA");
-        // console.log(keyA);
-
-        // console.log("keyB");
-        // console.log(keyB);
-        var found = false;
+        var found = 0;
         array.forEach(function (element) {
 
             if (new String(element.userId).valueOf() === new String(keyA).valueOf() && new String(element.bottleId).valueOf() === new String(keyB).valueOf()) {
                 // console.log("Error")
-                found = true;
-                return 0;
+                found++;
             }
         }, this);
 
         // console.log("Not Error")
-
         return found;
     }
 

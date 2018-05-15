@@ -43,7 +43,7 @@ app.start = function () {
 };
 
 
-var j = schedule.scheduleJob('0 0 12 * * *', function () {
+var j = schedule.scheduleJob('0 0 * * * *', function () {
 
   app.models.User.updateAll({}, {'bottlesCountToday': 3},  function(err, res){
     // $set: { 'bottlesCountToday': 3 }, function(err, done) {

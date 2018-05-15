@@ -80,8 +80,15 @@ module.exports = function (User) {
      * @param {Function(Error, object)} callback
      */
 
-    User.loginFacebook = function (socialId, token, gender, image, email, name, callback) {
+    User.loginFacebook = function (data, callback) {
         // check if user is new or old in the system 
+        var socialId = data.socialId;
+        var token = data.token;
+        var gender = data.gender;
+        var image = data.image;
+        var email = data.email;
+        var name = data.name;
+        var result;
         User.findOne({ where: { socialId: socialId, typeLogIn: "facebook" } }, function (err, oneUser) {
             if (err)
                 callback(err, null);
@@ -128,9 +135,15 @@ module.exports = function (User) {
         });
     }
 
-    User.loginInstegram = function (socialId, token, gender, image, email, name, callback) {
+    User.loginInstegram = function (data, callback) {
         var result;
         // TODO
+        var socialId = data.socialId;
+        var token = data.token;
+        var gender = data.gender;
+        var image = data.image;
+        var email = data.email;
+        var name = data.name;
         User.findOne({ where: { socialId: socialId, typeLogIn: "instegram" } }, function (err, oneUser) {
             if (err)
                 callback(err, null);

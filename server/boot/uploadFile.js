@@ -9,7 +9,7 @@ module.exports = function (app) {
     return uuid() + newFilename;
   };
 
-  app.dataSources.files.connector.allowedContentTypes = ["image/jpg", "image/jpeg", "image/png","video/mp4","audio/mp3"];
+  app.dataSources.files.connector.allowedContentTypes = ["image/jpg", "image/jpeg", "image/png","video/*","audio/*"];
   app.dataSources.files.connector.maxFileSize = 9999999;
 
 };

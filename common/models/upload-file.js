@@ -38,7 +38,7 @@ module.exports = function (Uploadfile) {
                     .screenshot({
                         count: 1,
                         filename: file.name.substring(0, file.name.lastIndexOf('.')) + "_thumb.PNG",
-                        folder: src + '/thumb/',
+                        folder: src + '/thumbnail/',
                         size: '320x240'
                     });
                 files.push({ 'file': urlFileRootSave + file.name, 'thumbnail': urlThumbRootSave + file.name.substring(0, file.name.lastIndexOf('.')) + "_thumb.PNG" });
@@ -48,7 +48,7 @@ module.exports = function (Uploadfile) {
             else if (folderName == "images") {
                 thumb({
                     source: src + "/" + folderName + "/" + file.name,// could be a filename: dest/path/image.jpg
-                    destination: src + '/thumb/',
+                    destination: src + '/thumbnail/',
                     concurrency: 4
                 }, function (files, err, stdout, stderr) {
                 });

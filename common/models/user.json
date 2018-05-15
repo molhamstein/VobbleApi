@@ -161,40 +161,13 @@
     "loginFacebook": {
       "accepts": [
         {
-          "arg": "socialId",
-          "type": "string",
+          "arg": "data",
+          "type": "object",
           "required": true,
-          "description": ""
-        },
-        {
-          "arg": "token",
-          "type": "string",
-          "required": true,
-          "description": ""
-        },
-        {
-          "arg": "gender",
-          "type": "string",
-          "required": true,
-          "description": ""
-        },
-        {
-          "arg": "image",
-          "type": "string",
-          "required": true,
-          "description": ""
-        },
-        {
-          "arg": "email",
-          "type": "string",
-          "required": false,
-          "description": ""
-        },
-        {
-          "arg": "name",
-          "type": "string",
-          "required": true,
-          "description": ""
+          "description": "",
+          "http": {
+            "source": "body"
+          }
         }
       ],
       "returns": [
@@ -216,40 +189,13 @@
     "loginInstegram": {
       "accepts": [
         {
-          "arg": "socialId",
-          "type": "string",
+          "arg": "data",
+          "type": "object",
           "required": true,
-          "description": ""
-        },
-        {
-          "arg": "token",
-          "type": "string",
-          "required": true,
-          "description": ""
-        },
-        {
-          "arg": "gender",
-          "type": "string",
-          "required": true,
-          "description": ""
-        },
-        {
-          "arg": "image",
-          "type": "string",
-          "required": true,
-          "description": ""
-        },
-        {
-          "arg": "email",
-          "type": "string",
-          "required": false,
-          "description": ""
-        },
-        {
-          "arg": "name",
-          "type": "string",
-          "required": true,
-          "description": ""
+          "description": "",
+          "http": {
+            "source": "body"
+          }
         }
       ],
       "returns": [
@@ -260,10 +206,10 @@
           "description": ""
         }
       ],
-      "description": "",
+      "description": "login by instegram account",
       "http": [
         {
-          "path": "/instegramLogin",
+          "path": "/loginInstegram",
           "verb": "post"
         }
       ]
