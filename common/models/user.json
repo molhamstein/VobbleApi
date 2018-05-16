@@ -143,6 +143,12 @@
       "principalId": "$everyone",
       "permission": "ALLOW",
       "property": "loginInstegram"
+    },   
+     {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW",
+      "property": "checkUsername"
     },
     {
       "accessType": "*",
@@ -210,6 +216,34 @@
       "http": [
         {
           "path": "/loginInstegram",
+          "verb": "post"
+        }
+      ]
+    },
+    "checkUsername": {
+      "accepts": [
+        {
+          "arg": "newUsername",
+          "type": "string",
+          "required": true,
+          "description": "",
+          "http": {
+            "source": "form"
+          }
+        }
+      ],
+      "returns": [
+        {
+          "arg": "result",
+          "type": "boolean",
+          "root": true,
+          "description": ""
+        }
+      ],
+      "description": "check username is unique",
+      "http": [
+        {
+          "path": "/checkUsername",
           "verb": "post"
         }
       ]

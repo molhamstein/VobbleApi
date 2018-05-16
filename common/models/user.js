@@ -5,6 +5,7 @@ const configPath = process.env.NODE_ENV === undefined ?
     '../../server/config.json' :
     `../../server/config.${process.env.NODE_ENV}.json`;
 const config = require(configPath);
+const errors = require('../../server/errors');
 
 
 // "siteDomain": "http://104.217.253.15/vobbleApp/Vobble-webApp",
@@ -38,11 +39,12 @@ module.exports = function (User) {
 
     // to Send Verfication email after register 
     User.afterRemote('create', function (context, user, next) {
-        sendVerificationEmail(user, 'Thanks for registering.', '', function (err, res) {
-            if (err)
-                next(err);
-            next();
-        })
+        // sendVerificationEmail(user, 'Thanks for registering.', '', function (err, res) {
+        //     if (err)
+        //         next(err);
+        //     next();
+        // })
+        next();
     });
 
 
@@ -95,31 +97,39 @@ module.exports = function (User) {
             // new user
             if (oneUser == null) {
                 // creat the user in database with type face book
-                User.create({
-                    socialId: socialId,
-                    gender: gender,
-                    image: image,
-                    username: name,
-                    password: "123",
-                    typeLogIn: "facebook"
-                }, function (err, newUser) {
-                    if (err)
-                        callback(err, null);
-                    // create the token
-                    User.app.models.AccessToken.create({
-                        userId: newUser.id
-                    }, function (err, newToken) {
-                        // get the token with user of new user
-                        User.app.models.AccessToken.findOne({ include: 'user', userId: newUser.id }, function (err, token) {
-                            if (err)
-                                callback(err, null);
-                            result = token;
-                            result.isNew = true;
-                            callback(null, result);
-                        });
-                    })
+                User.findOne({ where: { username: name } }, function (err, userByUsername) {
+                    if (userByUsername) {
+                        var randVal = 100 + (Math.random() * (999 - 100));
+                        var x = Math.round(randVal);
+                        name = name + "_" + x;
+                    }
+                    User.create({
+                        socialId: socialId,
+                        gender: gender,
+                        image: image,
+                        username: name,
+                        password: "123",
+                        typeLogIn: "facebook"
+                    }, function (err, newUser) {
+                        if (err)
+                            callback(err, null);
+                        // create the token
+                        User.app.models.AccessToken.create({
+                            userId: newUser.id
+                        }, function (err, newToken) {
+                            // get the token with user of new user
+                            User.app.models.AccessToken.findOne({ include: 'user', userId: newUser.id }, function (err, token) {
+                                if (err)
+                                    callback(err, null);
+                                result = token;
+                                result.isNew = true;
+                                callback(null, result);
+                            });
+                        })
 
+                    })
                 })
+
             }
             // old user
             else {
@@ -148,26 +158,33 @@ module.exports = function (User) {
             if (err)
                 callback(err, null);
             if (oneUser == null) {
-                User.create({
-                    socialId: socialId,
-                    gender: gender,
-                    image: image,
-                    username: name,
-                    password: "123",
-                    typeLogIn: "instegram"
-                }, function (err, newUser) {
-                    if (err)
-                        callback(err, null);
-                    User.app.models.AccessToken.create({
-                        userId: newUser.id
-                    }, function (err, newToken) {
-                        User.app.models.AccessToken.findOne({ include: 'user', userId: newUser.id }, function (err, token) {
-                            if (err)
-                                callback(err, null);
-                            result = token;
-                            result.isNew = true;
-                            callback(null, result);
-                        });
+                User.findOne({ where: { username: name } }, function (err, userByUsername) {
+                    if (userByUsername) {
+                        var randVal = 100 + (Math.random() * (999 - 100));
+                        var x = Math.round(randVal);
+                        name = name + "_" + x;
+                    }
+                    User.create({
+                        socialId: socialId,
+                        gender: gender,
+                        image: image,
+                        username: name,
+                        password: "123",
+                        typeLogIn: "instegram"
+                    }, function (err, newUser) {
+                        if (err)
+                            callback(err, null);
+                        User.app.models.AccessToken.create({
+                            userId: newUser.id
+                        }, function (err, newToken) {
+                            User.app.models.AccessToken.findOne({ include: 'user', userId: newUser.id }, function (err, token) {
+                                if (err)
+                                    callback(err, null);
+                                result = token;
+                                result.isNew = true;
+                                callback(null, result);
+                            });
+                        })
                     })
                 })
             } else {
@@ -181,5 +198,25 @@ module.exports = function (User) {
             }
         });
     };
+
+    /**
+ * check username is unique
+ * @param {string} newUsername
+ * @param {Function(Error, boolean)} callback
+ */
+
+    User.checkUsername = function (newUsername, callback) {
+        var result;
+        User.findOne({ where: { username: newUsername } }, function (err, userByUsername) {
+            if (userByUsername) {
+                callback(null, errors.account.usernameNotValid());
+
+            } else
+                callback(null, true);
+
+        })
+        // TODO
+    };
+
 
 };

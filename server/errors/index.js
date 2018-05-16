@@ -15,6 +15,9 @@ module.exports.account = {
   },
   emailNotValid: function () {
     return new cError('EMAIL_NOT_VALID', 400, 'Email not valid', 400);
+  },
+  usernameNotValid: function () {
+    return new cError('USERNAME_NOT_VALID', 400, 'Username not valid', 405);
   }
 };
 
@@ -23,10 +26,10 @@ module.exports.account = {
 
 module.exports.bottle = {
   noNewBottle: function () {
-    return new cError('NO_NEW_BOTTLE', 200, 'no new bottle', 405);
+    return new cError('NO_NEW_BOTTLE', 200, 'no new bottle', 406);
   },
   noAvailableBottleToday: function () {
-    return new cError('NOT_AVAILABLE_BOTTLE_TODAY', 200, 'not available bottle today', 406);
+    return new cError('NOT_AVAILABLE_BOTTLE_TODAY', 200, 'not available bottle today', 407);
   }
 };
 
