@@ -40,6 +40,8 @@ module.exports = async function (app) {
   }
   */
 
+  var date = new Date();
+  date = new Date(date.setTime(date.getTime() + 1 * 86400000));
 
   try {
     const user = await User.find();
@@ -327,7 +329,8 @@ module.exports = async function (app) {
           gender: "male",
           image: images[0],
           username: "admin",
-          ISOCode: "CC"
+          ISOCode: "CC",
+          nextRefill: date
         },
         {
           email: 'customer1@vobble.com',
@@ -338,7 +341,8 @@ module.exports = async function (app) {
           image: images[0],
           createdAt: "2012-05-03T23:56:42.924Z",
           username: "customer1",
-          ISOCode: "BF"
+          ISOCode: "BF",
+          nextRefill: date
 
         },
         {
@@ -350,9 +354,8 @@ module.exports = async function (app) {
           createdAt: "2018-05-09T23:56:42.924Z",
           image: images[0],
           username: "customer2",
-          ISOCode: "BD"
-
-
+          ISOCode: "BD",
+          nextRefill: date
         }
       ]);
       // console.log('Created users:', users);

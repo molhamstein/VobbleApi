@@ -6,6 +6,7 @@ const configPath = process.env.NODE_ENV === undefined ?
     `../../server/config.${process.env.NODE_ENV}.json`;
 const config = require(configPath);
 const errors = require('../../server/errors');
+const download = require('image-downloader')
 
 
 // "siteDomain": "http://104.217.253.15/vobbleApp/Vobble-webApp",
@@ -13,11 +14,27 @@ const errors = require('../../server/errors');
 module.exports = function (User) {
 
 
+    // file root save 
+    var urlFileRoot = config.domain + config.restApiRoot + "/uploadFiles";
+
+    // ulr save depend of folder name
+    var urlFileRootSave = urlFileRoot + '/profile/download/'
+
+
+    User.beforeRemote('create', function (context, result, next) {
+        // set next refill
+        var date = new DAte();
+        context.req.body.nextRefill = new Date(date.setTime(date.getTime() + 1 * 86400000));
+        next();
+
+    });
+
+
     function sendVerificationEmail(user, subject, message, callback) {
         var options = {
             type: 'email',
             to: user.email,
-            from: 'dlaaalsite@gmail.com',
+            from: 'vobbleapp@gmail.com',
             subject: subject,
             message: message,
             template: path.resolve(__dirname, '../../server/views/verify-template.ejs'),
@@ -39,12 +56,11 @@ module.exports = function (User) {
 
     // to Send Verfication email after register 
     User.afterRemote('create', function (context, user, next) {
-        // sendVerificationEmail(user, 'Thanks for registering.', '', function (err, res) {
-        //     if (err)
-        //         next(err);
-        //     next();
-        // })
-        next();
+        sendVerificationEmail(user, 'Thanks for registering.', '', function (err, res) {
+            if (err)
+                next(err);
+            next();
+        })
     });
 
 
@@ -66,7 +82,7 @@ module.exports = function (User) {
             if (err) return console.log('> error sending password reset email', err);
             User.app.models.Email.send({
                 to: info.email,
-                from: 'dlaaalsite@gmail.com',
+                from: 'vobbleapp@gmail.com',
                 subject: 'Password reset',
                 html: html
             }, function (err) {
@@ -74,6 +90,8 @@ module.exports = function (User) {
             });
         });
     });
+
+
     /**
      *
      * @param {string} token
@@ -83,58 +101,87 @@ module.exports = function (User) {
      */
 
     User.loginFacebook = function (data, callback) {
-        // check if user is new or old in the system 
         var socialId = data.socialId;
         var token = data.token;
         var gender = data.gender;
-        var image = data.image;
+        // var image = data.image;
+        var image = "https://www.idlidu.com/Content/images/default.png";
         var email = data.email;
         var name = data.name;
+
         var result;
+        // check if user is new or old in the system 
         User.findOne({ where: { socialId: socialId, typeLogIn: "facebook" } }, function (err, oneUser) {
             if (err)
                 callback(err, null);
             // new user
             if (oneUser == null) {
-                // creat the user in database with type face book
+                // cheack if username is userd befor
                 User.findOne({ where: { username: name } }, function (err, userByUsername) {
                     if (userByUsername) {
                         var randVal = 100 + (Math.random() * (999 - 100));
                         var x = Math.round(randVal);
                         name = name + "_" + x;
                     }
-                    User.create({
-                        socialId: socialId,
-                        gender: gender,
-                        image: image,
-                        username: name,
-                        password: "123",
-                        typeLogIn: "facebook"
-                    }, function (err, newUser) {
-                        if (err)
-                            callback(err, null);
-                        // create the token
-                        User.app.models.AccessToken.create({
-                            userId: newUser.id
-                        }, function (err, newToken) {
-                            // get the token with user of new user
-                            User.app.models.AccessToken.findOne({ include: 'user', userId: newUser.id }, function (err, token) {
+
+
+
+                    const parts = image.split('.'),
+                        extension = parts[parts.length - 1];
+                    var newFilename = (new Date()).getTime() + '.' + extension;
+
+                    const options = {
+                        url: image,
+                        dest: 'uploadFiles/profile/' + newFilename                  // Save to /path/to/dest/image.jpg
+                    }
+
+                    download.image(options)
+                        .then(({ filename, imageFile }) => {
+                            image = urlFileRootSave + newFilename;
+                            console.log(newFilename);
+                            var date = new Date();
+                            User.create({
+                                socialId: socialId,
+                                gender: gender,
+                                email: email,
+                                image: image,
+                                username: name,
+                                status: "active",
+                                nextRefill: new Date(date.setTime(date.getTime() + 1 * 86400000)),
+                                password: "123",
+                                typeLogIn: "facebook"
+                            }, function (err, newUser) {
                                 if (err)
                                     callback(err, null);
-                                result = token;
-                                result.isNew = true;
-                                callback(null, result);
-                            });
+                                // create the token
+                                User.app.models.AccessToken.create({
+                                    userId: newUser.id
+                                }, function (err, newToken) {
+                                    // get the token with user of new user
+                                    User.app.models.AccessToken.findOne({ include: 'user', userId: newUser.id }, function (err, token) {
+                                        if (err)
+                                            callback(err, null);
+                                        result = token;
+                                        result.isNew = true;
+                                        callback(null, result);
+                                    });
+                                })
+
+                            })
                         })
 
-                    })
                 })
+                // .catch((err) => {
+                //     console.log('err', err)
+
+                //     throw err
+                // })
 
             }
             // old user
             else {
                 // get the token with user
-                User.app.models.AccessToken.findOne({ include: 'user', userId: oneUser.id }, function (err, token) {
+                User.app.models.AccessToken.findOne({ include: { relation: 'user', scope: { include: { relation: 'country' } } }, userId: oneUser.id }, function (err, token) {
                     if (err)
                         callback(err, null);
                     result = token;
@@ -151,7 +198,8 @@ module.exports = function (User) {
         var socialId = data.socialId;
         var token = data.token;
         var gender = data.gender;
-        var image = data.image;
+        // var image = data.image;
+        var image = "https://www.idlidu.com/Content/images/default.png";
         var email = data.email;
         var name = data.name;
         User.findOne({ where: { socialId: socialId, typeLogIn: "instegram" } }, function (err, oneUser) {
@@ -164,28 +212,116 @@ module.exports = function (User) {
                         var x = Math.round(randVal);
                         name = name + "_" + x;
                     }
-                    User.create({
-                        socialId: socialId,
-                        gender: gender,
-                        image: image,
-                        username: name,
-                        password: "123",
-                        typeLogIn: "instegram"
-                    }, function (err, newUser) {
-                        if (err)
-                            callback(err, null);
-                        User.app.models.AccessToken.create({
-                            userId: newUser.id
-                        }, function (err, newToken) {
-                            User.app.models.AccessToken.findOne({ include: 'user', userId: newUser.id }, function (err, token) {
+                    const parts = image.split('.'),
+                        extension = parts[parts.length - 1];
+                    var newFilename = (new Date()).getTime() + '.' + extension;
+
+                    const options = {
+                        url: image,
+                        dest: 'uploadFiles/profile/' + newFilename                  // Save to /path/to/dest/image.jpg
+                    }
+                    download.image(options)
+                        .then(({ filename, imageFile }) => {
+                            image = urlFileRootSave + newFilename;
+                            console.log(newFilename);
+                            var date = new Date();
+                            User.create({
+                                socialId: socialId,
+                                gender: gender,
+                                image: image,
+                                email: email,
+                                username: name,
+                                status: "active",
+                                nextRefill: new Date(date.setTime(date.getTime() + 1 * 86400000)),
+                                password: "123",
+                                typeLogIn: "instegram"
+                            }, function (err, newUser) {
                                 if (err)
                                     callback(err, null);
-                                result = token;
-                                result.isNew = true;
-                                callback(null, result);
-                            });
+                                User.app.models.AccessToken.create({
+                                    userId: newUser.id
+                                }, function (err, newToken) {
+                                    User.app.models.AccessToken.findOne({ include: { relation: 'user', scope: { include: { relation: 'country' } } }, userId: oneUser.id }, function (err, token) {
+                                        if (err)
+                                            callback(err, null);
+                                        result = token;
+                                        result.isNew = true;
+                                        callback(null, result);
+                                    });
+                                })
+                            })
                         })
-                    })
+                })
+            } else {
+                User.app.models.AccessToken.findOne({ include: 'user', userId: oneUser.id }, function (err, token) {
+                    if (err)
+                        callback(err, null);
+                    result = token;
+                    result.isNew = false;
+                    callback(null, result);
+                });
+            }
+        });
+    };
+
+    User.loginGoogle = function (data, callback) {
+        var result;
+        var socialId = data.socialId;
+        var token = data.token;
+        var gender = data.gender;
+        // var image = data.image;
+        var image = "https://www.idlidu.com/Content/images/default.png";
+        var email = data.email;
+        var name = data.name;
+        User.findOne({ where: { socialId: socialId, typeLogIn: "google" } }, function (err, oneUser) {
+            if (err)
+                callback(err, null);
+            if (oneUser == null) {
+                User.findOne({ where: { username: name } }, function (err, userByUsername) {
+                    if (userByUsername) {
+                        var randVal = 100 + (Math.random() * (999 - 100));
+                        var x = Math.round(randVal);
+                        name = name + "_" + x;
+                    }
+                    const parts = image.split('.'),
+                        extension = parts[parts.length - 1];
+                    var newFilename = (new Date()).getTime() + '.' + extension;
+
+                    const options = {
+                        url: image,
+                        dest: 'uploadFiles/profile/' + newFilename                  // Save to /path/to/dest/image.jpg
+                    }
+                    download.image(options)
+                        .then(({ filename, imageFile }) => {
+                            image = urlFileRootSave + newFilename;
+                            console.log(newFilename);
+                            var date = new Date();
+                            User.create({
+                                nextRefill: new Date(date.setTime(date.getTime() + 1 * 86400000)),
+                                socialId: socialId,
+                                gender: gender,
+                                image: image,
+                                username: name,
+                                email: email,
+                                status: "active",
+                                password: "123",
+                                typeLogIn: "google"
+                            }, function (err, newUser) {
+                                if (err)
+                                    callback(err, null);
+                                User.app.models.AccessToken.create({
+                                    userId: newUser.id
+                                }, function (err, newToken) {
+                                    User.app.models.AccessToken.findOne({ include: { relation: 'user', scope: { include: { relation: 'country' } } }, userId: oneUser.id }, function (err, token) {
+                                        if (err)
+                                            callback(err, null);
+                                        result = token;
+                                        result.isNew = true;
+                                        callback(null, result);
+                                    });
+                                })
+                            })
+                        })
                 })
             } else {
                 User.app.models.AccessToken.findOne({ include: 'user', userId: oneUser.id }, function (err, token) {
@@ -200,10 +336,10 @@ module.exports = function (User) {
     };
 
     /**
- * check username is unique
- * @param {string} newUsername
- * @param {Function(Error, boolean)} callback
- */
+     * check username is unique
+     * @param {string} newUsername
+     * @param {Function(Error, boolean)} callback
+     */
 
     User.checkUsername = function (newUsername, callback) {
         var result;

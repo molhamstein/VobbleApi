@@ -50,6 +50,10 @@
     "socialId": {
       "type": "string"
     },
+    "nextRefill": {
+      "type": "date",
+      "required": true
+    },
     "createdAt": {
       "type": "date",
       "required": true,
@@ -143,8 +147,8 @@
       "principalId": "$everyone",
       "permission": "ALLOW",
       "property": "loginInstegram"
-    },   
-     {
+    },
+    {
       "principalType": "ROLE",
       "principalId": "$everyone",
       "permission": "ALLOW",
@@ -215,7 +219,35 @@
       "description": "login by instegram account",
       "http": [
         {
-          "path": "/loginInstegram",
+          "path": "/instegramLogin",
+          "verb": "post"
+        }
+      ]
+    },
+    "loginGoogle": {
+      "accepts": [
+        {
+          "arg": "data",
+          "type": "object",
+          "required": true,
+          "description": "",
+          "http": {
+            "source": "body"
+          }
+        }
+      ],
+      "returns": [
+        {
+          "arg": "result",
+          "type": "object",
+          "root": true,
+          "description": ""
+        }
+      ],
+      "description": "login by google account",
+      "http": [
+        {
+          "path": "/googleLogin",
           "verb": "post"
         }
       ]

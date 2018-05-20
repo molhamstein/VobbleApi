@@ -43,25 +43,25 @@ app.start = function () {
 };
 
 
-var j = schedule.scheduleJob('0 0 * * * *', function () {
+var timer = schedule.scheduleJob('0 0 * * * *', function () {
+  var date = new Date();
+  date = new Date(date.setTime(date.getTime() + 1 * 86400000));
+  app.models.User.updateAll({}, { 'bottlesCountToday': 3, 'nextRefill': date }, function (err, res) {
+    if (err)
+      console.log(err);
+    else
+      console.log('done');
 
-  app.models.User.updateAll({}, {'bottlesCountToday': 3},  function(err, res){
-    // $set: { 'bottlesCountToday': 3 }, function(err, done) {
-      if (err)
-        console.log(err);
-      else
-        console.log('done');
-    
-    });
   });
+});
 
 
-  // Bootstrap the application, configure models, datasources and middleware.
-  // Sub-apps like REST API are mounted via boot scripts.
-  boot(app, __dirname, function (err) {
-    if (err) throw err;
+// Bootstrap the application, configure models, datasources and middleware.
+// Sub-apps like REST API are mounted via boot scripts.
+boot(app, __dirname, function (err) {
+  if (err) throw err;
 
-    // start the server if `$ node server.js`
-    if (require.main === module)
-      app.start();
-  });
+  // start the server if `$ node server.js`
+  if (require.main === module)
+    app.start();
+});
