@@ -104,11 +104,11 @@ module.exports = function (User) {
         var socialId = data.socialId;
         var token = data.token;
         var gender = data.gender;
-        // var image = data.image;
-        var image = "https://www.idlidu.com/Content/images/default.png";
+        var image = data.image;
+        // var image = "https://www.idlidu.com/Content/images/default.png";
         var email = data.email;
         var name = data.name;
-
+        // image=image.replace("height=50&width=50", "height=200&width=200");
         var result;
         // check if user is new or old in the system 
         User.findOne({ where: { socialId: socialId, typeLogIn: "facebook" } }, function (err, oneUser) {
@@ -126,8 +126,9 @@ module.exports = function (User) {
 
 
 
-                    const parts = image.split('.'),
-                        extension = parts[parts.length - 1];
+                    const parts = image.split('.');
+                    // extension = parts[parts.length - 1];
+                    var extension = "jpg"
                     var newFilename = (new Date()).getTime() + '.' + extension;
 
                     const options = {
@@ -198,8 +199,8 @@ module.exports = function (User) {
         var socialId = data.socialId;
         var token = data.token;
         var gender = data.gender;
-        // var image = data.image;
-        var image = "https://www.idlidu.com/Content/images/default.png";
+        var image = data.image;
+        // var image = "https://www.idlidu.com/Content/images/default.png";
         var email = data.email;
         var name = data.name;
         User.findOne({ where: { socialId: socialId, typeLogIn: "instegram" } }, function (err, oneUser) {
@@ -212,8 +213,9 @@ module.exports = function (User) {
                         var x = Math.round(randVal);
                         name = name + "_" + x;
                     }
-                    const parts = image.split('.'),
-                        extension = parts[parts.length - 1];
+                    const parts = image.split('.');
+                    // extension = parts[parts.length - 1];
+                    var extension = "jpg"
                     var newFilename = (new Date()).getTime() + '.' + extension;
 
                     const options = {
@@ -223,6 +225,7 @@ module.exports = function (User) {
                     download.image(options)
                         .then(({ filename, imageFile }) => {
                             image = urlFileRootSave + newFilename;
+                            console.log("newFilename");
                             console.log(newFilename);
                             var date = new Date();
                             User.create({
@@ -241,7 +244,7 @@ module.exports = function (User) {
                                 User.app.models.AccessToken.create({
                                     userId: newUser.id
                                 }, function (err, newToken) {
-                                    User.app.models.AccessToken.findOne({ include: { relation: 'user', scope: { include: { relation: 'country' } } }, userId: oneUser.id }, function (err, token) {
+                                    User.app.models.AccessToken.findOne({ include: { relation: 'user', scope: { include: { relation: 'country' } } }, userId: newUser.id }, function (err, token) {
                                         if (err)
                                             callback(err, null);
                                         result = token;
@@ -250,6 +253,9 @@ module.exports = function (User) {
                                     });
                                 })
                             })
+                        }).catch((err) => {
+                            console.log("err");
+                            console.log(err);
                         })
                 })
             } else {
@@ -269,8 +275,8 @@ module.exports = function (User) {
         var socialId = data.socialId;
         var token = data.token;
         var gender = data.gender;
-        // var image = data.image;
-        var image = "https://www.idlidu.com/Content/images/default.png";
+        var image = data.image;
+        // var image = "https://www.idlidu.com/Content/images/default.png";
         var email = data.email;
         var name = data.name;
         User.findOne({ where: { socialId: socialId, typeLogIn: "google" } }, function (err, oneUser) {
@@ -283,8 +289,10 @@ module.exports = function (User) {
                         var x = Math.round(randVal);
                         name = name + "_" + x;
                     }
-                    const parts = image.split('.'),
-                        extension = parts[parts.length - 1];
+                    const parts = image.split('.');
+                    // extension = parts[parts.length - 1];
+                    var extension = "jpg";
+
                     var newFilename = (new Date()).getTime() + '.' + extension;
 
                     const options = {
@@ -312,7 +320,7 @@ module.exports = function (User) {
                                 User.app.models.AccessToken.create({
                                     userId: newUser.id
                                 }, function (err, newToken) {
-                                    User.app.models.AccessToken.findOne({ include: { relation: 'user', scope: { include: { relation: 'country' } } }, userId: oneUser.id }, function (err, token) {
+                                    User.app.models.AccessToken.findOne({ include: { relation: 'user', scope: { include: { relation: 'country' } } }, userId: newUser.id }, function (err, token) {
                                         if (err)
                                             callback(err, null);
                                         result = token;
