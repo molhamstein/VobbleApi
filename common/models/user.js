@@ -23,7 +23,7 @@ module.exports = function (User) {
 
     User.beforeRemote('create', function (context, result, next) {
         // set next refill
-        var date = new DAte();
+        var date = new Date();
         context.req.body.nextRefill = new Date(date.setTime(date.getTime() + 1 * 86400000));
         next();
 
@@ -61,6 +61,7 @@ module.exports = function (User) {
                 next(err);
             next();
         })
+        // next();
     });
 
 

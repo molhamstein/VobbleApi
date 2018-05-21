@@ -51,8 +51,7 @@
       "type": "string"
     },
     "nextRefill": {
-      "type": "date",
-      "required": true
+      "type": "date"
     },
     "createdAt": {
       "type": "date",
