@@ -1,14 +1,14 @@
 {
   "restApiRoot": "/api",
   "host": "0.0.0.0",
-  "domain": "http://104.217.253.15:7000",
+  "domain": "http://104.217.253.15:8888",
   "siteDomain": "http://104.217.253.15/vobbleApp/Vobble-webApp",
   "thumbUrl": "C:/FFmpeg/bin/",
   "programFFmpegName": [
     "ffmpeg.exe",
     "ffprobe.exe"
   ],
-  "port": 7000,
+  "port": 8888,
   "remoting": {
     "context": false,
     "rest": {
