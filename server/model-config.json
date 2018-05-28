@@ -101,5 +101,13 @@
   "report": {
     "dataSource": "db",
     "public": true
+  },
+  "typeNotification": {
+    "dataSource": "db",
+    "public": true
+  },
+  "notification": {
+    "dataSource": "db",
+    "public": true
   }
 }

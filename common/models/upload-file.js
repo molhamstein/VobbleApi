@@ -25,7 +25,7 @@ module.exports = function (Uploadfile) {
         var urlFileRootSave = urlFileRoot + '/' + folderName + '/download/'
 
         // ulr save thumble
-        var urlThumbRootSave = urlFileRoot + '/' + "thumb" + '/download/'
+        var urlThumbRootSave = urlFileRoot + '/' + "thumbnail" + '/download/'
 
         if (process.env.NODE_ENV != undefined) {
             ffmpeg.setFfmpegPath(path.join(config.thumbUrl + config.programFFmpegName[0]));
