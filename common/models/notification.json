@@ -9,18 +9,15 @@
     "body": {
       "type": "object",
       "required": true
+    },
+    "type": {
+      "type": "object",
+      "required": true
     }
+    
   },
   "validations": [],
   "relations": {
-    "typeId": {
-      "type": "belongsTo",
-      "model": "typeNotification",
-      "foreignKey": "notificationTypeId",
-      "options": {
-        "disableInclude": true
-      }
-    },
     "owner": {
       "type": "belongsTo",
       "model": "user",
