@@ -49,20 +49,27 @@ module.exports = function (Notification) {
 
 
     Notification.sendNotification = function (data, callback) {
-        var result =[];
+        var result = [];
         var message = {
             "app_id": "3754a01e-b355-4248-a906-e04549e6ab32",
             "included_segments ": ["Active Users", "Inactive Users"],
             "contents": data.content
             // ,"include_player_ids":["b2421560-5827-4b31-8517-429da589758b"]
 
-            ,"filters": [
-                { "field": "tag", "key": "user_id", "relation": "exists", "value": data.ownerId }
+            , "filters": [
+                { "field": "tag", "key": "user_id", "relation": "exists", "value": data.userId }
             ]
         }
         sendNewNotification(message);
+        var notification = { 'ownerId': data.userId, 'type': "Custom-Notification", 'body': { 'message': data.content } }
+        Notification.create(
+            notification,
+            function(err, newUser) {
+                if (err)
+                    callback(err, null);
+                callback(null, result);            
+        })
         // TODO
-        callback(null, result);
     };
 
 };

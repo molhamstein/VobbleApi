@@ -44,13 +44,7 @@ module.exports = function (Bottle) {
     });
 
 
-
-    /**
- * get one mthode with some logic
- * @param {string} gender gender of owner bottle
- * @param {string} ISOCode ISOCode of owner bottle
- * @param {Function(Error, object)} callback
- */
+    // get bottle to view
 
     Bottle.getOneBottle = function (gender, ISOCode, shoreId, req, callback) {
         var result;
@@ -67,19 +61,21 @@ module.exports = function (Bottle) {
             filter.shoreId = shoreId;
         }
         var seenBottle = [];
-        var countPagination = 0;
+        // get bottle seen 
         Bottle.app.models.bottleUserseen.find({where: { userId: req.accessToken.userId }}, function (err, bottles) {
             seenBottle = bottles;
         })
-        var whileVariable = true;
 
+
+        // get all bottle
         Bottle.find({ where: { status: 'active' }, order: 'weight DESC' }, function (err, bottles) {
             if (err) {
                 callback(err, null);
-                whileVariable = false;
             }
             var ranking = bottles;
-            ranking = removeInvalidBottle(bottles, req.accessToken.userId, seenBottle, filter);
+
+            // process bottle sort
+            ranking = sortBottle(bottles, req.accessToken.userId, seenBottle, filter);
             if (ranking[0]) {
                 var bottleUserseenObject = {
                     "userId": req.accessToken.userId,
@@ -88,20 +84,16 @@ module.exports = function (Bottle) {
                 Bottle.app.models.bottleUserseen.create(bottleUserseenObject)
                     .then()
                     .catch(err => console.log(err));
-                // console.log(ranking);
-                callback(null, ranking);
-                whileVariable = false;
+                callback(null, ranking[0]);
             }
             else {
                 callback(null, errors.bottle.noNewBottle());
             }
-            countPagination++;
-
         });
     };
 
 
-    function removeInvalidBottle(ranking, userId, seenBottle, filter) {
+    function sortBottle(ranking, userId, seenBottle, filter) {
         var index = ranking.length - 1;
         var newRanking=[];
         while (index >= 0) {
@@ -143,12 +135,9 @@ module.exports = function (Bottle) {
         array.forEach(function (element) {
 
             if (new String(element.userId).valueOf() === new String(keyA).valueOf() && new String(element.bottleId).valueOf() === new String(keyB).valueOf()) {
-                // console.log("Error")
                 found++;
             }
         }, this);
-
-        // console.log("Not Error")
         return found;
     }
 

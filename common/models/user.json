@@ -70,6 +70,14 @@
         "disableInclude": true
       }
     },
+    "notifications": {
+      "type": "hasMany",
+      "model": "notification",
+      "foreignKey": "ownerId",
+      "options": {
+        "disableInclude": true
+      }
+    },
     "country": {
       "type": "belongsTo",
       "model": "country",

@@ -76,11 +76,11 @@
   },
   "bottleUserseen": {
     "dataSource": "db",
-    "public": true
+    "public": false
   },
   "country": {
     "dataSource": "db",
-    "public": true
+    "public": false
   },
   "typeGoods": {
     "dataSource": "db",
@@ -104,7 +104,7 @@
   },
   "typeNotification": {
     "dataSource": "db",
-    "public": true
+    "public": false
   },
   "notification": {
     "dataSource": "db",
