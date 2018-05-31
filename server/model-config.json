@@ -109,5 +109,9 @@
   "notification": {
     "dataSource": "db",
     "public": true
+  },
+  "message-notification": {
+    "dataSource": "db",
+    "public": true
   }
 }

@@ -25,6 +25,12 @@
       "type": "string",
       "required": true
     },
+    "bottleCount": {
+      "type": "number"
+    },
+    "validity": {
+      "type": "number"
+    },
     "description": {
       "type": "string",
       "required": true

@@ -1,0 +1,78 @@
+{
+  "name": "message-notification",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "expiredDate": {
+      "type": "date",
+      "required": true
+    },
+    "conversationId": {
+      "type": "string",
+      "id": true,
+      "required": true
+    }
+  },
+  "validations": [],
+  "relations": {
+    "from": {
+      "type": "belongsTo",
+      "model": "user",
+      "foreignKey": "from"
+    },
+    "to": {
+      "type": "belongsTo",
+      "model": "user",
+      "foreignKey": "to"
+    }
+  },
+  "acls": [],
+  "methods": {
+    "unreadMessage": {
+      "accepts": [
+        {
+          "arg": "userId",
+          "type": "string",
+          "required": true,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "arg": "result",
+          "type": "number",
+          "root": true,
+          "description": ""
+        }
+      ],
+      "description": "unread Message count ",
+      "http": [
+        {
+          "path": "/unreadMessage",
+          "verb": "get"
+        }
+      ]
+    },
+    "deleteMyNot": {
+      "accepts": [
+        {
+          "arg": "userId",
+          "type": "string",
+          "required": true,
+          "description": ""
+        }
+      ],
+      "returns": [],
+      "description": "delete my unread notification",
+      "http": [
+        {
+          "path": "/deleteMyNot",
+          "verb": "delete"
+        }
+      ]
+    }
+  }
+}

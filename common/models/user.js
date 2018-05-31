@@ -160,7 +160,9 @@ module.exports = function (User) {
                                     userId: newUser.id
                                 }, function (err, newToken) {
                                     // get the token with user of new user
-                                    User.app.models.AccessToken.findOne({ include: 'user', userId: newUser.id }, function (err, token) {
+                                    // User.app.models.AccessToken.findOne({ include: 'user', userId: newUser.id }, function (err, token) {
+                                    // User.app.models.AccessToken.findOne(, function (err, token) {
+                                    User.app.models.AccessToken.findOne({ include: { relation: 'user', scope: { include: { relation: 'country' } } }, where: { userId: newUser.id } }, function (err, token) {
                                         if (err)
                                             callback(err, null);
                                         result = token;
@@ -183,7 +185,7 @@ module.exports = function (User) {
             // old user
             else {
                 // get the token with user
-                User.app.models.AccessToken.findOne({ include: { relation: 'user', scope: { include: { relation: 'country' } } }, userId: oneUser.id }, function (err, token) {
+                User.app.models.AccessToken.findOne({ include: { relation: 'user', scope: { include: { relation: 'country' } } }, where: { userId: oneUser.id } }, function (err, token) {
                     if (err)
                         callback(err, null);
                     result = token;
@@ -245,7 +247,7 @@ module.exports = function (User) {
                                 User.app.models.AccessToken.create({
                                     userId: newUser.id
                                 }, function (err, newToken) {
-                                    User.app.models.AccessToken.findOne({ include: { relation: 'user', scope: { include: { relation: 'country' } } }, userId: newUser.id }, function (err, token) {
+                                    User.app.models.AccessToken.findOne({ include: { relation: 'user', scope: { include: { relation: 'country' } } }, where: { userId: newUser.id } }, function (err, token) {
                                         if (err)
                                             callback(err, null);
                                         result = token;
@@ -260,7 +262,8 @@ module.exports = function (User) {
                         })
                 })
             } else {
-                User.app.models.AccessToken.findOne({ include: 'user', userId: oneUser.id }, function (err, token) {
+                User.app.models.AccessToken.findOne({ include: { relation: 'user', scope: { include: { relation: 'country' } } },  where: { userId: oneUser.id } }, function (err, token) {
+
                     if (err)
                         callback(err, null);
                     result = token;
@@ -321,7 +324,7 @@ module.exports = function (User) {
                                 User.app.models.AccessToken.create({
                                     userId: newUser.id
                                 }, function (err, newToken) {
-                                    User.app.models.AccessToken.findOne({ include: { relation: 'user', scope: { include: { relation: 'country' } } }, userId: newUser.id }, function (err, token) {
+                                    User.app.models.AccessToken.findOne({ include: { relation: 'user', scope: { include: { relation: 'country' } } }, where: { userId: newUser.id } }, function (err, token) {
                                         if (err)
                                             callback(err, null);
                                         result = token;
@@ -333,7 +336,8 @@ module.exports = function (User) {
                         })
                 })
             } else {
-                User.app.models.AccessToken.findOne({ include: 'user', userId: oneUser.id }, function (err, token) {
+                User.app.models.AccessToken.findOne({ include: { relation: 'user', scope: { include: { relation: 'country' } } },  where: { userId: oneUser.id }}, function (err, token) {
+
                     if (err)
                         callback(err, null);
                     result = token;
@@ -354,7 +358,7 @@ module.exports = function (User) {
         var result;
         User.findOne({ where: { username: newUsername } }, function (err, userByUsername) {
             if (userByUsername) {
-                callback(null, errors.account.usernameNotValid());
+                callback(errors.account.usernameNotValid(), null);
 
             } else
                 callback(null, true);

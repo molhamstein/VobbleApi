@@ -40,12 +40,8 @@ module.exports = function (Notification) {
      */
 
 
-    // {
-    //     "typeNotification" :"",
-    //         "ownerId":"",
-    //             "content":{"en": "English" , "ar":"Arabic"}
-
-    // }
+// {"content" : {"en": "English Message"},
+// "userId":"5b001ca3f683ce7622a21c52"}
 
 
     Notification.sendNotification = function (data, callback) {
@@ -54,8 +50,6 @@ module.exports = function (Notification) {
             "app_id": "3754a01e-b355-4248-a906-e04549e6ab32",
             "included_segments ": ["Active Users", "Inactive Users"],
             "contents": data.content
-            // ,"include_player_ids":["b2421560-5827-4b31-8517-429da589758b"]
-
             , "filters": [
                 { "field": "tag", "key": "user_id", "relation": "exists", "value": data.userId }
             ]

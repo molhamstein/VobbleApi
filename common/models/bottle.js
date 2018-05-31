@@ -19,7 +19,7 @@ module.exports = function (Bottle) {
                 console.log(err);
                 next();
             }
-            if (user.bottlesCountToday == 0) {
+            if (user.bottlesCountToday == 0 || user.bottlesCount == 0) {
                 return next(errors.bottle.noAvailableBottleToday());
             }
             weight += Date.parse(new Date()) * 3;
@@ -37,8 +37,11 @@ module.exports = function (Bottle) {
     // increment bottlesCount for user
     Bottle.afterRemote('create', function (context, result, next) {
         const user = context.res.locals.user;
-        user.bottlesCount++;
-        user.bottlesCountToday--;
+        user.bottles++;
+        if (user.bottlesCount > 0)
+            user.bottlesCount--;
+        else
+            user.bottlesCountToday--;
         user.save();
         next();
     });
@@ -62,7 +65,7 @@ module.exports = function (Bottle) {
         }
         var seenBottle = [];
         // get bottle seen 
-        Bottle.app.models.bottleUserseen.find({where: { userId: req.accessToken.userId }}, function (err, bottles) {
+        Bottle.app.models.bottleUserseen.find({ where: { userId: req.accessToken.userId } }, function (err, bottles) {
             seenBottle = bottles;
         })
 
@@ -87,7 +90,7 @@ module.exports = function (Bottle) {
                 callback(null, ranking[0]);
             }
             else {
-                callback(null, errors.bottle.noNewBottle());
+                callback(errors.bottle.noNewBottle(), null);
             }
         });
     };
@@ -95,17 +98,17 @@ module.exports = function (Bottle) {
 
     function sortBottle(ranking, userId, seenBottle, filter) {
         var index = ranking.length - 1;
-        var newRanking=[];
+        var newRanking = [];
         while (index >= 0) {
             var element = ranking[index];
             element.owner(function (err, owner) {
                 element.shore(function (err, shore) {
-                    var numberOfSeenThisBottle=findInSeenUser(seenBottle, userId, element.id);
+                    var numberOfSeenThisBottle = findInSeenUser(seenBottle, userId, element.id);
                     if ((new String(userId).valueOf() === new String(owner.id).valueOf()) || (filter.gender && filter.gender != owner.gender) || (filter.ISOCode && filter.ISOCode != owner.ISOCode) || (filter.shoreId && filter.shoreId != shore.id)) {
                         console.log("Delete Object");
                         ranking.splice(index, 1);
-                    }else if(numberOfSeenThisBottle>0){
-                        ranking[index].numberRepeted=numberOfSeenThisBottle;
+                    } else if (numberOfSeenThisBottle > 0) {
+                        ranking[index].numberRepeted = numberOfSeenThisBottle;
                         newRanking.push(ranking[index]);
                         ranking.splice(index, 1);
                     }
@@ -114,7 +117,7 @@ module.exports = function (Bottle) {
             index -= 1;
         }
         newRanking.sort(compare);
-        ranking=ranking.concat(newRanking);
+        ranking = ranking.concat(newRanking);
         return ranking;
     }
     // function for sort bottle depend of weight
