@@ -28,8 +28,7 @@
       "defaultFn": "now"
     },
     "endAt": {
-      "type": "date",
-      "required": true
+      "type": "date"
     }
   },
   "validations": [],

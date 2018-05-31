@@ -25,11 +25,11 @@ module.exports.account = {
 
 
 module.exports.bottle = {
+  noAvailableBottleToday: function () {
+    return new cError('NOT_AVAILABLE_BOTTLE_TODAY', 408, 'not available bottle today', 408);
+  },
   noNewBottle: function () {
     return new cError('NO_NEW_BOTTLE', 406, 'no new bottle', 406);
-  },
-  noAvailableBottleToday: function () {
-    return new cError('NOT_AVAILABLE_BOTTLE_TODAY',407, 'not available bottle today', 407);
   }
 };
 

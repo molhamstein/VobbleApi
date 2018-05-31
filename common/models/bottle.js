@@ -19,8 +19,8 @@ module.exports = function (Bottle) {
                 console.log(err);
                 next();
             }
-            if (user.bottlesCountToday == 0 || user.bottlesCount == 0) {
-                return next(errors.bottle.noAvailableBottleToday());
+            if (user.bottlesCountToday == 0 && user.bottlesCount == 0) {
+               return next(errors.bottle.noAvailableBottleToday());
             }
             weight += Date.parse(new Date()) * 3;
             weight += Date.parse(user.createdAt) * 4;
