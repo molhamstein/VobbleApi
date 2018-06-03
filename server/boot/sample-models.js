@@ -33,6 +33,11 @@ module.exports = async function (app) {
     imageBaseUrl + '/uploadFiles/thumb/download/d1b4bba0-4f2f-11e8-af28-93a1158274a61525392743514_thumb.PNG'
   ]
 
+
+  const iconProduct=[
+    imageBaseUrl + '/uploadFiles/images/bottles2.png',
+    imageBaseUrl + '/uploadFiles/images/globe-01.png'
+  ]
   /*
   {
     "email": "admin@vobble.com",
@@ -431,7 +436,7 @@ module.exports = async function (app) {
           "bottleCount": 1,
           "price": "5000",
           "description": "description",
-          "icon": "icon",
+          "icon": iconProduct[0],
           "androidProduct": "string",
           "appleProduct": "string",
           "typeGoodsId": bottleType.id
@@ -442,7 +447,7 @@ module.exports = async function (app) {
           "price": "9000",
           "bottleCount": 3,
           "description": "description",
-          "icon": "icon",
+          "icon": iconProduct[0],
           "androidProduct": "string",
           "appleProduct": "string",
           "typeGoodsId": bottleType.id
@@ -453,7 +458,7 @@ module.exports = async function (app) {
           "bottleCount": 5,
           "price": "13000",
           "description": "description",
-          "icon": "icon",
+          "icon": iconProduct[0],
           "androidProduct": "string",
           "appleProduct": "string",
           "typeGoodsId": bottleType.id
@@ -464,7 +469,7 @@ module.exports = async function (app) {
           "price": "6000",
           "validity": 24,
           "description": "description",
-          "icon": "icon",
+          "icon": iconProduct[1],
           "androidProduct": "string",
           "appleProduct": "string",
           "typeGoodsId": genderType.id
@@ -475,7 +480,7 @@ module.exports = async function (app) {
           "price": "10000",
           "validity": 48,
           "description": "description",
-          "icon": "icon",
+          "icon": iconProduct[1],
           "androidProduct": "string",
           "appleProduct": "string",
           "typeGoodsId": genderType.id
@@ -486,7 +491,7 @@ module.exports = async function (app) {
           "price": "6000",
           "validity": 24,          
           "description": "description",
-          "icon": "icon",
+          "icon": iconProduct[1],
           "androidProduct": "string",
           "appleProduct": "string",
           "typeGoodsId": countryType.id
@@ -497,7 +502,7 @@ module.exports = async function (app) {
           "price": "10000",
           "validity": 48,
           "description": "description",
-          "icon": "icon",
+          "icon": iconProduct[1],
           "androidProduct": "string",
           "appleProduct": "string",
           "typeGoodsId": countryType.id
