@@ -20,7 +20,7 @@ module.exports = function (Bottle) {
                 next();
             }
             if (user.bottlesCountToday == 0 && user.bottlesCount == 0) {
-               return next(errors.bottle.noAvailableBottleToday());
+                return next(errors.bottle.noAvailableBottleToday());
             }
             weight += Date.parse(new Date()) * 3;
             weight += Date.parse(user.createdAt) * 4;
@@ -69,6 +69,26 @@ module.exports = function (Bottle) {
             seenBottle = bottles;
         })
 
+        var blockList = [];
+        // get id user block list 
+        Bottle.app.models.block.find({
+            where:
+            {
+                or: [
+                    { "ownerId": req.accessToken.userId },
+                    { "userId": req.accessToken.userId },
+                ]
+            }
+        }, function (err, blocksList) {
+            console.log(blocksList);
+            blockList = blocksList.map(function (block) {
+                if (new String(req.accessToken.userId).valueOf() === new String(block.ownerId).valueOf())
+                    return block.userId;
+                else
+                    return block.ownerId;
+
+            });
+        })
 
         // get all bottle
         Bottle.find({ where: { status: 'active' }, order: 'weight DESC' }, function (err, bottles) {
@@ -78,7 +98,7 @@ module.exports = function (Bottle) {
             var ranking = bottles;
 
             // process bottle sort
-            ranking = sortBottle(bottles, req.accessToken.userId, seenBottle, filter);
+            ranking = sortBottle(bottles, req.accessToken.userId, seenBottle, blockList, filter)
             if (ranking[0]) {
                 var bottleUserseenObject = {
                     "userId": req.accessToken.userId,
@@ -87,7 +107,7 @@ module.exports = function (Bottle) {
                 Bottle.app.models.bottleUserseen.create(bottleUserseenObject)
                     .then()
                     .catch(err => console.log(err));
-                callback(null, ranking[0]);
+                callback(null, ranking);
             }
             else {
                 callback(errors.bottle.noNewBottle(), null);
@@ -96,23 +116,27 @@ module.exports = function (Bottle) {
     };
 
 
-    function sortBottle(ranking, userId, seenBottle, filter) {
+    function sortBottle(ranking, userId, seenBottle, blockList, filter) {
+        console.log("blockList");
+        console.log(blockList);
         var index = ranking.length - 1;
         var newRanking = [];
+        var blocking = false;
         while (index >= 0) {
             var element = ranking[index];
             element.owner(function (err, owner) {
                 element.shore(function (err, shore) {
                     var numberOfSeenThisBottle = findInSeenUser(seenBottle, userId, element.id);
-                    if ((new String(userId).valueOf() === new String(owner.id).valueOf()) || (filter.gender && filter.gender != owner.gender) || (filter.ISOCode && filter.ISOCode != owner.ISOCode) || (filter.shoreId && filter.shoreId != shore.id)) {
-                        console.log("Delete Object");
+                    var isBlocked = isInBlockList(blockList, owner.id)
+                    if (isBlocked || (new String(userId).valueOf() === new String(owner.id).valueOf()) || (filter.gender && filter.gender != owner.gender) || (filter.ISOCode && filter.ISOCode != owner.ISOCode) || (filter.shoreId && filter.shoreId != shore.id)) {
                         ranking.splice(index, 1);
-                    } else if (numberOfSeenThisBottle > 0) {
+                    }
+                    else if (numberOfSeenThisBottle > 0) {
                         ranking[index].numberRepeted = numberOfSeenThisBottle;
                         newRanking.push(ranking[index]);
                         ranking.splice(index, 1);
                     }
-                })
+                });
             });
             index -= 1;
         }
@@ -120,6 +144,19 @@ module.exports = function (Bottle) {
         ranking = ranking.concat(newRanking);
         return ranking;
     }
+
+    function isInBlockList(blockList, userId) {
+        var result =false;
+        blockList.forEach(function (element) {
+            if ((new String(userId).valueOf() === new String(element).valueOf())) {
+                result= true;
+                return;
+            }
+        }, this);
+        return result;
+    }
+
+  
     // function for sort bottle depend of weight
     function compare(a, b) {
         if (a.numberRepeted < b.numberRepeted)
