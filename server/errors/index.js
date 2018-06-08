@@ -33,3 +33,13 @@ module.exports.bottle = {
   }
 };
 
+
+module.exports.block = {
+  alreadyIsBlocked: function () {
+    return new cError('ALREADY_IS_BLOCKED', 409, 'already is blocked', 409);
+  },
+  noBlocked : function () {
+    return new cError('NO_BLOCKED', 410, 'no blocked', 410);
+  }
+};
+

@@ -100,6 +100,11 @@
       "type": "hasMany",
       "model": "bottle",
       "foreignKey": "ownerId"
+    },
+    "blocking": {
+      "type": "hasMany",
+      "model": "block",
+      "foreignKey": "ownerId"
     }
   },
   "acls": [
@@ -298,6 +303,96 @@
         {
           "path": "/checkUsername",
           "verb": "post"
+        }
+      ]
+    },
+    "block": {
+      "accepts": [
+        {
+          "arg": "userId",
+          "type": "string",
+          "required": true,
+          "description": ""
+        },
+        {
+          "arg": "context",
+          "type": "object",
+          "http": {
+            "source": "context"
+          }
+        }
+      ],
+      "returns": [
+        {
+          "arg": "result",
+          "type": "object",
+          "root": true,
+          "description": ""
+        }
+      ],
+      "description": "block user",
+      "http": [
+        {
+          "path": "/block",
+          "verb": "post"
+        }
+      ]
+    },
+    "unBlock": {
+      "accepts": [
+        {
+          "arg": "userId",
+          "type": "string",
+          "required": true,
+          "description": ""
+        },
+        {
+          "arg": "context",
+          "type": "object",
+          "http": {
+            "source": "context"
+          }
+        }
+      ],
+      "returns": [
+        {
+          "arg": "result",
+          "type": "boolean",
+          "root": true,
+          "description": ""
+        }
+      ],
+      "description": "unblock user",
+      "http": [
+        {
+          "path": "/unblock",
+          "verb": "delete"
+        }
+      ]
+    },
+    "myListBlock": {
+      "accepts": [
+        {
+          "arg": "context",
+          "type": "object",
+          "http": {
+            "source": "context"
+          }
+        }
+      ],
+      "returns": [
+        {
+          "arg": "result",
+          "type": "array",
+          "root": true,
+          "description": ""
+        }
+      ],
+      "description": "",
+      "http": [
+        {
+          "path": "/blockList",
+          "verb": "get"
         }
       ]
     }

@@ -113,5 +113,9 @@
   "message-notification": {
     "dataSource": "db",
     "public": true
+  },
+  "block": {
+    "dataSource": "db",
+    "public": true
   }
 }

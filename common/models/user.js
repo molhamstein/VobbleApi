@@ -262,7 +262,7 @@ module.exports = function (User) {
                         })
                 })
             } else {
-                User.app.models.AccessToken.findOne({ include: { relation: 'user', scope: { include: { relation: 'country' } } },  where: { userId: oneUser.id } }, function (err, token) {
+                User.app.models.AccessToken.findOne({ include: { relation: 'user', scope: { include: { relation: 'country' } } }, where: { userId: oneUser.id } }, function (err, token) {
 
                     if (err)
                         callback(err, null);
@@ -336,7 +336,7 @@ module.exports = function (User) {
                         })
                 })
             } else {
-                User.app.models.AccessToken.findOne({ include: { relation: 'user', scope: { include: { relation: 'country' } } },  where: { userId: oneUser.id }}, function (err, token) {
+                User.app.models.AccessToken.findOne({ include: { relation: 'user', scope: { include: { relation: 'country' } } }, where: { userId: oneUser.id } }, function (err, token) {
 
                     if (err)
                         callback(err, null);
@@ -367,5 +367,76 @@ module.exports = function (User) {
         // TODO
     };
 
+
+    /**
+     * block user
+     * @param {string} userId
+     * @param {Function(Error, boolean)} callback
+     */
+
+    User.block = function (userId, context, callback) {
+        const locals = context.res.locals;
+        locals.user.blocking.find({}).then(users => {
+            var isNewBlock = false
+            isNewBlock = users.find(function (user) {
+                // return user.userId;
+                if (new String(userId).valueOf() === new String(user.userId).valueOf()) {
+                    return true
+                }
+            });
+            if (isNewBlock) {
+                callback(errors.block.alreadyIsBlocked(), null);
+
+            } else {
+                var newBlock = {
+                    "userId": userId,
+                    "ownerId": context.req.accessToken.userId
+                }
+                User.app.models.block.create(newBlock, function (err, newBlocked) {
+                    if (err)
+                        callback(err);
+                    callback(null, newBlocked);
+
+                })
+            }
+        });
+    };
+
+    /**
+ * unblock user
+ * @param {string} userId
+ * @param {Function(Error, boolean)} callback
+ */
+
+    User.unBlock = function (userId, context, callback) {
+        var result;
+        const locals = context.res.locals;
+        locals.user.blocking.findOne({ where: { "userId": userId } }).then(users => {
+            console.log(users);
+            if (!users) {
+                callback(errors.block.noBlocked(), null);
+            } else {
+                User.app.models.block.deleteById(users.id, function (err) {
+                    if (err)
+                        callback(err);
+                    callback(null);
+                })
+            }
+        });
+    };
+
+    /**
+ *
+ * @param {Function(Error, array)} callback
+ */
+
+    User.myListBlock = function (context, callback) {
+        var result;
+        const locals = context.res.locals;
+        locals.user.blocking.find({ include: { relation: 'user' } }).then(users => {
+            callback(null, users);
+        });
+        // TODO
+    };
 
 };
