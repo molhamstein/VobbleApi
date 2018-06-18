@@ -55,14 +55,14 @@ module.exports = function (User) {
     }
 
     // to Send Verfication email after register 
-    User.afterRemote('create', function (context, user, next) {
-        sendVerificationEmail(user, 'Thanks for registering.', '', function (err, res) {
-            if (err)
-                next(err);
-            next();
-        })
-        // next();
-    });
+    // User.afterRemote('create', function (context, user, next) {
+    //     sendVerificationEmail(user, 'Thanks for registering.', '', function (err, res) {
+    //         if (err)
+    //             next(err);
+    //         next();
+    //     })
+    //     // next();
+    // });
 
 
 

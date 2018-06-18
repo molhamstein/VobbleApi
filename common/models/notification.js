@@ -51,7 +51,7 @@ module.exports = function (Notification) {
             "included_segments ": ["Active Users", "Inactive Users"],
             "contents": data.content
             , "filters": [
-                { "field": "tag", "key": "user_id", "relation": "exists", "value": data.userId }
+                { "field": "tag", "key": "user_id", "relation": "=", "value": data.userId }
             ]
         }
         sendNewNotification(message);
