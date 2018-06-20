@@ -63,7 +63,7 @@ module.exports = function (Messagenotification) {
                         "included_segments ": ["Active Users", "Inactive Users"],
                         "contents": { "en": "new message from " + fromUser.username }
                         , "filters": [
-                            { "field": "tag", "key": "user_id", "relation": "exists", "value": messageNotification.to }
+                            { "field": "tag", "key": "user_id", "relation": "=", "value": messageNotification.to }
                         ]
                     }
                     sendNewNotification(message);

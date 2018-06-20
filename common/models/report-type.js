@@ -1,5 +1,5 @@
 'use strict';
 
-module.exports = function(Reporttype) {
+module.exports = function(ReportType) {
 
 };
