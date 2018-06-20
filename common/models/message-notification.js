@@ -24,7 +24,7 @@ module.exports = function (Messagenotification) {
     var sendNewNotification = function (data) {
         var headers = {
             "Content-Type": "application/json; charset=utf-8",
-            "Authorization": "Basic OGExY2MwMzctOWY5MC00ZGI2LTgyNTktNGUwMTljOGQ3ZDVj"
+            "Authorization": "Basic YWE2MTJjOWItYzY4MC00ZWRjLThlZTQtYTNmOGI5MjY2Y2Zm"
         };
 
         var options = {
@@ -59,7 +59,7 @@ module.exports = function (Messagenotification) {
             if (toUser.isActive == false)
                 Messagenotification.app.models.User.findById(messageNotification.from, function (err, fromUser) {
                     var message = {
-                        "app_id": "3754a01e-b355-4248-a906-e04549e6ab32",
+                        "app_id": "e8a91e90-a766-4f1b-a47e-e3b3f569dbef",
                         "included_segments ": ["Active Users", "Inactive Users"],
                         "contents": { "en": "new message from " + fromUser.username }
                         , "filters": [
