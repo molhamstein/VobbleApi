@@ -107,7 +107,7 @@ module.exports = function (Bottle) {
                 Bottle.app.models.bottleUserseen.create(bottleUserseenObject)
                     .then()
                     .catch(err => console.log(err));
-                callback(null, ranking[0]);
+                callback(null, ranking);
             }
             else {
                 callback(errors.bottle.noNewBottle(), null);
@@ -128,7 +128,7 @@ module.exports = function (Bottle) {
                 element.shore(function (err, shore) {
                     var numberOfSeenThisBottle = findInSeenUser(seenBottle, userId, element.id);
                     var isBlocked = isInBlockList(blockList, owner.id)
-                    if (isBlocked || (new String(userId).valueOf() === new String(owner.id).valueOf()) || (filter.gender && filter.gender != owner.gender) || (filter.ISOCode && filter.ISOCode != owner.ISOCode) || (filter.shoreId && filter.shoreId != shore.id)) {
+                    if (element.status == "deactivate" || owner.status == "deactivate" || isBlocked || (new String(userId).valueOf() === new String(owner.id).valueOf()) || (filter.gender && filter.gender != owner.gender) || (filter.ISOCode && filter.ISOCode != owner.ISOCode) || (filter.shoreId && filter.shoreId != shore.id)) {
                         ranking.splice(index, 1);
                     }
                     else if (numberOfSeenThisBottle > 0) {
@@ -146,17 +146,17 @@ module.exports = function (Bottle) {
     }
 
     function isInBlockList(blockList, userId) {
-        var result =false;
+        var result = false;
         blockList.forEach(function (element) {
             if ((new String(userId).valueOf() === new String(element).valueOf())) {
-                result= true;
+                result = true;
                 return;
             }
         }, this);
         return result;
     }
 
-  
+
     // function for sort bottle depend of weight
     function compare(a, b) {
         if (a.numberRepeted < b.numberRepeted)

@@ -34,6 +34,12 @@ module.exports.bottle = {
 };
 
 
+// module.exports.global = {
+//   notInEnum: function (nameError,messageError) {
+//     return new cError('NOT_IN_ENUM_'+nameError, 409, 'not in enum '+messageError, 409);
+//   }
+// };
+
 module.exports.block = {
   alreadyIsBlocked: function () {
     return new cError('ALREADY_IS_BLOCKED', 409, 'already is blocked', 409);

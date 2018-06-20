@@ -1,15 +1,41 @@
 'use strict';
+const errors = require('../../server/errors');
 
 module.exports = function (Item) {
+    Item.validatesInclusionOf('storeType', { in: ['playStore', 'iTunes'] });
 
     Item.beforeRemote('create', function (context, item, next) {
-        console.log(context.req.body.ownerId);
+        // var storeTypeEnum=["playStore","iTunes"];
+        // var storeType = context.req.body.storeType;
+        // if(storeTypeEnum.findIndex(storeType)==-1){
+        //     return next(errors.global.notActive());
+        // }
         Item.app.models.Product.findById(context.req.body.productId, function (err, product) {
             if (err) {
-                console.log(err);
-                next();
+                return next(err);
             }
             context.req.body.ownerId = context.req.accessToken.userId;
+            next();
+            // if (product.bottleCount > 0) {
+            //     Item.app.models.User.findById(context.req.body.ownerId).then(user => {
+            //         user.bottlesCount += product.bottleCount;
+            //         user.save();
+            //         next();
+            //     }).catch(err => next(err));
+            // } else {
+            //     var date = new Date().getTime();
+            //     date += (product.validity * 60 * 60 * 1000);
+            //     context.req.body.endAt = new Date(date);
+            //     next();
+            // }
+        })
+    });
+
+    Item.afterRemote('create', function (context, item, next) {
+        Item.app.models.Product.findById(context.req.body.productId, function (err, product) {
+            if (err) {
+                return next(err);
+            }
             if (product.bottleCount > 0) {
                 Item.app.models.User.findById(context.req.body.ownerId).then(user => {
                     user.bottlesCount += product.bottleCount;
@@ -19,9 +45,12 @@ module.exports = function (Item) {
             } else {
                 var date = new Date().getTime();
                 date += (product.validity * 60 * 60 * 1000);
-                context.req.body.endAt = new Date(date);
+                item.endAt = new Date(date);
+                item.save();
+                next();
             }
         })
+
     });
 
 };

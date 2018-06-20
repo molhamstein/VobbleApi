@@ -61,10 +61,6 @@
       "type": "date",
       "required": true,
       "defaultFn": "now"
-    },
-    "isActive": {
-      "type": "boolean",
-      "default": "true"
     }
   },
   "validations": [],
@@ -96,7 +92,7 @@
       "model": "item",
       "foreignKey": "ownerId"
     },
-    "bottles": {
+    "myBottles": {
       "type": "hasMany",
       "model": "bottle",
       "foreignKey": "ownerId"

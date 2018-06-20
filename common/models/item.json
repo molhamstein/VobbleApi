@@ -8,7 +8,6 @@
   "properties": {
     "storeType": {
       "type": "string",
-      "enum": ["red", "green", "blue"],
       "required": true
     },
     "storeToken": {

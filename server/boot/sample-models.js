@@ -415,13 +415,16 @@ module.exports = async function (app) {
         [
           {
             "name_en": "Bottles Packs",
-            "name_ar": "زجاجات"
+            "name_ar": "زجاجات",
+            "id" : "5b13ee987fe59d9d184bfe3e"
           }, {
             "name_en": "Filter By Gender",
-            "name_ar": "تصنيف حسب الجنس"
+            "name_ar": "تصنيف حسب الجنس",
+            "id" : "5b13ee987fe59d9d184bfe3f"            
           }, {
             "name_en": "Filter By Country",
-            "name_ar": "تصنيف حسب البلد"
+            "name_ar": "تصنيف حسب البلد",
+            "id" : "5b13ee987fe59d9d184bfe40"            
           }
         ]);
 
