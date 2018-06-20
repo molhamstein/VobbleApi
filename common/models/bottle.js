@@ -107,7 +107,7 @@ module.exports = function (Bottle) {
                 Bottle.app.models.bottleUserseen.create(bottleUserseenObject)
                     .then()
                     .catch(err => console.log(err));
-                callback(null, ranking);
+                callback(null, ranking[0]);
             }
             else {
                 callback(errors.bottle.noNewBottle(), null);
