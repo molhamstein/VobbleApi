@@ -11,8 +11,8 @@ module.exports = function (Bottle) {
             return next(errors.account.notActive());
         }
 
-
-        context.req.body.ownerId = context.req.accessToken.userId;
+        if (context.req.body.ownerId == null)
+            context.req.body.ownerId = context.req.accessToken.userId;
         let weight = 0
         Bottle.app.models.User.findById(context.req.body.ownerId, function (err, user) {
             if (err) {

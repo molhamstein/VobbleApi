@@ -94,7 +94,7 @@
     "dataSource": "db",
     "public": true
   },
-  "report-type": {
+  "reportType": {
     "dataSource": "db",
     "public": true
   },

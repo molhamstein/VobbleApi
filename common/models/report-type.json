@@ -1,5 +1,5 @@
 {
-  "name": "report-type",
+  "name": "reportType",
   "base": "PersistedModel",
   "idInjection": true,
   "options": {

@@ -14,7 +14,7 @@
         "relation": "bottle"
       },
       {
-        "relation": "report-type"
+        "relation": "reportType"
       }
     ]
   },
@@ -32,9 +32,9 @@
       "model": "bottle",
       "foreignKey": "bottleId"
     },
-    "report-type": {
+    "reportType": {
       "type": "belongsTo",
-      "model": "report-type",
+      "model": "reportType",
       "foreignKey": "reportTypeId"
     },
     "owner": {

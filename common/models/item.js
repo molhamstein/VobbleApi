@@ -14,7 +14,8 @@ module.exports = function (Item) {
             if (err) {
                 return next(err);
             }
-            context.req.body.ownerId = context.req.accessToken.userId;
+            if (context.req.body.ownerId == null)
+                context.req.body.ownerId = context.req.accessToken.userId;
             next();
             // if (product.bottleCount > 0) {
             //     Item.app.models.User.findById(context.req.body.ownerId).then(user => {
