@@ -49,3 +49,10 @@ module.exports.block = {
   }
 };
 
+
+module.exports.product = {
+  productNotFound: function () {
+    return new cError('PRODUCT_NOT_FOUND', 411, 'product not found', 411);
+  }
+};
+

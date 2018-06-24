@@ -14,21 +14,12 @@ module.exports = function (Item) {
             if (err) {
                 return next(err);
             }
-            if (context.req.body.ownerId == null)
+            if (context.req.body.ownerId == null && context.req.accessToken != null)
                 context.req.body.ownerId = context.req.accessToken.userId;
+            if (product == null) {
+                return next(errors.product.productNotFound());
+            }
             next();
-            // if (product.bottleCount > 0) {
-            //     Item.app.models.User.findById(context.req.body.ownerId).then(user => {
-            //         user.bottlesCount += product.bottleCount;
-            //         user.save();
-            //         next();
-            //     }).catch(err => next(err));
-            // } else {
-            //     var date = new Date().getTime();
-            //     date += (product.validity * 60 * 60 * 1000);
-            //     context.req.body.endAt = new Date(date);
-            //     next();
-            // }
         })
     });
 
