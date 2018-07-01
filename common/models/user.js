@@ -79,7 +79,8 @@ module.exports = function (User) {
     //send password reset link when requested
     User.on('resetPasswordRequest', function (info) {
         // let url = `${config.siteDomain}/login/reset-password?access_token=${info.accessToken.id}&user_id=${info.user.id}`;
-        let url = `${config.siteDomain}` + `/login/reset-password?access_token=${info.accessToken.id}&user_id=${info.user.id}`;
+        // let url = `${config.siteDomain}` + `/login/reset-password?access_token=${info.accessToken.id}&user_id=${info.user.id}`;
+        let url = `http://104.217.253.15/vobbleResetPassword?access_token=${info.accessToken.id}&user_id=${info.user.id}`;
         ejs.renderFile(path.resolve(__dirname + "../../../server/views/reset-password-template.ejs"), { url: url }, function (err, html) {
             if (err) return console.log('> error sending password reset email', err);
             User.app.models.Email.send({
