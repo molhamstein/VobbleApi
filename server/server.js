@@ -5,6 +5,7 @@ var loopback = require('loopback');
 var boot = require('loopback-boot');
 var schedule = require('node-schedule');
 var app = module.exports = loopback();
+
 const LoopBackContext = require('loopback-context');
 app.use(LoopBackContext.perRequest());
 app.use(loopback.token());
@@ -43,10 +44,14 @@ app.start = function () {
 };
 
 
-var timer = schedule.scheduleJob('0 0 * * * *', function () {
+var timer = schedule.scheduleJob('0 * * * * *', function () {
+  // var date = new Date();
+  // date = new Date(date.setTime(date.getTime() + 1 * 86400000));
   var date = new Date();
-  date = new Date(date.setTime(date.getTime() + 1 * 86400000));
-  app.models.User.updateAll({}, { 'bottlesCountToday': 3, 'nextRefill': date }, function (err, res) {
+  console.log(date);
+  date.setHours(date.getHours() + 24);
+  console.log(date);
+  app.models.User.updateAll({}, { 'bottlesCount': 3, 'nextRefill': date }, function (err, res) {
     if (err)
       console.log(err);
     else

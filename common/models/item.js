@@ -30,7 +30,7 @@ module.exports = function (Item) {
             }
             if (product.bottleCount > 0) {
                 Item.app.models.User.findById(context.req.body.ownerId).then(user => {
-                    user.bottlesCount += product.bottleCount;
+                    user.extraBottlesCount += product.bottleCount;
                     user.save();
                     next();
                 }).catch(err => next(err));

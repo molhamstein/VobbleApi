@@ -27,15 +27,15 @@
     "image": {
       "type": "string"
     },
-    "bottles": {
+    "totlalBottlesThrow": {
+      "type": "number",
+      "default": 0
+    },
+    "extraBottlesCount": {
       "type": "number",
       "default": 0
     },
     "bottlesCount": {
-      "type": "number",
-      "default": 0
-    },
-    "bottlesCountToday": {
       "type": "number",
       "default": 3
     },

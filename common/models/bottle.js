@@ -19,7 +19,7 @@ module.exports = function (Bottle) {
                 console.log(err);
                 next();
             }
-            if (user.bottlesCountToday == 0 && user.bottlesCount == 0) {
+            if (user.bottlesCount == 0 && user.extraBottlesCount == 0) {
                 return next(errors.bottle.noAvailableBottleToday());
             }
             weight += Date.parse(new Date()) * 3;
@@ -35,13 +35,26 @@ module.exports = function (Bottle) {
 
 
     // increment bottlesCount for user
+    // Bottle.afterRemote('create', function (context, result, next) {
+    //     const user = context.res.locals.user;
+    //     user.totlalBottlesThrow++;
+    //     if (user.extraBottlesCount > 0)
+    //         user.bottlesCount--;
+    //     else
+    //         user.bottlesCountToday--;
+    //     user.save();
+    //     next();
+    // });
+
+
+    // increment bottlesCount for user
     Bottle.afterRemote('create', function (context, result, next) {
         const user = context.res.locals.user;
-        user.bottles++;
-        if (user.bottlesCount > 0)
-            user.bottlesCount--;
+        user.totlalBottlesThrow++;
+        if (user.extraBottlesCount > 0)
+            user.extraBottlesCount--;
         else
-            user.bottlesCountToday--;
+            user.bottlesCount--;
         user.save();
         next();
     });
