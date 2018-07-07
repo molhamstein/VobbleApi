@@ -27,7 +27,7 @@
     "image": {
       "type": "string"
     },
-    "totlalBottlesThrow": {
+    "totlalBottlesThrown": {
       "type": "number",
       "default": 0
     },

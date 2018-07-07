@@ -37,7 +37,7 @@ module.exports = function (Bottle) {
     // increment bottlesCount for user
     // Bottle.afterRemote('create', function (context, result, next) {
     //     const user = context.res.locals.user;
-    //     user.totlalBottlesThrow++;
+    //     user.totlalBottlesThrown++;
     //     if (user.extraBottlesCount > 0)
     //         user.bottlesCount--;
     //     else
@@ -50,7 +50,7 @@ module.exports = function (Bottle) {
     // increment bottlesCount for user
     Bottle.afterRemote('create', function (context, result, next) {
         const user = context.res.locals.user;
-        user.totlalBottlesThrow++;
+        user.totlalBottlesThrown++;
         if (user.extraBottlesCount > 0)
             user.extraBottlesCount--;
         else
