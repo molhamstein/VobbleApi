@@ -3,7 +3,8 @@
   "base": "User",
   "idInjection": true,
   "options": {
-    "validateUpsert": true
+    "validateUpsert": true,
+    "ttl": 31536000000
   },
   "replaceOnPUT": false,
   "hidden": [
