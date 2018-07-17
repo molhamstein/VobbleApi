@@ -4,7 +4,7 @@
   "idInjection": true,
   "options": {
     "validateUpsert": true,
-    "ttl": 31536000000
+    "ttl": 60
   },
   "replaceOnPUT": false,
   "hidden": [
