@@ -28,9 +28,9 @@ module.exports = function (User) {
         // change to 12
         // todo
         // context.req.body.nextRefill = new Date(date.setTime(date.getTime() + 1 * 86400000));
-        var d = new Date();
-        d.setHours(24, 0, 0, 0);
-        context.req.body.nextRefill = d
+        var nextRefill = new Date();
+        nextRefill.setHours(24, 0, 0, 0);
+        context.req.body.nextRefill = nextRefill
         next();
     });
 
@@ -151,6 +151,8 @@ module.exports = function (User) {
                             image = urlFileRootSave + newFilename;
                             console.log(newFilename);
                             var date = new Date();
+                            var nextRefillVar = new Date();
+                            nextRefillVar.setHours(24, 0, 0, 0);
                             User.create({
                                 socialId: socialId,
                                 gender: gender,
@@ -158,7 +160,7 @@ module.exports = function (User) {
                                 image: image,
                                 username: name,
                                 status: "active",
-                                nextRefill: new Date(date.setTime(date.getTime() + 1 * 86400000)),
+                                nextRefill: nextRefillVar,
                                 password: "123",
                                 typeLogIn: "facebook"
                             }, function (err, newUser) {
@@ -234,6 +236,8 @@ module.exports = function (User) {
                         url: image,
                         dest: 'uploadFiles/profile/' + newFilename                  // Save to /path/to/dest/image.jpg
                     }
+                    var nextRefillVar = new Date();
+                    nextRefillVar.setHours(24, 0, 0, 0);
                     download.image(options)
                         .then(({ filename, imageFile }) => {
                             image = urlFileRootSave + newFilename;
@@ -247,7 +251,7 @@ module.exports = function (User) {
                                 email: email,
                                 username: name,
                                 status: "active",
-                                nextRefill: new Date(date.setTime(date.getTime() + 1 * 86400000)),
+                                nextRefill: nextRefillVar,
                                 password: "123",
                                 typeLogIn: "instegram"
                             }, function (err, newUser) {
@@ -317,8 +321,10 @@ module.exports = function (User) {
                             image = urlFileRootSave + newFilename;
                             console.log(newFilename);
                             var date = new Date();
+                            var nextRefillVar = new Date();
+                            nextRefillVar.setHours(24, 0, 0, 0);
                             User.create({
-                                nextRefill: new Date(date.setTime(date.getTime() + 1 * 86400000)),
+                                nextRefill: nextRefillVar,
                                 socialId: socialId,
                                 gender: gender,
                                 image: image,
