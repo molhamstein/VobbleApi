@@ -2,7 +2,7 @@
 const errors = require('../../server/errors');
 
 module.exports = function (Bottle) {
-    Bottle.validatesInclusionOf('storeType', { in: ['deactive', 'active'] });
+    Bottle.validatesInclusionOf('status', { in: ['deactive', 'active'] });
 
 
     // Set owner Id
