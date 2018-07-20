@@ -1,3 +1,4 @@
+
 const cError = require('./cError');
 
 module.exports.account = {
@@ -8,7 +9,7 @@ module.exports.account = {
     return new cError('ACCESS_DENIED', 403, 'Access Denied', 403);
   },
   notFound: function () {
-    return new cError('NOT_FOUND', 404, 'User not found', 404);
+    return new cError('NOT_FOUND', 404, 'User not found', 409);
   },
   notActive: function () {
     return new cError('NOT_ACTIVE_USER', 403, 'User not active', 403);

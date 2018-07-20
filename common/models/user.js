@@ -25,10 +25,16 @@ module.exports = function (User) {
         // set next refill
         var date = new Date();
         context.req.body.totlalBottlesThrown = 0;
-        context.req.body.nextRefill = new Date(date.setTime(date.getTime() + 1 * 86400000));
+        // change to 12
+        // todo
+        // context.req.body.nextRefill = new Date(date.setTime(date.getTime() + 1 * 86400000));
+        var d = new Date();
+        d.setHours(24, 0, 0, 0);
+        context.req.body.nextRefill = d
         next();
-
     });
+
+
 
 
     function sendVerificationEmail(user, subject, message, callback) {
@@ -89,7 +95,7 @@ module.exports = function (User) {
                 subject: 'Password reset',
                 html: html
             }, function (err) {
-                if (err) return console.log('> error sending password reset email');
+                if (err) return console.log('> error sending password reset email', err);
             });
         });
     });
@@ -104,6 +110,7 @@ module.exports = function (User) {
      */
 
     User.loginFacebook = function (data, callback) {
+        console.log("SS");
         var socialId = data.socialId;
         var token = data.token;
         var gender = data.gender;
