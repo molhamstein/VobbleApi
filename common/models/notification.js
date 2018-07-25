@@ -49,7 +49,8 @@ module.exports = function (Notification) {
         var message = {
             "app_id": "e8a91e90-a766-4f1b-a47e-e3b3f569dbef",
             "included_segments ": ["Active Users", "Inactive Users"],
-            "contents": data.content
+            "contents": data.content,
+            "data":data.data
             , "filters": [
                 { "field": "tag", "key": "user_id", "relation": "=", "value": data.userId }
             ]

@@ -25,6 +25,7 @@ module.exports = function (User) {
         // set next refill
         var date = new Date();
         context.req.body.totlalBottlesThrown = 0;
+        context.req.body.registrationCompleted=true;
         // change to 12
         // todo
         // context.req.body.nextRefill = new Date(date.setTime(date.getTime() + 1 * 86400000));

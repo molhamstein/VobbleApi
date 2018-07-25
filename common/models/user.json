@@ -48,6 +48,11 @@
       "required": true,
       "default": "active"
     },
+    "registrationCompleted": {
+      "type": "boolean",
+      "required": true,
+      "default": "false"
+    },
     "typeLogIn": {
       "type": "string",
       "default": "registration"

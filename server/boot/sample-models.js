@@ -531,7 +531,8 @@ module.exports = async function (app) {
           "shoreId": loveShore.id,
           "ownerId": customer.id,
           "weight": 9920533014003,
-          "status": "deactivate"
+          "status": "deactive"
+          
         },
         {
           "file": files[1],
