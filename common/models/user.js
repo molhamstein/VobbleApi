@@ -24,8 +24,8 @@ module.exports = function (User) {
     User.beforeRemote('create', function (context, result, next) {
         // set next refill
         var date = new Date();
-        context.req.body.totlalBottlesThrown = 0;
-        context.req.body.registrationCompleted=true;
+        context.req.body.totalBottlesThrown = 0;
+        context.req.body.registrationCompleted = true;
         // change to 12
         // todo
         // context.req.body.nextRefill = new Date(date.setTime(date.getTime() + 1 * 86400000));
@@ -452,6 +452,27 @@ module.exports = function (User) {
         locals.user.blocking.find({ include: { relation: 'user' } }).then(users => {
             callback(null, users);
         });
+        // TODO
+    };
+
+
+    /**
+ * get my info
+ * @param {Function(Error, object)} callback
+ */
+
+    User.me = function (context, callback) {
+        var result;
+        var userId = context.req.accessToken.userId;
+        User.findById(userId, function (err, oneUser) {
+            if (err)
+                callback(err, null);
+            else {
+                oneUser.lastLogin = new Date();
+                oneUser.save();
+                callback(null, oneUser);
+            }
+        })
         // TODO
     };
 

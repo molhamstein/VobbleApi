@@ -28,7 +28,7 @@
     "image": {
       "type": "string"
     },
-    "totlalBottlesThrown": {
+    "totalBottlesThrown": {
       "type": "number",
       "default": 0
     },
@@ -67,6 +67,9 @@
       "type": "date",
       "required": true,
       "defaultFn": "now"
+    },
+    "lastLogin": {
+      "type": "date"
     }
   },
   "validations": [],
@@ -394,6 +397,32 @@
       "http": [
         {
           "path": "/blockList",
+          "verb": "get"
+        }
+      ]
+    },
+    "me": {
+      "accepts": [
+        {
+          "arg": "context",
+          "type": "object",
+          "http": {
+            "source": "context"
+          }
+        }
+      ],
+      "returns": [
+        {
+          "arg": "result",
+          "type": "object",
+          "root": true,
+          "description": ""
+        }
+      ],
+      "description": "get my info",
+      "http": [
+        {
+          "path": "/me",
           "verb": "get"
         }
       ]

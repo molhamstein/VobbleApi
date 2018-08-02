@@ -40,8 +40,8 @@ module.exports = function (Notification) {
      */
 
 
-// {"content" : {"en": "English Message"},
-// "userId":"5b001ca3f683ce7622a21c52"}
+    // {"content" : {"en": "English Message"},
+    // "userId":"5b001ca3f683ce7622a21c52"}
 
 
     Notification.sendNotification = function (data, callback) {
@@ -50,20 +50,23 @@ module.exports = function (Notification) {
             "app_id": "e8a91e90-a766-4f1b-a47e-e3b3f569dbef",
             "included_segments ": ["Active Users", "Inactive Users"],
             "contents": data.content,
-            "data":data.data
+            "data": data.data
             , "filters": [
                 { "field": "tag", "key": "user_id", "relation": "=", "value": data.userId }
-            ]
+            ],
+            "headings": {
+                "en": "Vibo"
+            }
         }
         sendNewNotification(message);
         var notification = { 'ownerId': data.userId, 'type': "Custom-Notification", 'body': { 'message': data.content } }
         Notification.create(
             notification,
-            function(err, newUser) {
+            function (err, newUser) {
                 if (err)
                     callback(err, null);
-                callback(null, result);            
-        })
+                callback(null, result);
+            })
         // TODO
     };
 

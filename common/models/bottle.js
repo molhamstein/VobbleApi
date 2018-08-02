@@ -23,10 +23,20 @@ module.exports = function (Bottle) {
             if (user.bottlesCount == 0 && user.extraBottlesCount == 0) {
                 return next(errors.bottle.noAvailableBottleToday());
             }
-            weight += Date.parse(new Date()) * 3;
-            weight += Date.parse(user.createdAt) * 4;
-            context.req.body.weight = weight;
-            next();
+            Bottle.app.models.shore.findById(context.req.body.shoreId, function (err, shore) {
+                if (err) {
+                    return next(err);
+                }
+                shore.bottleCount++;
+                shore.save();
+                weight += Date.parse(new Date()) * 3;
+                weight += Date.parse(user.createdAt) * 4;
+                context.req.body.weight = weight;
+                next();
+            })
+
+
+
         })
 
 
@@ -51,7 +61,7 @@ module.exports = function (Bottle) {
     // increment bottlesCount for user
     Bottle.afterRemote('create', function (context, result, next) {
         const user = context.res.locals.user;
-        user.totlalBottlesThrown++;
+        user.totalBottlesThrown++;
         if (user.extraBottlesCount > 0)
             user.extraBottlesCount--;
         else
@@ -142,7 +152,7 @@ module.exports = function (Bottle) {
                 element.shore(function (err, shore) {
                     var numberOfSeenThisBottle = findInSeenUser(seenBottle, userId, element.id);
                     var isBlocked = isInBlockList(blockList, owner.id)
-                    if (element.status == "deactivate" || owner.status == "deactivate" || isBlocked || (new String(userId).valueOf() === new String(owner.id).valueOf()) || (filter.gender && filter.gender != owner.gender) || (filter.ISOCode && filter.ISOCode != owner.ISOCode) || (filter.shoreId && filter.shoreId != shore.id)) {
+                    if (element.status == "deactive" || owner.status == "deactive" || isBlocked || (new String(userId).valueOf() === new String(owner.id).valueOf()) || (filter.gender && filter.gender != owner.gender) || (filter.ISOCode && filter.ISOCode != owner.ISOCode) || (filter.shoreId && (new String(filter.shoreId).valueOf() != new String(shore.id).valueOf()))) {
                         ranking.splice(index, 1);
                     }
                     else if (numberOfSeenThisBottle > 0) {

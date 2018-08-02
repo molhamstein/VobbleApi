@@ -10,6 +10,6 @@ module.exports = function (app) {
   };
 
   // app.dataSources.files.connector.allowedContentTypes = ["image/jpg", "image/jpeg", "image/png","video/mp4","video/x-m4v","video/quicktime","audio/mp3","audio/mpeg","audio/wave",,"audio/x-m4a"];
-  app.dataSources.files.connector.maxFileSize = 9999999;
+  app.dataSources.files.connector.maxFileSize = 9999999999999999999;
 
 };

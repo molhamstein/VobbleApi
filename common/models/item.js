@@ -14,6 +14,8 @@ module.exports = function (Item) {
             if (err) {
                 return next(err);
             }
+            product.productSold++;
+            product.save();
             if (context.req.body.ownerId == null && context.req.accessToken != null)
                 context.req.body.ownerId = context.req.accessToken.userId;
             if (product == null) {

@@ -19,6 +19,10 @@
     },
     "icon": {
       "type": "string"
+    },
+    "bottleCount": {
+      "type": "number",
+      "default": 0
     }
   },
   "validations": [],
