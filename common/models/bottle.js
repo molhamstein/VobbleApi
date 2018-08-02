@@ -152,6 +152,10 @@ module.exports = function (Bottle) {
                 element.shore(function (err, shore) {
                     var numberOfSeenThisBottle = findInSeenUser(seenBottle, userId, element.id);
                     var isBlocked = isInBlockList(blockList, owner.id)
+                    console.log("shoreId Filter")
+                    console.log(filter.shoreId)
+                    console.log("shoreId")
+                    console.log(shore.id)
                     if (element.status == "deactive" || owner.status == "deactive" || isBlocked || (new String(userId).valueOf() === new String(owner.id).valueOf()) || (filter.gender && filter.gender != owner.gender) || (filter.ISOCode && filter.ISOCode != owner.ISOCode) || (filter.shoreId && (new String(filter.shoreId).valueOf() != new String(shore.id).valueOf()))) {
                         ranking.splice(index, 1);
                     }
