@@ -1,0 +1,30 @@
+{
+  "name": "replies",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "createdAt": {
+      "type": "date",
+      "required": true,
+      "defaultFn": "now"
+    }
+  },
+  "validations": [],
+  "relations": {
+    "user": {
+      "type": "belongsTo",
+      "model": "user",
+      "foreignKey": "userId"
+    },
+    "bottle": {
+      "type": "belongsTo",
+      "model": "bottle",
+      "foreignKey": "bottleId"
+    }
+  },
+  "acls": [],
+  "methods": {}
+}

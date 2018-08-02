@@ -4,6 +4,25 @@ const errors = require('../../server/errors');
 module.exports = function (Bottle) {
     Bottle.validatesInclusionOf('status', { in: ['deactive', 'active'] });
 
+    /**
+     *
+     * @param {string} id
+     * @param {Function(Error)} callback
+     */
+
+    Bottle.deactiveBottle = function (id, callback) {
+        // TODO
+        Bottle.findById(id, function (err, bottle) {
+            if (err) {
+                console.log(err);
+                next();
+            }
+            bottle.status = "deactive";
+            bottle.save();
+            callback(null);
+        });
+        callback(null);
+    };
 
     // Set owner Id
     Bottle.beforeRemote('create', function (context, result, next) {

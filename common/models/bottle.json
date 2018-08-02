@@ -36,6 +36,10 @@
     },
     "weight": {
       "type": "number"
+    },
+    "repliesUserCount": {
+      "type": "number",
+      "default": 0
     }
   },
   "validations": [],
@@ -131,6 +135,24 @@
         {
           "path": "/getOneBottle",
           "verb": "get"
+        }
+      ]
+    },
+    "deactiveBottle": {
+      "accepts": [
+        {
+          "arg": "id",
+          "type": "string",
+          "required": true,
+          "description": ""
+        }
+      ],
+      "returns": [],
+      "description": "",
+      "http": [
+        {
+          "path": "/deactiveBottle",
+          "verb": "delete"
         }
       ]
     }

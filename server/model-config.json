@@ -117,5 +117,9 @@
   "block": {
     "dataSource": "db",
     "public": true
+  },
+  "replies": {
+    "dataSource": "db",
+    "public": true
   }
 }

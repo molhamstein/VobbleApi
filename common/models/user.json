@@ -32,6 +32,10 @@
       "type": "number",
       "default": 0
     },
+    "repliesBottlesCount": {
+      "type": "number",
+      "default": 0
+    },
     "extraBottlesCount": {
       "type": "number",
       "default": 0

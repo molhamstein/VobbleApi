@@ -38,6 +38,8 @@ module.exports = async function (app) {
     imageBaseUrl + '/uploadFiles/images/bottles2.png',
     imageBaseUrl + '/uploadFiles/images/globe-01.png'
   ]
+
+  // فندق الايوان
   /*
   {
     "email": "admin@vobble.com",

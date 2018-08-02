@@ -9,10 +9,16 @@ const errors = require('../../server/errors');
 const download = require('image-downloader')
 
 
+
+
 // "siteDomain": "http://104.217.253.15/vobbleApp/Vobble-webApp",
 
 module.exports = function (User) {
 
+
+  User.deleteById = function(id, cb) {
+    User.update({id: id}, {status: "deactive"}, cb);
+  }
 
     // file root save 
     var urlFileRoot = config.domain + config.restApiRoot + "/uploadFiles";
