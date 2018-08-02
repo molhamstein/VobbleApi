@@ -15,10 +15,20 @@ const download = require('image-downloader')
 
 module.exports = function (User) {
 
+    User.deactiveUser = function (id, callback) {
+        // TODO
+        User.findById(id, function (err, user) {
+            if (err) {
+                console.log(err);
+                next();
+            }
+            user.status = "deactive";
+            user.save();
+            callback(null);
+        });
+        callback(null);
+    };
 
-  User.deleteById = function(id, cb) {
-    User.update({id: id}, {status: "deactive"}, cb);
-  }
 
     // file root save 
     var urlFileRoot = config.domain + config.restApiRoot + "/uploadFiles";

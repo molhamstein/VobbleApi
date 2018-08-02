@@ -430,6 +430,24 @@
           "verb": "get"
         }
       ]
+    },
+    "deactiveUser": {
+      "accepts": [
+        {
+          "arg": "id",
+          "type": "string",
+          "required": true,
+          "description": ""
+        }
+      ],
+      "returns": [],
+      "description": "",
+      "http": [
+        {
+          "path": "/deactiveUser",
+          "verb": "delete"
+        }
+      ]
     }
   }
 }
