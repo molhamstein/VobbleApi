@@ -274,7 +274,7 @@ module.exports = function (User) {
                   }
                 },
                 where: {
-                  userId: newUser.id
+                  userId: oneUser.id
                 }
               }, function (err, token) {
                 if (err)
