@@ -402,8 +402,37 @@ module.exports = function (User) {
           if (err)
             callback(err, null);
           result = token;
-          result.isNew = false;
-          callback(null, result);
+          if (result == null) {
+            User.app.models.AccessToken.create({
+              userId: oneUser.id
+            }, function (err, newToken) {
+              // get the token with user of new user
+              // User.app.models.AccessToken.findOne({ include: 'user', userId: newUser.id }, function (err, token) {
+              // User.app.models.AccessToken.findOne(, function (err, token) {
+              User.app.models.AccessToken.findOne({
+                include: {
+                  relation: 'user',
+                  scope: {
+                    include: {
+                      relation: 'country'
+                    }
+                  }
+                },
+                where: {
+                  userId: oneUser.id
+                }
+              }, function (err, token) {
+                if (err)
+                  callback(err, null);
+                result = token;
+                result.isNew = false;
+                callback(null, result);
+              });
+            })
+          } else {
+            result.isNew = false;
+            callback(null, result);
+          }
         });
       }
     });
@@ -514,8 +543,37 @@ module.exports = function (User) {
           if (err)
             callback(err, null);
           result = token;
-          result.isNew = false;
-          callback(null, result);
+          if (result == null) {
+            User.app.models.AccessToken.create({
+              userId: oneUser.id
+            }, function (err, newToken) {
+              // get the token with user of new user
+              // User.app.models.AccessToken.findOne({ include: 'user', userId: newUser.id }, function (err, token) {
+              // User.app.models.AccessToken.findOne(, function (err, token) {
+              User.app.models.AccessToken.findOne({
+                include: {
+                  relation: 'user',
+                  scope: {
+                    include: {
+                      relation: 'country'
+                    }
+                  }
+                },
+                where: {
+                  userId: oneUser.id
+                }
+              }, function (err, token) {
+                if (err)
+                  callback(err, null);
+                result = token;
+                result.isNew = false;
+                callback(null, result);
+              });
+            })
+          } else {
+            result.isNew = false;
+            callback(null, result);
+          }
         });
       }
     });
