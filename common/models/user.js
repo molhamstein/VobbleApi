@@ -218,6 +218,10 @@ module.exports = function (User) {
                 User.app.models.AccessToken.findOne({ include: { relation: 'user', scope: { include: { relation: 'country' } } }, where: { userId: oneUser.id } }, function (err, token) {
                     if (err)
                         callback(err, null);
+                    console.log("token")
+                    console.log(token)
+                    console.log("userId")
+                    console.log(oneUser.id)
                     result = token;
                     result.isNew = false;
                     callback(null, result);
