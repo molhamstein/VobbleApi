@@ -50,16 +50,37 @@ module.exports = function (Item) {
 
   Item.getFilterItem = function (filter, callback) {
     var ISOCode = ""
+    var goodId = ""
 
+    // filter['where']['and'].forEach(function (key, element,object) {
+    //   if (key['owner.ISOCode'] != null) {
+    //     ISOCode = key['owner.ISOCode'];
+    //     object.splice(element, 1)
+    //   } else if (key['product.typeGoodsId'] != null) {
+    //     console.log(goodId);
+    //     goodId = key['product.typeGoodsId'];
+    //     object.splice(element, 1)
+    //   }
+    //   console.log(key);
+    // }, this);
 
-    filter['where']['and'].forEach(function (key, element) {
-      if (key['owner.ISOCode'] != null) {
-        ISOCode = key['owner.ISOCode'];
-        filter['where']['and'].splice(element, 1)
+    var index = filter['where']['and'].length - 1;
+
+    while (index >= 0) {
+      if (filter['where']['and'][index]['owner.ISOCode'] != null) {
+        ISOCode = filter['where']['and'][index]['owner.ISOCode'];
+        filter['where']['and'].splice(index, 1)
+      } else if (filter['where']['and'][index]['product.typeGoodsId'] != null) {
+        goodId = filter['where']['and'][index]['product.typeGoodsId'];
+        filter['where']['and'].splice(index, 1)
       }
-    }, this);
+
+      index -= 1;
+    }
+
     if (filter['where']['and'][0] == null)
       filter = {}
+    console.log(filter);
     Item.find(
       filter,
       function (err, items) {
@@ -71,9 +92,12 @@ module.exports = function (Item) {
         if (items) {
           items.forEach(function (element) {
             element.owner(function (err, owner) {
-              if ((ISOCode != "" && owner.ISOCode != ISOCode) == false) {
-                result.push(element);
-              }
+              element.product(function (err, product) {
+                console.log(goodId);
+                if (((ISOCode != "" && owner.ISOCode != ISOCode) || (goodId != "" && product.typeGoodsId != goodId)) == false) {
+                  result.push(element);
+                }
+              })
             })
           }, this);
         }

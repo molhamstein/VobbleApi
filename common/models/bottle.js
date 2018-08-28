@@ -119,15 +119,30 @@ module.exports = function (Bottle) {
     var ISOCode = ""
 
 
-    filter['where']['and'].forEach(function (key, element) {
-      if (key['owner.gender'] != null) {
-        gender = key['owner.gender'];
-        filter['where']['and'].splice(element, 1)
-      } else if (key['owner.ISOCode'] != null) {
-        ISOCode = key['owner.ISOCode'];
-        filter['where']['and'].splice(element, 1)
+    // filter['where']['and'].forEach(function (key, element) {
+    //   if (key['owner.gender'] != null) {
+    //     gender = key['owner.gender'];
+    //     filter['where']['and'].splice(element, 1)
+    //   } else if (key['owner.ISOCode'] != null) {
+    //     ISOCode = key['owner.ISOCode'];
+    //     filter['where']['and'].splice(element, 1)
+    //   }
+    // }, this);
+
+    var index = filter['where']['and'].length - 1;
+
+    while (index >= 0) {
+      if (filter['where']['and'][index]['owner.gender'] != null) {
+        gender = filter['where']['and'][index]['owner.gender'];
+        filter['where']['and'].splice(index, 1)
+      } else if (filter['where']['and'][index]['owner.ISOCode'] != null) {
+        ISOCode = filter['where']['and'][index]['owner.ISOCode'];
+        filter['where']['and'].splice(index, 1)
       }
-    }, this);
+
+      index -= 1;
+    }
+
     if (filter['where']['and'][0] == null)
       filter = {}
     Bottle.find(
