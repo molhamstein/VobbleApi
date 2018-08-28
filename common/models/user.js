@@ -38,13 +38,20 @@ module.exports = function (User) {
 
 
   User.beforeRemote('create', function (context, result, next) {
-    // set next refill
+    User.findOne({
+      where: {
+        email: context.req.body.email
+      }
+    }, function (err, user) {
+      if (err)
+        return next(err)
+      if (user)
+        return next(errors.account.emailAlreadyExists());
+
+    })
     var date = new Date();
     context.req.body.totalBottlesThrown = 0;
     context.req.body.registrationCompleted = true;
-    // change to 12
-    // todo
-    // context.req.body.nextRefill = new Date(date.setTime(date.getTime() + 1 * 86400000));
     var nextRefill = new Date();
     nextRefill.setHours(24, 0, 0, 0);
     context.req.body.nextRefill = nextRefill
@@ -68,7 +75,6 @@ module.exports = function (User) {
     options.verifyHref = siteDomain +
       '/login/verify' +
       '?uid=' + options.user.id;
-    console.log(options.verifyHref);
     user.verify(options, function (err, res) {
       if (err) {
         User.deleteById(user.id);
@@ -131,7 +137,6 @@ module.exports = function (User) {
    */
 
   User.loginFacebook = function (data, callback) {
-    console.log("SS");
     var socialId = data.socialId;
     var token = data.token;
     var gender = data.gender;
@@ -182,7 +187,6 @@ module.exports = function (User) {
               imageFile
             }) => {
               image = urlFileRootSave + newFilename;
-              console.log(newFilename);
               var date = new Date();
               var nextRefillVar = new Date();
               nextRefillVar.setHours(24, 0, 0, 0);
@@ -197,8 +201,12 @@ module.exports = function (User) {
                 password: "123",
                 typeLogIn: "facebook"
               }, function (err, newUser) {
-                if (err)
-                  callback(err, null);
+                if (err) {
+                  if (err.statusCode == 422)
+                    callback(errors.account.emailAlreadyExistsSN(), null);
+                  else
+                    callback(err, null);
+                }
                 // create the token
                 User.app.models.AccessToken.create({
                   userId: newUser.id
@@ -339,8 +347,6 @@ module.exports = function (User) {
               imageFile
             }) => {
               image = urlFileRootSave + newFilename;
-              console.log("newFilename");
-              console.log(newFilename);
               var date = new Date();
               User.create({
                 socialId: socialId,
@@ -354,7 +360,10 @@ module.exports = function (User) {
                 typeLogIn: "instegram"
               }, function (err, newUser) {
                 if (err)
-                  callback(err, null);
+                  if (err.statusCode == 422)
+                    callback(errors.account.emailAlreadyExistsSN(), null);
+                  else
+                    callback(err, null);
                 User.app.models.AccessToken.create({
                   userId: newUser.id
                 }, function (err, newToken) {
@@ -482,7 +491,7 @@ module.exports = function (User) {
               imageFile
             }) => {
               image = urlFileRootSave + newFilename;
-              console.log(newFilename);
+
               var date = new Date();
               var nextRefillVar = new Date();
               nextRefillVar.setHours(24, 0, 0, 0);
@@ -498,7 +507,10 @@ module.exports = function (User) {
                 typeLogIn: "google"
               }, function (err, newUser) {
                 if (err)
-                  callback(err, null);
+                  if (err.statusCode == 422)
+                    callback(errors.account.emailAlreadyExistsSN(), null);
+                  else
+                    callback(err, null);
                 User.app.models.AccessToken.create({
                   userId: newUser.id
                 }, function (err, newToken) {
@@ -651,7 +663,6 @@ module.exports = function (User) {
         "userId": userId
       }
     }).then(users => {
-      console.log(users);
       if (!users) {
         callback(errors.block.noBlocked(), null);
       } else {

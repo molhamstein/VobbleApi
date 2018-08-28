@@ -6,8 +6,7 @@
     "validateUpsert": true
   },
   "scope": {
-    "include": [
-      {
+    "include": [{
         "relation": "owner"
       },
       {
@@ -55,8 +54,7 @@
       "foreignKey": "ownerId"
     }
   },
-  "acls": [
-    {
+  "acls": [{
       "accessType": "*",
       "principalType": "ROLE",
       "principalId": "$everyone",
@@ -95,8 +93,7 @@
   ],
   "methods": {
     "getOneBottle": {
-      "accepts": [
-        {
+      "accepts": [{
           "arg": "gender",
           "type": "string",
           "required": false,
@@ -122,39 +119,50 @@
           }
         }
       ],
-      "returns": [
-        {
-          "arg": "result",
-          "type": "object",
-          "root": true,
-          "description": ""
-        }
-      ],
+      "returns": [{
+        "arg": "result",
+        "type": "object",
+        "root": true,
+        "description": ""
+      }],
       "description": "get one mthode with some logic",
-      "http": [
-        {
-          "path": "/getOneBottle",
-          "verb": "get"
-        }
-      ]
+      "http": [{
+        "path": "/getOneBottle",
+        "verb": "get"
+      }]
+    },
+    "getFilterBottle": {
+      "accepts": [{
+        "arg": "filter",
+        "type": "object",
+        "required": false,
+        "description": "filter bottle"
+      }],
+      "returns": [{
+        "arg": "result",
+        "type": "object",
+        "root": true,
+        "description": ""
+      }],
+      "description": "filter On the bottle",
+      "http": [{
+        "path": "/filterBottle",
+        "verb": "get"
+      }]
     },
     "deactiveBottle": {
-      "accepts": [
-        {
-          "arg": "id",
-          "type": "string",
-          "required": true,
-          "description": ""
-        }
-      ],
+      "accepts": [{
+        "arg": "id",
+        "type": "string",
+        "required": true,
+        "description": ""
+      }],
       "returns": [],
       "description": "",
-      "http": [
-        {
-          "path": "/deactiveBottle",
-          "verb": "delete"
-        }
-      ]
+      "http": [{
+        "path": "/deactiveBottle",
+        "verb": "delete"
+      }]
     }
   }
 }

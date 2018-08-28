@@ -5,6 +5,15 @@
   "options": {
     "validateUpsert": true
   },
+  "scope": {
+    "include": [{
+        "relation": "owner"
+      },
+      {
+        "relation": "product"
+      }
+    ]
+  },
   "properties": {
     "storeType": {
       "type": "string",
@@ -45,5 +54,25 @@
     }
   },
   "acls": [],
-  "methods": {}
+  "methods": {
+    "getFilterItem": {
+      "accepts": [{
+        "arg": "filter",
+        "type": "object",
+        "required": false,
+        "description": "filter Item"
+      }],
+      "returns": [{
+        "arg": "result",
+        "type": "object",
+        "root": true,
+        "description": ""
+      }],
+      "description": "filter On the Item",
+      "http": [{
+        "path": "/filterItem",
+        "verb": "get"
+      }]
+    }
+  }
 }
