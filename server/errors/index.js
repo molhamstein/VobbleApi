@@ -25,6 +25,9 @@ module.exports.account = {
   },
   emailAlreadyExistsSN: function () {
     return new cError('EMAIL_ALREADY_EXISTS_SN',412, 'Email already exists SN', 412);
+  },
+  youLoginToday: function () {
+    return new cError('YOU_ALREADY_LOGIN_TODAY',414, 'you already login today', 414);
   }
 
   

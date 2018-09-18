@@ -121,5 +121,9 @@
   "replies": {
     "dataSource": "db",
     "public": true
+  },
+  "userActivate": {
+    "dataSource": "db",
+    "public": true
   }
 }

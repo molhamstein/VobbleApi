@@ -238,7 +238,17 @@ module.exports = function (Bottle) {
         Bottle.app.models.bottleUserseen.create(bottleUserseenObject)
           .then()
           .catch(err => console.log(err));
-        callback(null, ranking[0]);
+
+        Bottle.app.models.user.findById(req.accessToken.userId, function (err, oneUser) {
+          if (err) {
+            return next(err);
+          }
+          oneUser.foundBottlesCount++;
+          oneUser.save();
+          callback(null, ranking[0]);
+
+        })
+
       } else {
         callback(errors.bottle.noNewBottle(), null);
       }
@@ -250,6 +260,8 @@ module.exports = function (Bottle) {
     console.log("blockList");
     console.log(blockList);
     var index = ranking.length - 1;
+    console.log("ranking")
+    console.log(ranking)
     var newRanking = [];
     var blocking = false;
     while (index >= 0) {
@@ -314,5 +326,225 @@ module.exports = function (Bottle) {
     return found;
   }
 
+  // Bottle.getDataSource().connector.connect(function(err, db) {
+  //   var collection = db.collection('bottle');
+  //   var cursor = collection.aggregate([
+  //     { $match: { ownerId: id } },
+  //     { $group: {
+  //       _id: ownerId,
+  //      total: { $sum: "$weight" }
+  //     }}
+  //   ]);
+  //   cursor.get(function(err, data) {
+  //     console.log(data);
+  //     if (err) return callback(err);
+  //     return callback(err, data);
+  //   })
+  // });
+
+  // var bookCollection =Bottle.app.dataSources.db.connector.collection('bottle');
+  // bookCollection.aggregate({
+  //   $group: {
+  //     _id: { weight: "$weight"},
+  //     total: { $sum: 1 }
+  //   }
+  // }, function(err, groupByRecords) {
+  //   if(err) {
+  //     next(err);
+  //   } else {
+  //     next();
+  //   }
+  // });
+
+
+  /**
+   * report as time
+   * @param {date} from
+   * @param {date} to
+   * @param {Function(Error, object)} callback
+   */
+
+  function getFirstReport(filter, country, callback) {
+    if (country) {
+      filter['ISOCode'] = country
+    }
+    console.log(filter);
+    Bottle.getDataSource().connector.connect(function (err, db) {
+
+      var collection = db.collection('user');
+      var cursor = collection.aggregate([{
+          $match: filter
+        },
+        {
+          $group: {
+            _id: {
+              month: {
+                $month: "$createdAt"
+              },
+              day: {
+                $dayOfMonth: "$createdAt"
+              },
+              year: {
+                $year: "$createdAt"
+              }
+            },
+            total: {
+              $sum: 1
+            }
+          }
+        },
+        {
+          $project: {
+            _id: 0,
+            date: "$_id",
+            count: "$total",
+          }
+        }
+      ]);
+      cursor.get(function (err, data) {
+        console.log(data);
+        if (err) return callback(err);
+        return callback(null, data);
+      })
+    });
+  }
+
+
+  function getSecondReport(filter, country, callback) {
+    console.log(filter);
+    if (country) {
+      filter['owner.ISOCode'] = country
+    }
+    Bottle.getDataSource().connector.connect(function (err, db) {
+
+      var collection = db.collection('bottle');
+      var cursor = collection.aggregate([{
+          $lookup: {
+            from: "user",
+            localField: "ownerId",
+            foreignField: "_id",
+            as: "owner"
+          }
+        },
+        {
+          $match: filter
+        },
+        {
+          $group: {
+            _id: {
+              month: {
+                $month: "$createdAt"
+              },
+              day: {
+                $dayOfMonth: "$createdAt"
+              },
+              year: {
+                $year: "$createdAt"
+              }
+            },
+            total: {
+              $sum: 1
+            }
+          }
+        },
+        {
+          $project: {
+            _id: 0,
+            date: "$_id",
+            count: "$total",
+          }
+        }
+      ]);
+      cursor.get(function (err, data) {
+        console.log(data);
+        if (err) return callback(err);
+        return callback(null, data);
+      })
+    });
+  }
+
+
+
+
+  function getThierdReport(filter, country, callback) {
+    if (country) {
+      filter['ISOCode'] = country
+    }
+    console.log(filter);
+    Bottle.getDataSource().connector.connect(function (err, db) {
+
+      var collection = db.collection('userActivate');
+      var cursor = collection.aggregate([{
+          $lookup: {
+            from: "user",
+            localField: "ownerId",
+            foreignField: "_id",
+            as: "owner"
+          }
+        }, {
+          $match: filter
+        },
+        {
+          $group: {
+            _id: {
+              month: {
+                $month: "$createdAt"
+              },
+              day: {
+                $dayOfMonth: "$createdAt"
+              },
+              year: {
+                $year: "$createdAt"
+              }
+            },
+            total: {
+              $sum: 1
+            }
+          }
+        },
+        {
+          $project: {
+            _id: 0,
+            date: "$_id",
+            count: "$total",
+          }
+        }
+      ]);
+      cursor.get(function (err, data) {
+        console.log(data);
+        if (err) return callback(err);
+        return callback(null, data);
+      })
+    });
+  }
+
+
+  Bottle.timeStateReport = function (from, to, country, callback) {
+    var filter = {}
+    if (from) {
+      filter['createdAt'] = {
+        '$gt': new Date(from)
+      }
+    }
+    if (to) {
+      if (filter['createdAt'] == null)
+        filter['createdAt'] = {}
+      filter['createdAt']['$lt'] = new Date(to)
+    }
+
+
+    var resultData = []
+    getFirstReport(filter, country, function (err, firstData) {
+      resultData[0] = firstData;
+      getSecondReport(filter, country, function (err, secondetData) {
+        resultData[1] = secondetData;
+        getThierdReport(filter, country, function (err, thierdData) {
+          resultData[2] = thierdData;
+          callback(null, resultData)
+        })
+      })
+
+    });
+  };
 
 };

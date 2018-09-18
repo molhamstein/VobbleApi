@@ -23,6 +23,7 @@
     "helmet": "^3.10.0",
     "image-downloader": "^3.3.0",
     "loopback": "^3.19.0",
+    "loopback-aggregation-mixin": "^1.0.5",
     "loopback-boot": "^2.6.5",
     "loopback-component-explorer": "^6.0.0",
     "loopback-component-storage": "^3.3.1",

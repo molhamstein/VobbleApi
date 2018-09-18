@@ -714,4 +714,71 @@ module.exports = function (User) {
     // TODO
   };
 
+
+  /**
+   *
+   * @param {object} result
+   * @param {Function(Error, object)} callback
+   */
+
+  User.genderStateReport = function (from, to, callback) {
+
+    var filter = {};
+    if (from) {
+      filter['startAt'] = {
+        '$gt': new Date(from)
+      }
+    }
+    if (to) {
+      if (filter['startAt'] == null)
+        filter['startAt'] = {}
+      filter['startAt']['$lt'] = new Date(to)
+    }
+    User.getDataSource().connector.connect(function (err, db) {
+
+      var collection = db.collection('user');
+      var cursor = collection.aggregate([{
+          $match: filter
+        },
+        {
+          $project: {
+            male: {
+              $cond: [{
+                $eq: ["$gender", "male"]
+              }, 1, 0]
+            },
+            female: {
+              $cond: [{
+                $eq: ["$gender", "female"]
+              }, 1, 0]
+            },
+          }
+        },
+        {
+          $group: {
+            _id: null,
+            male: {
+              $sum: "$male"
+            },
+            female: {
+              $sum: "$female"
+            },
+            total: {
+              $sum: 1
+            },
+          }
+        },
+      ]);
+      cursor.get(function (err, data) {
+        console.log(data);
+        if (err) return callback(err);
+        var result = {
+          "male": data[0]['male'] * 100 / data[0]['total'],
+          "female": data[0]['female'] * 100 / data[0]['total']
+        }
+        return callback(null, result);
+      })
+    });
+  };
+
 };

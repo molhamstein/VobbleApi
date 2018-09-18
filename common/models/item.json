@@ -5,8 +5,10 @@
   "options": {
     "validateUpsert": true
   },
+  "replaceOnPUT": false,
   "scope": {
-    "include": [{
+    "include": [
+      {
         "relation": "owner"
       },
       {
@@ -38,6 +40,10 @@
     },
     "endAt": {
       "type": "date"
+    },
+    "price": {
+      "type": "number",
+      "required": true
     }
   },
   "validations": [],
@@ -56,23 +62,60 @@
   "acls": [],
   "methods": {
     "getFilterItem": {
-      "accepts": [{
-        "arg": "filter",
-        "type": "object",
-        "required": false,
-        "description": "filter Item"
-      }],
-      "returns": [{
-        "arg": "result",
-        "type": "object",
-        "root": true,
-        "description": ""
-      }],
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "required": false,
+          "description": "filter Item"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "result",
+          "type": "object",
+          "root": true,
+          "description": ""
+        }
+      ],
       "description": "filter On the Item",
-      "http": [{
-        "path": "/filterItem",
-        "verb": "get"
-      }]
+      "http": [
+        {
+          "path": "/filterItem",
+          "verb": "get"
+        }
+      ]
+    },
+    "itemStateReport": {
+      "accepts": [
+        {
+          "arg": "from",
+          "type": "date",
+          "required": false,
+          "description": ""
+        },
+        {
+          "arg": "to",
+          "type": "date",
+          "required": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "arg": "result",
+          "type": "array",
+          "root": true,
+          "description": ""
+        }
+      ],
+      "description": "",
+      "http": [
+        {
+          "path": "/itemStateReport",
+          "verb": "get"
+        }
+      ]
     }
   }
 }

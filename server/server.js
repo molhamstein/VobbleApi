@@ -1,5 +1,6 @@
 'use strict';
 require('cls-hooked');
+const errors = require('../server/errors');
 
 var loopback = require('loopback');
 var boot = require('loopback-boot');
@@ -17,7 +18,7 @@ app.use(function (req, res, next) {
   app.models.User.findById(req.accessToken.userId,
     function (err, user) {
       if (err) return next(err);
-      if (!user) return next(errors.user.notFound());
+      if (!user) return next(errors.account.notFound());
       res.locals.user = user
       app.currentUser = user;
       user.roles.find({}, function (err, roles) {

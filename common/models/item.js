@@ -6,11 +6,6 @@ module.exports = function (Item) {
   });
 
   Item.beforeRemote('create', function (context, item, next) {
-    // var storeTypeEnum=["playStore","iTunes"];
-    // var storeType = context.req.body.storeType;
-    // if(storeTypeEnum.findIndex(storeType)==-1){
-    //     return next(errors.global.notActive());
-    // }
     Item.app.models.Product.findById(context.req.body.productId, function (err, product) {
       if (err) {
         return next(err);
@@ -22,6 +17,7 @@ module.exports = function (Item) {
       if (product == null) {
         return next(errors.product.productNotFound());
       }
+      context.req.body.price = product.price;
       next();
     })
   });
@@ -107,5 +103,70 @@ module.exports = function (Item) {
 
 
   }
+
+
+  /**
+   *
+   * @param {Function(Error, array)} callback
+   */
+
+  Item.itemStateReport = function (from, to, callback) {
+    var result;
+    var filter = {};
+    if (from) {
+      filter['startAt'] = {
+        '$gt': new Date(from)
+      }
+    }
+    if (to) {
+      if (filter['startAt'] == null)
+        filter['startAt'] = {}
+      filter['startAt']['$lt'] = new Date(to)
+    }
+    Item.getDataSource().connector.connect(function (err, db) {
+
+      var collection = db.collection('item');
+      var cursor = collection.aggregate([{
+          $match: filter
+        }, {
+          $lookup: {
+            from: "user",
+            localField: "ownerId",
+            foreignField: "_id",
+            as: "owner"
+          }
+        },
+        {
+          $group: {
+            _id: '$owner.country.name',
+            count: {
+              $sum: 1
+            },
+            totalRevenue: {
+              $sum: "$price"
+            }
+          }
+        },
+        {
+          $project: {
+            _id: 0,
+            country: {
+              $arrayElemAt: ["$_id", 0]
+            },
+            count: 1,
+            totalRevenue: 1,
+
+          }
+        }
+      ]);
+      cursor.get(function (err, data) {
+        console.log(data);
+        if (err) return callback(err);
+        return callback(null, data);
+      })
+    });
+    // TODO
+    // callback(null, result);
+  };
 
 };

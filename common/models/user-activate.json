@@ -1,5 +1,6 @@
 {
-  "name": "replies",
+  "name": "userActivate",
+  "plural": "/userActive",
   "base": "PersistedModel",
   "idInjection": true,
   "options": {
@@ -14,15 +15,10 @@
   },
   "validations": [],
   "relations": {
-    "user": {
+    "owner": {
       "type": "belongsTo",
       "model": "user",
-      "foreignKey": "userId"
-    },
-    "bottle": {
-      "type": "belongsTo",
-      "model": "bottle",
-      "foreignKey": "bottleId"
+      "foreignKey": "ownerId"
     }
   },
   "acls": [],
