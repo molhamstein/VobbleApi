@@ -255,6 +255,92 @@ module.exports = function (Bottle) {
     });
   };
 
+  Bottle.getOneBottleTest = function (gender, ISOCode, shoreId, req, callback) {
+    var result;
+    var filter = {};
+    if (gender) {
+      filter.gender = gender;
+    }
+
+    if (ISOCode) {
+      filter.ISOCode = ISOCode;
+    }
+
+    if (shoreId) {
+      filter.shoreId = shoreId;
+    }
+    var seenBottle = [];
+    // get bottle seen 
+    Bottle.app.models.bottleUserseen.find({
+      where: {
+        userId: req.accessToken.userId
+      }
+    }, function (err, bottles) {
+      seenBottle = bottles;
+    })
+
+    var blockList = [];
+    // get id user block list 
+    Bottle.app.models.block.find({
+      where: {
+        or: [{
+            "ownerId": req.accessToken.userId
+          },
+          {
+            "userId": req.accessToken.userId
+          },
+        ]
+      }
+    }, function (err, blocksList) {
+      console.log(blocksList);
+      blockList = blocksList.map(function (block) {
+        if (new String(req.accessToken.userId).valueOf() === new String(block.ownerId).valueOf())
+          return block.userId;
+        else
+          return block.ownerId;
+
+      });
+    })
+
+    // get all bottle
+    Bottle.find({
+      where: {
+        status: 'active'
+      },
+      order: 'weight DESC'
+    }, function (err, bottles) {
+      if (err) {
+        callback(err, null);
+      }
+      var ranking = bottles;
+
+      // process bottle sort
+      ranking = sortBottle(bottles, req.accessToken.userId, seenBottle, blockList, filter)
+      if (ranking[0]) {
+        var bottleUserseenObject = {
+          "userId": req.accessToken.userId,
+          "bottleId": ranking[0].id
+        }
+        Bottle.app.models.bottleUserseen.create(bottleUserseenObject)
+          .then()
+          .catch(err => console.log(err));
+
+        Bottle.app.models.user.findById(req.accessToken.userId, function (err, oneUser) {
+          if (err) {
+            return next(err);
+          }
+          oneUser.foundBottlesCount++;
+          oneUser.save();
+          callback(null, ranking);
+
+        })
+
+      } else {
+        callback(errors.bottle.noNewBottle(), null);
+      }
+    });
+  };
+
 
   function sortBottle(ranking, userId, seenBottle, blockList, filter) {
     console.log("blockList");
@@ -394,6 +480,13 @@ module.exports = function (Bottle) {
           }
         },
         {
+          $sort: {
+            "_id.year": 1,
+            "_id.month": 1,
+            "_id.day": 1,
+          }
+        },
+        {
           $project: {
             _id: 0,
             date: "$_id",
@@ -448,6 +541,13 @@ module.exports = function (Bottle) {
           }
         },
         {
+          $sort: {
+            "_id.year": 1,
+            "_id.month": 1,
+            "_id.day": 1,
+          }
+        },
+        {
           $project: {
             _id: 0,
             date: "$_id",
@@ -499,7 +599,14 @@ module.exports = function (Bottle) {
             },
             total: {
               $sum: 1
-            }
+            },
+          }
+        },
+        {
+          $sort: {
+            "_id.year": 1,
+            "_id.month": 1,
+            "_id.day": 1,
           }
         },
         {
