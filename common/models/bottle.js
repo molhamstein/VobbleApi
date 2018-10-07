@@ -1,7 +1,18 @@
 'use strict';
 const errors = require('../../server/errors');
+const mongoXlsx = require('mongo-xlsx');
+const configPath = process.env.NODE_ENV === undefined ?
+  '../../server/config.json' :
+  `../../server/config.${process.env.NODE_ENV}.json`;
+const config = require(configPath);
 
 module.exports = function (Bottle) {
+
+  var urlFileRoot = config.domain + config.restApiRoot + "/uploadFiles";
+
+  var urlFileRootexcel = urlFileRoot + '/excelFiles/download/';
+
+
   Bottle.validatesInclusionOf('status', { in: ['deactive', 'active']
   });
 
@@ -653,5 +664,91 @@ module.exports = function (Bottle) {
 
     });
   };
+
+
+  Bottle.export = function (context, callback) {
+    var config = {
+      path: 'uploadFiles/excelFiles',
+      save: true,
+      fileName: 'bottle' + Date.now() + '.xlsx'
+    };
+
+    var data = [];
+    Bottle.find({}, function (err, bottles) {
+      console.log(bottles)
+      bottles.forEach(function (element) {
+
+        var object = {};
+        var ownerObject
+        var shoreObject;
+        element.owner(function (err, owner) {
+          var countryNaem
+          owner.country(function (err, country) {
+            countryNaem = country.name
+          })
+          ownerObject = {
+            country: countryNaem,
+            image: owner['image'],
+            totalBottlesThrown: owner['totalBottlesThrown'],
+            repliesBottlesCount: owner['repliesBottlesCount'],
+            repliesReceivedCount: owner['repliesReceivedCount'],
+            foundBottlesCount: owner['foundBottlesCount'],
+            extraBottlesCount: owner['extraBottlesCount'],
+            bottlesCount: owner['bottlesCount'],
+            registrationCompleted: owner['registrationCompleted'],
+            gender: owner['gender'],
+            nextRefill: owner['nextRefill'].toString(),
+            createdAt: owner['createdAt'].toString(),
+            lastLogin: owner['lastLogin'],
+            email: owner['email'],
+            status: owner['status'],
+            typeLogIn: owner['typeLogIn'],
+            username: owner['username']
+          }
+
+        })
+
+        element.shore(function (err, shore) {
+          shoreObject = {
+            name_ar: shore['name_ar'],
+            name_en: shore['name_en'],
+            cover: shore['cover'],
+            icon: shore['icon']
+          }
+        })
+        var objectBottle = {
+          file: element['file'],
+          status: element['status'],
+          thumbnail: element['thumbnail'],
+          createdAt: element['createdAt'].toString(),
+          repliesUserCount: element['repliesUserCount'],
+        }
+
+        object = Object.assign({}, ownerObject, objectBottle, shoreObject);
+        data.push(object);
+      }, this);
+      /* Generate automatic model for processing (A static model should be used) */
+      var model = mongoXlsx.buildDynamicModel(data);
+
+
+      /* Generate Excel */
+      mongoXlsx.mongoData2Xlsx(data, model, config, function (err, data) {
+        console.log('File saved at:', data.fullPath);
+        callback(null, {
+          'path': urlFileRootexcel + config['fileName']
+        });
+
+      });
+    });
+
+    // model[0].access = 'id';
+    // mongoXlsx.mongoData2Xlsx(data, model, config, function (err, data) {
+    //   console.log('File saved at:', path.join(__dirname, '../../', data.fullPath), data.fullPath);
+    //   return res.sendFile(path.join(__dirname, '../../', data.fullPath))
+    // });
+
+    // TODO
+  };
+
 
 };

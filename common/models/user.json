@@ -34,6 +34,10 @@
       "type": "number",
       "default": 0
     },
+    "repliesReceivedCount": {
+      "type": "number",
+      "default": 0
+    },
     "foundBottlesCount": {
       "type": "number",
       "default": 0
@@ -423,6 +427,26 @@
       "description": "",
       "http": [{
         "path": "/genderStateReport",
+        "verb": "get"
+      }]
+    },
+    "export": {
+      "accepts": [{
+        "arg": "context",
+        "type": "object",
+        "http": {
+          "source": "context"
+        }
+      }],
+      "returns": [{
+        "arg": "result",
+        "type": "object",
+        "root": true,
+        "description": ""
+      }],
+      "description": "Export To Excel",
+      "http": [{
+        "path": "/export",
         "verb": "get"
       }]
     }

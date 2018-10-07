@@ -8,6 +8,7 @@ const config = require(configPath);
 const errors = require('../../server/errors');
 const download = require('image-downloader')
 
+const mongoXlsx = require('mongo-xlsx');
 
 
 
@@ -32,6 +33,10 @@ module.exports = function (User) {
 
   // file root save 
   var urlFileRoot = config.domain + config.restApiRoot + "/uploadFiles";
+
+  var urlFileRootexcel = urlFileRoot + '/excelFiles/download/';
+
+
 
   // ulr save depend of folder name
   var urlFileRootSave = urlFileRoot + '/profile/download/'
@@ -780,5 +785,68 @@ module.exports = function (User) {
       })
     });
   };
+
+
+  User.export = function (context, callback) {
+    var config = {
+      path: 'uploadFiles/excelFiles',
+      save: true,
+      fileName: 'user' + Date.now() + '.xlsx'
+    };
+
+    var data = [];
+    User.find({}, function (err, users) {
+      users.forEach(function (element) {
+
+        var object = {};
+        var countryNaem
+        element.country(function (err, country) {
+            countryNaem= country.name
+        })
+        object = {
+          country: countryNaem,
+          image: element['image'],
+          totalBottlesThrown: element['totalBottlesThrown'],
+          repliesBottlesCount: element['repliesBottlesCount'],
+          repliesReceivedCount: element['repliesReceivedCount'],
+          foundBottlesCount: element['foundBottlesCount'],
+          extraBottlesCount: element['extraBottlesCount'],
+          bottlesCount: element['bottlesCount'],
+          registrationCompleted: element['registrationCompleted'],
+          gender: element['gender'],
+          nextRefill: element['nextRefill'].toString(),
+          createdAt: element['createdAt'].toString(),
+          lastLogin: element['lastLogin'],
+          email: element['email'],
+          status: element['status'],
+          typeLogIn: element['typeLogIn'],
+          username: element['username']
+        }
+
+        data.push(object);
+      }, this);
+      /* Generate automatic model for processing (A static model should be used) */
+      var model = mongoXlsx.buildDynamicModel(data);
+
+
+      /* Generate Excel */
+      mongoXlsx.mongoData2Xlsx(data, model, config, function (err, data) {
+        console.log('File saved at:', data.fullPath);
+        callback(null, {
+          'path': urlFileRootexcel + config['fileName']
+        });
+
+      });
+    });
+
+    // model[0].access = 'id';
+    // mongoXlsx.mongoData2Xlsx(data, model, config, function (err, data) {
+    //   console.log('File saved at:', path.join(__dirname, '../../', data.fullPath), data.fullPath);
+    //   return res.sendFile(path.join(__dirname, '../../', data.fullPath))
+    // });
+
+    // TODO
+  };
+
 
 };
