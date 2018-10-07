@@ -48,7 +48,7 @@ module.exports = function (Uploadfile) {
                 count: 1,
                 filename: file.name.substring(0, file.name.lastIndexOf('.')) + "_thumb.PNG",
                 folder: src + '/thumbnail/',
-                size: newWidth + 'x' + newHeight
+                size: newWidth + 'x' + parseInt(newHeight)
               });
           }
         });
