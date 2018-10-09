@@ -36,19 +36,42 @@ module.exports = function (Uploadfile) {
       if (folderName == "videos") {
         var newWidth = 0
         var newHeight = 0
+        var oldWidth = 0;
+        var oldHeight = 0;
+        var rotation;
+        var size
         ffmpeg.ffprobe(src + "/" + folderName + "/" + file.name, function (err, metadata) {
-          if (err) {
-            console.error(err);
-          } else {
-            var res = metadata['streams'][0].width / metadata['streams'][0].height;
-            newWidth = 400
-            newHeight = newWidth / res
+          if (err) {} else {
+            console.log(metadata);
+            metadata['streams'].forEach(function (element) {
+              if (element.width) {
+                oldWidth = element.width;
+                oldHeight = element.height;
+                rotation = element.rotation
+              }
+            }, this);
+            if (oldWidth != 0)
+              var res = oldWidth / oldHeight;
+            else
+              var res = 2
+            console.log("res");
+            console.log(res);
+            if (rotation == -90 || rotation == 90) {
+              newHeight = 400
+              newWidth = newHeight * res
+              size = newHeight + 'x' + parseInt(newWidth)
+            } else {
+              newWidth = 400
+              newHeight = newWidth / res
+              size = newWidth + 'x' + parseInt(newHeight)
+            }
+            console.log(size)
             ffmpeg(src + "/" + folderName + "/" + file.name)
               .screenshot({
                 count: 1,
                 filename: file.name.substring(0, file.name.lastIndexOf('.')) + "_thumb.PNG",
                 folder: src + '/thumbnail/',
-                size: newWidth + 'x' + parseInt(newHeight)
+                size: size
               });
           }
         });

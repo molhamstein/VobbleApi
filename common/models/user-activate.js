@@ -44,4 +44,16 @@ module.exports = function (Useractivate) {
       })
   })
 
+  Useractivate.afterRemote('create', function (context, item, next) {
+    Useractivate.app.models.User.findById(context.req.body.ownerId, function (err, user) {
+      if (err) {
+        return next(err);
+      }
+      user.lastLogin = new Date();
+      user.save();
+      next();
+
+    });
+  })
+
 };
