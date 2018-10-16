@@ -15,7 +15,7 @@
   },
   "AccessToken": {
     "dataSource": "db",
-    "public": false,
+    "public": true,
     "relations": {
       "user": {
         "type": "belongsTo",

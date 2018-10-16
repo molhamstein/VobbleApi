@@ -214,6 +214,7 @@ module.exports = function (User) {
                 }
                 // create the token
                 User.app.models.AccessToken.create({
+                  ttl: 31536000000,
                   userId: newUser.id
                 }, function (err, newToken) {
                   // get the token with user of new user
@@ -272,6 +273,7 @@ module.exports = function (User) {
           result = token;
           if (result == null) {
             User.app.models.AccessToken.create({
+              ttl: 31536000000,
               userId: oneUser.id
             }, function (err, newToken) {
               // get the token with user of new user
@@ -370,6 +372,7 @@ module.exports = function (User) {
                   else
                     callback(err, null);
                 User.app.models.AccessToken.create({
+                  ttl: 31536000000,
                   userId: newUser.id
                 }, function (err, newToken) {
                   User.app.models.AccessToken.findOne({
@@ -418,6 +421,7 @@ module.exports = function (User) {
           result = token;
           if (result == null) {
             User.app.models.AccessToken.create({
+              ttl: 31536000000,
               userId: oneUser.id
             }, function (err, newToken) {
               // get the token with user of new user
@@ -517,6 +521,7 @@ module.exports = function (User) {
                   else
                     callback(err, null);
                 User.app.models.AccessToken.create({
+                  ttl: 31536000000,
                   userId: newUser.id
                 }, function (err, newToken) {
                   User.app.models.AccessToken.findOne({
@@ -562,6 +567,7 @@ module.exports = function (User) {
           result = token;
           if (result == null) {
             User.app.models.AccessToken.create({
+              ttl: 31536000000,
               userId: oneUser.id
             }, function (err, newToken) {
               // get the token with user of new user
