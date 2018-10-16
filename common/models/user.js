@@ -801,28 +801,48 @@ module.exports = function (User) {
         var object = {};
         var countryNaem
         element.country(function (err, country) {
-            countryNaem= country.name
+          countryNaem = country.name
         })
-        object = {
-          country: countryNaem,
-          image: element['image'],
-          totalBottlesThrown: element['totalBottlesThrown'],
-          repliesBottlesCount: element['repliesBottlesCount'],
-          repliesReceivedCount: element['repliesReceivedCount'],
-          foundBottlesCount: element['foundBottlesCount'],
-          extraBottlesCount: element['extraBottlesCount'],
-          bottlesCount: element['bottlesCount'],
-          registrationCompleted: element['registrationCompleted'],
-          gender: element['gender'],
-          nextRefill: element['nextRefill'].toString(),
-          createdAt: element['createdAt'].toString(),
-          lastLogin: element['lastLogin'],
-          email: element['email'],
-          status: element['status'],
-          typeLogIn: element['typeLogIn'],
-          username: element['username']
-        }
 
+        if (element['lastLogin'] != null)
+          object = {
+            country: countryNaem,
+            image: element['image'],
+            totalBottlesThrown: element['totalBottlesThrown'],
+            repliesBottlesCount: element['repliesBottlesCount'],
+            repliesReceivedCount: element['repliesReceivedCount'],
+            foundBottlesCount: element['foundBottlesCount'],
+            extraBottlesCount: element['extraBottlesCount'],
+            bottlesCount: element['bottlesCount'],
+            registrationCompleted: element['registrationCompleted'],
+            gender: element['gender'],
+            nextRefill: element['nextRefill'].toString(),
+            createdAt: element['createdAt'].toString(),
+            lastLogin: element['lastLogin'].toString(),
+            email: element['email'],
+            status: element['status'],
+            typeLogIn: element['typeLogIn'],
+            username: element['username']
+          }
+        else
+          object = {
+            country: countryNaem,
+            image: element['image'],
+            totalBottlesThrown: element['totalBottlesThrown'],
+            repliesBottlesCount: element['repliesBottlesCount'],
+            repliesReceivedCount: element['repliesReceivedCount'],
+            foundBottlesCount: element['foundBottlesCount'],
+            extraBottlesCount: element['extraBottlesCount'],
+            bottlesCount: element['bottlesCount'],
+            registrationCompleted: element['registrationCompleted'],
+            gender: element['gender'],
+            nextRefill: element['nextRefill'].toString(),
+            createdAt: element['createdAt'].toString(),
+            email: element['email'],
+            status: element['status'],
+            typeLogIn: element['typeLogIn'],
+            username: element['username']
+          }
         data.push(object);
       }, this);
       /* Generate automatic model for processing (A static model should be used) */

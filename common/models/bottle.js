@@ -699,7 +699,7 @@ module.exports = function (Bottle) {
             gender: owner['gender'],
             nextRefill: owner['nextRefill'].toString(),
             createdAt: owner['createdAt'].toString(),
-            lastLogin: owner['lastLogin'],
+            lastLogin: owner['lastLogin'].toString(),
             email: owner['email'],
             status: owner['status'],
             typeLogIn: owner['typeLogIn'],

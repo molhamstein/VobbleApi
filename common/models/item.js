@@ -212,9 +212,9 @@ module.exports = function (Item) {
             bottlesCount: owner['bottlesCount'],
             registrationCompleted: owner['registrationCompleted'],
             gender: owner['gender'],
-            // nextRefill: owner['nextRefill'].toString(),
-            // createdAt: owner['createdAt'].toString(),
-            lastLogin: owner['lastLogin'],
+            nextRefill: owner['nextRefill'].toString(),
+            createdAt: owner['createdAt'].toString(),
+            lastLogin: owner['lastLogin'].toString(),
             email: owner['email'],
             status: owner['status'],
             typeLogIn: owner['typeLogIn'],
@@ -241,8 +241,8 @@ module.exports = function (Item) {
             storeToken: element['storeToken'],
             isConsumed: element['isConsumed'],
             valid: element['valid'],
-            // startAt: element['startAt'].toString(),
-            // endAt: element['endAt'].toString(),
+            startAt: element['startAt'].toString(),
+            endAt: element['endAt'].toString(),
             mainPrice: element['price'],
           }
         else {
@@ -251,13 +251,15 @@ module.exports = function (Item) {
             storeToken: element['storeToken'],
             isConsumed: element['isConsumed'],
             valid: element['valid'],
-            // startAt: element['startAt'].toString(),
+            startAt: element['startAt'].toString(),
             mainPrice: element['price'],
           }
         }
 
-        object = Object.assign({}, ownerObject, objectItem, productObject);
-        data.push(object);
+        object = Object.assign({}, objectItem, productObject);
+        var newObject = Object.assign({}, object, ownerObject)
+        // object ={"anas":"test"}
+        data.push(newObject);
       }, this);
       /* Generate automatic model for processing (A static model should be used) */
       var model = mongoXlsx.buildDynamicModel(data);
