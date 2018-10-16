@@ -212,8 +212,8 @@ module.exports = function (Item) {
             bottlesCount: owner['bottlesCount'],
             registrationCompleted: owner['registrationCompleted'],
             gender: owner['gender'],
-            nextRefill: owner['nextRefill'].toString(),
-            createdAt: owner['createdAt'].toString(),
+            // nextRefill: owner['nextRefill'].toString(),
+            // createdAt: owner['createdAt'].toString(),
             lastLogin: owner['lastLogin'],
             email: owner['email'],
             status: owner['status'],
@@ -241,8 +241,8 @@ module.exports = function (Item) {
             storeToken: element['storeToken'],
             isConsumed: element['isConsumed'],
             valid: element['valid'],
-            startAt: element['startAt'].toString(),
-            endAt: element['endAt'].toString(),
+            // startAt: element['startAt'].toString(),
+            // endAt: element['endAt'].toString(),
             mainPrice: element['price'],
           }
         else {
@@ -251,7 +251,7 @@ module.exports = function (Item) {
             storeToken: element['storeToken'],
             isConsumed: element['isConsumed'],
             valid: element['valid'],
-            startAt: element['startAt'].toString(),
+            // startAt: element['startAt'].toString(),
             mainPrice: element['price'],
           }
         }
