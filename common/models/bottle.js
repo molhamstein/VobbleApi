@@ -686,26 +686,45 @@ module.exports = function (Bottle) {
           owner.country(function (err, country) {
             countryNaem = country.name
           })
-          ownerObject = {
-            country: countryNaem,
-            image: owner['image'],
-            totalBottlesThrown: owner['totalBottlesThrown'],
-            repliesBottlesCount: owner['repliesBottlesCount'],
-            repliesReceivedCount: owner['repliesReceivedCount'],
-            foundBottlesCount: owner['foundBottlesCount'],
-            extraBottlesCount: owner['extraBottlesCount'],
-            bottlesCount: owner['bottlesCount'],
-            registrationCompleted: owner['registrationCompleted'],
-            gender: owner['gender'],
-            nextRefill: owner['nextRefill'].toString(),
-            createdAt: owner['createdAt'].toString(),
-            lastLogin: owner['lastLogin'].toString(),
-            email: owner['email'],
-            status: owner['status'],
-            typeLogIn: owner['typeLogIn'],
-            username: owner['username']
-          }
-
+          if (owner['lastLogin'] != null)
+            object = {
+              country: countryNaem,
+              image: owner['image'],
+              totalBottlesThrown: owner['totalBottlesThrown'],
+              repliesBottlesCount: owner['repliesBottlesCount'],
+              repliesReceivedCount: owner['repliesReceivedCount'],
+              foundBottlesCount: owner['foundBottlesCount'],
+              extraBottlesCount: owner['extraBottlesCount'],
+              bottlesCount: owner['bottlesCount'],
+              registrationCompleted: owner['registrationCompleted'],
+              gender: owner['gender'],
+              nextRefill: owner['nextRefill'].toString(),
+              createdAt: owner['createdAt'].toString(),
+              lastLogin: owner['lastLogin'].toString(),
+              email: owner['email'],
+              status: owner['status'],
+              typeLogIn: owner['typeLogIn'],
+              username: owner['username']
+            }
+          else
+            object = {
+              country: countryNaem,
+              image: owner['image'],
+              totalBottlesThrown: owner['totalBottlesThrown'],
+              repliesBottlesCount: owner['repliesBottlesCount'],
+              repliesReceivedCount: owner['repliesReceivedCount'],
+              foundBottlesCount: owner['foundBottlesCount'],
+              extraBottlesCount: owner['extraBottlesCount'],
+              bottlesCount: owner['bottlesCount'],
+              registrationCompleted: owner['registrationCompleted'],
+              gender: owner['gender'],
+              nextRefill: owner['nextRefill'].toString(),
+              createdAt: owner['createdAt'].toString(),
+              email: owner['email'],
+              status: owner['status'],
+              typeLogIn: owner['typeLogIn'],
+              username: owner['username']
+            }
         })
 
         element.shore(function (err, shore) {
