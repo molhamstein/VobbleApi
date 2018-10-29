@@ -87,7 +87,6 @@ module.exports = function (Item) {
 
     if (filter['where']['and'][0] == null)
       filter = {}
-    console.log(filter);
     Item.find(
       filter,
       function (err, items) {
@@ -101,7 +100,7 @@ module.exports = function (Item) {
             element.owner(function (err, owner) {
               element.product(function (err, product) {
                 console.log(goodId);
-                if (((ISOCode != "" && owner.ISOCode != ISOCode) || (goodId != "" && product.typeGoodsId != goodId)) == false) {
+                if (((ISOCode == "" || owner.ISOCode == ISOCode) && (goodId == "" || product.typeGoodsId == goodId))) {
                   result.push(element);
                 }
               })
@@ -181,7 +180,33 @@ module.exports = function (Item) {
   };
 
 
-  Item.export = function (context, callback) {
+  Item.export = function (filter, callback) {
+
+    var ISOCode = ""
+    var goodId = ""
+
+    var index
+    if (filter != null)
+      index = filter['where']['and'].length - 1;
+    else
+      index = -1
+
+    while (index >= 0) {
+      if (filter['where']['and'][index]['owner.ISOCode'] != null) {
+        ISOCode = filter['where']['and'][index]['owner.ISOCode'];
+        filter['where']['and'].splice(index, 1)
+      } else if (filter['where']['and'][index]['product.typeGoodsId'] != null) {
+        goodId = filter['where']['and'][index]['product.typeGoodsId'];
+        filter['where']['and'].splice(index, 1)
+      }
+
+      index -= 1;
+    }
+
+
+
+    if (filter == null || filter['where']['and'][0] == null)
+      filter = {}
     var config = {
       path: 'uploadFiles/excelFiles',
       save: true,
@@ -189,11 +214,10 @@ module.exports = function (Item) {
     };
 
     var data = [];
-    Item.find({}, function (err, items) {
-      console.log(items)
+    Item.find(filter, function (err, items) {
       items.forEach(function (element) {
-
         var object = {};
+        var secObject = {};
         var ownerObject
         var productObject;
         element.owner(function (err, owner) {
@@ -201,58 +225,59 @@ module.exports = function (Item) {
           owner.country(function (err, country) {
             countryNaem = country.name
           })
-          if (owner['lastLogin'] != null)
-            object = {
-              country: countryNaem,
-              image: owner['image'],
-              totalBottlesThrown: owner['totalBottlesThrown'],
-              repliesBottlesCount: owner['repliesBottlesCount'],
-              repliesReceivedCount: owner['repliesReceivedCount'],
-              foundBottlesCount: owner['foundBottlesCount'],
-              extraBottlesCount: owner['extraBottlesCount'],
-              bottlesCount: owner['bottlesCount'],
-              registrationCompleted: owner['registrationCompleted'],
-              gender: owner['gender'],
-              nextRefill: owner['nextRefill'].toString(),
-              createdAt: owner['createdAt'].toString(),
-              lastLogin: owner['lastLogin'].toString(),
-              email: owner['email'],
-              status: owner['status'],
-              typeLogIn: owner['typeLogIn'],
-              username: owner['username']
-            }
-          else
-            object = {
-              country: countryNaem,
-              image: owner['image'],
-              totalBottlesThrown: owner['totalBottlesThrown'],
-              repliesBottlesCount: owner['repliesBottlesCount'],
-              repliesReceivedCount: owner['repliesReceivedCount'],
-              foundBottlesCount: owner['foundBottlesCount'],
-              extraBottlesCount: owner['extraBottlesCount'],
-              bottlesCount: owner['bottlesCount'],
-              registrationCompleted: owner['registrationCompleted'],
-              gender: owner['gender'],
-              nextRefill: owner['nextRefill'].toString(),
-              createdAt: owner['createdAt'].toString(),
-              email: owner['email'],
-              status: owner['status'],
-              typeLogIn: owner['typeLogIn'],
-              username: owner['username']
-            }
-
-        })
-
-        element.product(function (err, product) {
-          productObject = {
-            name_ar: product['name_ar'],
-            name_en: product['name_en'],
-            price: product['price'],
-            description: product['description'],
-            icon: product['icon'],
-            androidProduct: product['androidProduct'],
-            appleProduct: product['appleProduct'],
+          if ((ISOCode == "" || owner.ISOCode == ISOCode)) {
+            if (owner['lastLogin'] != null)
+              ownerObject = {
+                country: countryNaem,
+                image: owner['image'],
+                totalBottlesThrown: owner['totalBottlesThrown'],
+                repliesBottlesCount: owner['repliesBottlesCount'],
+                repliesReceivedCount: owner['repliesReceivedCount'],
+                foundBottlesCount: owner['foundBottlesCount'],
+                extraBottlesCount: owner['extraBottlesCount'],
+                bottlesCount: owner['bottlesCount'],
+                registrationCompleted: owner['registrationCompleted'],
+                gender: owner['gender'],
+                nextRefill: owner['nextRefill'].toString(),
+                createdAt: owner['createdAt'].toString(),
+                lastLogin: owner['lastLogin'].toString(),
+                email: owner['email'],
+                status: owner['status'],
+                typeLogIn: owner['typeLogIn'],
+                username: owner['username']
+              }
+            else
+              ownerObject = {
+                country: countryNaem,
+                image: owner['image'],
+                totalBottlesThrown: owner['totalBottlesThrown'],
+                repliesBottlesCount: owner['repliesBottlesCount'],
+                repliesReceivedCount: owner['repliesReceivedCount'],
+                foundBottlesCount: owner['foundBottlesCount'],
+                extraBottlesCount: owner['extraBottlesCount'],
+                bottlesCount: owner['bottlesCount'],
+                registrationCompleted: owner['registrationCompleted'],
+                gender: owner['gender'],
+                nextRefill: owner['nextRefill'].toString(),
+                createdAt: owner['createdAt'].toString(),
+                email: owner['email'],
+                status: owner['status'],
+                typeLogIn: owner['typeLogIn'],
+                username: owner['username']
+              }
           }
+        })
+        element.product(function (err, product) {
+          if (goodId == "" || product.typeGoodsId == goodId)
+            productObject = {
+              name_ar: product['name_ar'],
+              name_en: product['name_en'],
+              price: product['price'],
+              description: product['description'],
+              icon: product['icon'],
+              androidProduct: product['androidProduct'],
+              appleProduct: product['appleProduct'],
+            }
         })
 
         if (element['endAt'] != null)
@@ -276,12 +301,12 @@ module.exports = function (Item) {
           }
         }
 
-        object = Object.assign({}, objectItem, productObject);
-        var newObject = Object.assign({}, object, ownerObject)
-        // object ={"anas":"test"}
-        data.push(newObject);
+        if (ownerObject != null || productObject != null) {
+          object = Object.assign({}, objectItem, productObject);
+          secObject = Object.assign({}, object, ownerObject);
+          data.push(secObject);
+        }
       }, this);
-      /* Generate automatic model for processing (A static model should be used) */
       var model = mongoXlsx.buildDynamicModel(data);
 
 

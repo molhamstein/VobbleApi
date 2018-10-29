@@ -793,15 +793,19 @@ module.exports = function (User) {
   };
 
 
-  User.export = function (context, callback) {
+  User.export = function (filter, callback) {
     var config = {
       path: 'uploadFiles/excelFiles',
       save: true,
       fileName: 'user' + Date.now() + '.xlsx'
     };
 
+    if (filter == null || filter['where']['and'][0] == null)
+      filter = {}
+
+
     var data = [];
-    User.find({}, function (err, users) {
+    User.find(filter, function (err, users) {
       users.forEach(function (element) {
 
         var object = {};

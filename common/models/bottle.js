@@ -167,7 +167,7 @@ module.exports = function (Bottle) {
         if (bottles) {
           bottles.forEach(function (element) {
             element.owner(function (err, owner) {
-              if (((gender != "" && owner.gender != gender) || (ISOCode != "" && owner.ISOCode != ISOCode)) == false) {
+              if (((gender == "" || owner.gender == gender) && (ISOCode == "" || owner.ISOCode == ISOCode))) {
                 result.push(element);
               }
             })
@@ -666,65 +666,95 @@ module.exports = function (Bottle) {
   };
 
 
-  Bottle.export = function (context, callback) {
+  Bottle.export = function (filter, callback) {
+    var shoreId = "";
+    var gt = ""
+    var ls = ""
+    var gender = ""
+    var ISOCode = ""
+    var index
+    if (filter != null)
+      index = filter['where']['and'].length - 1;
+    else
+      index = -1
+    while (index >= 0) {
+      if (filter['where']['and'][index]['owner.gender'] != null) {
+        gender = filter['where']['and'][index]['owner.gender'];
+        filter['where']['and'].splice(index, 1)
+      } else if (filter['where']['and'][index]['owner.ISOCode'] != null) {
+        ISOCode = filter['where']['and'][index]['owner.ISOCode'];
+        filter['where']['and'].splice(index, 1)
+      }
+
+      index -= 1;
+    }
+
+    if (filter == null || filter['where']['and'][0] == null)
+      filter = {}
+
     var config = {
       path: 'uploadFiles/excelFiles',
       save: true,
       fileName: 'bottle' + Date.now() + '.xlsx'
     };
-
+    console.log("filter");
+    console.log(filter);
     var data = [];
-    Bottle.find({}, function (err, bottles) {
-      console.log(bottles)
+    Bottle.find(filter, function (err, bottles) {
+      console.log("bottles");
+      console.log(bottles);
       bottles.forEach(function (element) {
 
         var object = {};
         var ownerObject
+        var secObject = {}
         var shoreObject;
         element.owner(function (err, owner) {
           var countryNaem
           owner.country(function (err, country) {
             countryNaem = country.name
           })
-          if (owner['lastLogin'] != null)
-            object = {
-              country: countryNaem,
-              image: owner['image'],
-              totalBottlesThrown: owner['totalBottlesThrown'],
-              repliesBottlesCount: owner['repliesBottlesCount'],
-              repliesReceivedCount: owner['repliesReceivedCount'],
-              foundBottlesCount: owner['foundBottlesCount'],
-              extraBottlesCount: owner['extraBottlesCount'],
-              bottlesCount: owner['bottlesCount'],
-              registrationCompleted: owner['registrationCompleted'],
-              gender: owner['gender'],
-              nextRefill: owner['nextRefill'].toString(),
-              createdAt: owner['createdAt'].toString(),
-              lastLogin: owner['lastLogin'].toString(),
-              email: owner['email'],
-              status: owner['status'],
-              typeLogIn: owner['typeLogIn'],
-              username: owner['username']
-            }
-          else
-            object = {
-              country: countryNaem,
-              image: owner['image'],
-              totalBottlesThrown: owner['totalBottlesThrown'],
-              repliesBottlesCount: owner['repliesBottlesCount'],
-              repliesReceivedCount: owner['repliesReceivedCount'],
-              foundBottlesCount: owner['foundBottlesCount'],
-              extraBottlesCount: owner['extraBottlesCount'],
-              bottlesCount: owner['bottlesCount'],
-              registrationCompleted: owner['registrationCompleted'],
-              gender: owner['gender'],
-              nextRefill: owner['nextRefill'].toString(),
-              createdAt: owner['createdAt'].toString(),
-              email: owner['email'],
-              status: owner['status'],
-              typeLogIn: owner['typeLogIn'],
-              username: owner['username']
-            }
+          if (((gender == "" || owner.gender == gender) && (ISOCode == "" || owner.ISOCode == ISOCode))) {
+            if (owner['lastLogin'] != null)
+              ownerObject = {
+                country: countryNaem,
+                image: owner['image'],
+                totalBottlesThrown: owner['totalBottlesThrown'],
+                repliesBottlesCount: owner['repliesBottlesCount'],
+                repliesReceivedCount: owner['repliesReceivedCount'],
+                foundBottlesCount: owner['foundBottlesCount'],
+                extraBottlesCount: owner['extraBottlesCount'],
+                bottlesCount: owner['bottlesCount'],
+                registrationCompleted: owner['registrationCompleted'],
+                gender: owner['gender'],
+                nextRefill: owner['nextRefill'].toString(),
+                ownerCreatedAt: owner['createdAt'].toString(),
+                lastLogin: owner['lastLogin'].toString(),
+                email: owner['email'],
+                status: owner['status'],
+                typeLogIn: owner['typeLogIn'],
+                username: owner['username']
+              }
+            else
+              ownerObject = {
+                country: countryNaem,
+                image: owner['image'],
+                totalBottlesThrown: owner['totalBottlesThrown'],
+                repliesBottlesCount: owner['repliesBottlesCount'],
+                repliesReceivedCount: owner['repliesReceivedCount'],
+                foundBottlesCount: owner['foundBottlesCount'],
+                extraBottlesCount: owner['extraBottlesCount'],
+                bottlesCount: owner['bottlesCount'],
+                registrationCompleted: owner['registrationCompleted'],
+                gender: owner['gender'],
+                nextRefill: owner['nextRefill'].toString(),
+                ownerCreatedAt: owner['createdAt'].toString(),
+                email: owner['email'],
+                status: owner['status'],
+                typeLogIn: owner['typeLogIn'],
+                username: owner['username']
+              }
+          }
         })
 
         element.shore(function (err, shore) {
@@ -739,12 +769,15 @@ module.exports = function (Bottle) {
           file: element['file'],
           status: element['status'],
           thumbnail: element['thumbnail'],
-          createdAt: element['createdAt'].toString(),
+          shoreCreatedAt: element['createdAt'].toString(),
           repliesUserCount: element['repliesUserCount'],
         }
 
-        object = Object.assign({}, ownerObject, objectBottle, shoreObject);
-        data.push(object);
+        if (ownerObject != null) {
+          object = Object.assign({}, objectBottle, shoreObject);
+          secObject = Object.assign({}, object, ownerObject);
+          data.push(secObject);
+        }
       }, this);
       /* Generate automatic model for processing (A static model should be used) */
       var model = mongoXlsx.buildDynamicModel(data);
@@ -760,13 +793,33 @@ module.exports = function (Bottle) {
       });
     });
 
-    // model[0].access = 'id';
-    // mongoXlsx.mongoData2Xlsx(data, model, config, function (err, data) {
-    //   console.log('File saved at:', path.join(__dirname, '../../', data.fullPath), data.fullPath);
-    //   return res.sendFile(path.join(__dirname, '../../', data.fullPath))
-    // });
 
-    // TODO
+    // {
+    //   "where": {
+    //     "and": [{
+    //       "owner.gender": "male"
+    //     }, {
+    //       "shoreId": "5b2a6dae4341292648004b2b"
+    //     }, {
+    //       "owner.ISOCode": "CC"
+    //     }, {
+    //       "createdAt": {
+    //         "gt": "2014-10-20T00:00:00.000Z"
+    //       }
+    //     }, {
+    //       "createdAt": {
+    //         "lt": "2018-10-20T00:00:00.000Z"
+    //       }
+    //     }]
+    //   }
+    // }
+
+    // "shoreId": "5b2a6dae4341292648004b2b"
+    //     }, {
+
+
+
+
   };
 
 
