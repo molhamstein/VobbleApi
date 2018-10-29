@@ -17,6 +17,7 @@
     "cls-hooked": "^4.2.2",
     "compression": "^1.0.3",
     "cors": "^2.5.2",
+    "dates-between": "^1.1.0",
     "express-session": "^1.15.6",
     "ffprobe": "^1.1.0",
     "fluent-ffmpeg": "^2.1.2",

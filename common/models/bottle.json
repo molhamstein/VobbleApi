@@ -241,6 +241,38 @@
         "verb": "get"
       }]
     },
+    "timeStateExport": {
+      "accepts": [{
+          "arg": "from",
+          "type": "date",
+          "required": false,
+          "description": ""
+        },
+        {
+          "arg": "to",
+          "type": "date",
+          "required": false,
+          "description": ""
+        },
+        {
+          "arg": "country",
+          "type": "string",
+          "required": false,
+          "description": ""
+        }
+      ],
+      "returns": [{
+        "arg": "result",
+        "type": "object",
+        "root": true,
+        "description": ""
+      }],
+      "description": "Export as time",
+      "http": [{
+        "path": "/timeStateExport",
+        "verb": "get"
+      }]
+    },
     "export": {
       "accepts": [{
         "arg": "filter",

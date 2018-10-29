@@ -71,7 +71,11 @@ module.exports = function (Item) {
     //   console.log(key);
     // }, this);
 
-    var index = filter['where']['and'].length - 1;
+    var index
+    if (filter != null)
+      index = filter['where']['and'].length - 1;
+    else
+      index = -1
 
     while (index >= 0) {
       if (filter['where']['and'][index]['owner.ISOCode'] != null) {
@@ -85,7 +89,7 @@ module.exports = function (Item) {
       index -= 1;
     }
 
-    if (filter['where']['and'][0] == null)
+    if (filter == null || filter['where']['and'][0] == null)
       filter = {}
     Item.find(
       filter,

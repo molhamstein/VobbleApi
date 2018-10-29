@@ -5,6 +5,7 @@ const configPath = process.env.NODE_ENV === undefined ?
   '../../server/config.json' :
   `../../server/config.${process.env.NODE_ENV}.json`;
 const config = require(configPath);
+const datesBetween = require('dates-between');
 
 module.exports = function (Bottle) {
 
@@ -140,7 +141,11 @@ module.exports = function (Bottle) {
     //   }
     // }, this);
 
-    var index = filter['where']['and'].length - 1;
+    var index
+    if (filter != null)
+      index = filter['where']['and'].length - 1;
+    else
+      index = -1
 
     while (index >= 0) {
       if (filter['where']['and'][index]['owner.gender'] != null) {
@@ -154,15 +159,13 @@ module.exports = function (Bottle) {
       index -= 1;
     }
 
-    if (filter['where']['and'][0] == null)
+    if (filter == null || filter['where']['and'][0] == null)
       filter = {}
     Bottle.find(
       filter,
       function (err, bottles) {
         if (err)
           callback(err, null);
-        console.log("bottles")
-        console.log(bottles)
         var result = [];
         if (bottles) {
           bottles.forEach(function (element) {
@@ -217,7 +220,6 @@ module.exports = function (Bottle) {
         ]
       }
     }, function (err, blocksList) {
-      console.log(blocksList);
       blockList = blocksList.map(function (block) {
         if (new String(req.accessToken.userId).valueOf() === new String(block.ownerId).valueOf())
           return block.userId;
@@ -232,7 +234,7 @@ module.exports = function (Bottle) {
       where: {
         status: 'active'
       },
-      order: 'weight DESC'
+      order: 'createdAt DESC'
     }, function (err, bottles) {
       if (err) {
         callback(err, null);
@@ -303,7 +305,6 @@ module.exports = function (Bottle) {
         ]
       }
     }, function (err, blocksList) {
-      console.log(blocksList);
       blockList = blocksList.map(function (block) {
         if (new String(req.accessToken.userId).valueOf() === new String(block.ownerId).valueOf())
           return block.userId;
@@ -354,11 +355,7 @@ module.exports = function (Bottle) {
 
 
   function sortBottle(ranking, userId, seenBottle, blockList, filter) {
-    console.log("blockList");
-    console.log(blockList);
     var index = ranking.length - 1;
-    console.log("ranking")
-    console.log(ranking)
     var newRanking = [];
     var blocking = false;
     while (index >= 0) {
@@ -367,10 +364,6 @@ module.exports = function (Bottle) {
         element.shore(function (err, shore) {
           var numberOfSeenThisBottle = findInSeenUser(seenBottle, userId, element.id);
           var isBlocked = isInBlockList(blockList, owner.id)
-          console.log("shoreId Filter")
-          console.log(filter.shoreId)
-          console.log("shoreId")
-          console.log(shore.id)
           if (element.status == "deactive" || owner.status == "deactive" || isBlocked || (new String(userId).valueOf() === new String(owner.id).valueOf()) || (filter.gender && filter.gender != owner.gender) || (filter.ISOCode && filter.ISOCode != owner.ISOCode) || (filter.shoreId && (new String(filter.shoreId).valueOf() != new String(shore.id).valueOf()))) {
             ranking.splice(index, 1);
           } else if (numberOfSeenThisBottle > 0) {
@@ -465,7 +458,6 @@ module.exports = function (Bottle) {
     if (country) {
       filter['ISOCode'] = country
     }
-    console.log(filter);
     Bottle.getDataSource().connector.connect(function (err, db) {
 
       var collection = db.collection('user');
@@ -506,7 +498,6 @@ module.exports = function (Bottle) {
         }
       ]);
       cursor.get(function (err, data) {
-        console.log(data);
         if (err) return callback(err);
         return callback(null, data);
       })
@@ -515,7 +506,6 @@ module.exports = function (Bottle) {
 
 
   function getSecondReport(filter, country, callback) {
-    console.log(filter);
     if (country) {
       filter['owner.ISOCode'] = country
     }
@@ -567,7 +557,6 @@ module.exports = function (Bottle) {
         }
       ]);
       cursor.get(function (err, data) {
-        console.log(data);
         if (err) return callback(err);
         return callback(null, data);
       })
@@ -581,7 +570,6 @@ module.exports = function (Bottle) {
     if (country) {
       filter['ISOCode'] = country
     }
-    console.log(filter);
     Bottle.getDataSource().connector.connect(function (err, db) {
 
       var collection = db.collection('userActivate');
@@ -629,7 +617,6 @@ module.exports = function (Bottle) {
         }
       ]);
       cursor.get(function (err, data) {
-        console.log(data);
         if (err) return callback(err);
         return callback(null, data);
       })
@@ -665,6 +652,118 @@ module.exports = function (Bottle) {
     });
   };
 
+  Bottle.timeStateExport = function (from, to, country, callback) {
+    var filter = {}
+    if (from) {
+      filter['createdAt'] = {
+        '$gt': new Date(from)
+      }
+    }
+    if (to) {
+      if (filter['createdAt'] == null)
+        filter['createdAt'] = {}
+      filter['createdAt']['$lt'] = new Date(to)
+    }
+
+    var mainData = []
+    var resultData = []
+    getFirstReport(filter, country, function (err, firstData) {
+      resultData[0] = convertAgrrig(firstData);
+      getSecondReport(filter, country, function (err, secondetData) {
+        resultData[1] = convertAgrrig(secondetData);
+        getThierdReport(filter, country, function (err, thierdData) {
+          resultData[2] = convertAgrrig(thierdData);
+          var From = startDate(firstData[0], secondetData[0], thierdData[0])
+          var To = endDate(firstData[firstData.length - 1], secondetData[secondetData.length - 1], thierdData[thierdData.length - 1])
+          var dates = convertDates(Array.from(datesBetween(new Date(From), new Date(To))));
+          resultData.forEach(function (element) {
+            // console.log("//////////////////////////")
+            dates = convertDates(Array.from(datesBetween(new Date(From), new Date(To))));
+            for (var prop in dates) {
+              if (element[prop] == null)
+                dates[prop] = 0;
+              else
+                dates[prop] = element[prop]
+            }
+            mainData.push(dates);
+            // }
+          }, this);
+          var config = {
+            path: 'uploadFiles/excelFiles',
+            save: true,
+            fileName: 'timeState' + Date.now() + '.xlsx'
+          };
+          var model = mongoXlsx.buildDynamicModel(mainData);
+
+
+          /* Generate Excel */
+          mongoXlsx.mongoData2Xlsx(mainData, model, config, function (err, data) {
+            if(err)
+            callback(err,null);
+            console.log('File saved at:', data.fullPath);
+            callback(null, {
+              'path': urlFileRootexcel + config['fileName']
+            });
+
+          });
+        })
+      })
+
+    });
+  };
+
+  function convertDates(Data) {
+    var array = [];
+    Data.forEach(function (element, index) {
+      array[element.getFullYear() + "-" + (element.getMonth() + 1) + "-" + element.getDate()] = 0;
+    }, this);
+    return array;
+  }
+
+
+  function convertAgrrig(Data) {
+    var array = [];
+    Data.forEach(function (element) {
+      array[element.date['year'] + "-" + element.date['month'] + "-" + element.date['day']] = element.count;
+    }, this);
+    return array;
+  }
+
+  function startDate(first, seconde, thierd) {
+    var arrayStart = [];
+    if (first != null) {
+      arrayStart.push(first.date['year'] + "-" + first.date['month'] + "-" + first.date['day']);
+    }
+    if (seconde != null) {
+      arrayStart.push(seconde.date['year'] + "-" + seconde.date['month'] + "-" + seconde.date['day']);
+    }
+    if (thierd != null) {
+      arrayStart.push(thierd.date['year'] + "-" + thierd.date['month'] + "-" + thierd.date['day']);
+    }
+    var orderedDates = arrayStart.sort(function (a, b) {
+      return Date.parse(a) > Date.parse(b);
+    });
+    return orderedDates[0];
+  }
+
+  function endDate(first, seconde, thierd) {
+    var arrayEnd = [];
+    if (first != null) {
+      arrayEnd.push(first.date['year'] + "-" + first.date['month'] + "-" + first.date['day']);
+    }
+    if (seconde != null) {
+      arrayEnd.push(seconde.date['year'] + "-" + seconde.date['month'] + "-" + seconde.date['day']);
+    }
+    if (thierd != null) {
+      arrayEnd.push(thierd.date['year'] + "-" + thierd.date['month'] + "-" + thierd.date['day']);
+    }
+    var orderedDates = arrayEnd.sort(function (a, b) {
+      return Date.parse(a) < Date.parse(b);
+    });
+    return orderedDates[0];
+  }
+
+
 
   Bottle.export = function (filter, callback) {
     var shoreId = "";
@@ -697,12 +796,8 @@ module.exports = function (Bottle) {
       save: true,
       fileName: 'bottle' + Date.now() + '.xlsx'
     };
-    console.log("filter");
-    console.log(filter);
     var data = [];
     Bottle.find(filter, function (err, bottles) {
-      console.log("bottles");
-      console.log(bottles);
       bottles.forEach(function (element) {
 
         var object = {};
@@ -769,7 +864,7 @@ module.exports = function (Bottle) {
           file: element['file'],
           status: element['status'],
           thumbnail: element['thumbnail'],
-          shoreCreatedAt: element['createdAt'].toString(),
+          CreatedAt: element['createdAt'].toString(),
           repliesUserCount: element['repliesUserCount'],
         }
 
