@@ -325,6 +325,7 @@ module.exports = function (Bottle) {
         callback(err, null);
       }
       var ranking = bottles;
+      callback(null, bottles);
 
       // process bottle sort
       ranking = sortBottle(bottles, req.accessToken.userId, seenBottle, blockList, filter)
@@ -698,8 +699,8 @@ module.exports = function (Bottle) {
 
           /* Generate Excel */
           mongoXlsx.mongoData2Xlsx(mainData, model, config, function (err, data) {
-            if(err)
-            callback(err,null);
+            if (err)
+              callback(err, null);
             console.log('File saved at:', data.fullPath);
             callback(null, {
               'path': urlFileRootexcel + config['fileName']
