@@ -325,8 +325,8 @@ module.exports = function (Bottle) {
         callback(err, null);
       }
       var ranking = bottles;
-      callback(null, bottles);
-
+      // callback(null, bottles);
+      // console.log("DDDDD");
       // process bottle sort
       ranking = sortBottle(bottles, req.accessToken.userId, seenBottle, blockList, filter)
       if (ranking[0]) {
@@ -369,7 +369,7 @@ module.exports = function (Bottle) {
             ranking.splice(index, 1);
           } else if (numberOfSeenThisBottle > 0) {
             ranking[index].numberRepeted = numberOfSeenThisBottle;
-            newRanking.push(ranking[index]);
+            newRanking.unshift(ranking[index]);
             ranking.splice(index, 1);
           }
         });
