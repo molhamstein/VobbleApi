@@ -319,7 +319,7 @@ module.exports = function (Bottle) {
       where: {
         status: 'active'
       },
-      order: 'weight DESC'
+      order: 'createdAt DESC'
     }, function (err, bottles) {
       if (err) {
         callback(err, null);
