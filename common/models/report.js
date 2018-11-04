@@ -41,7 +41,7 @@ module.exports = function (Report) {
     var config = {
       path: 'uploadFiles/excelFiles',
       save: true,
-      fileName: 'bottle' + Date.now() + '.xlsx'
+      fileName: 'report' + Date.now() + '.xlsx'
     };
     console.log("filter");
     console.log(filter);
