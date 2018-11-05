@@ -31,7 +31,11 @@
     "validity": {
       "type": "number"
     },
-    "description": {
+    "description_ar": {
+      "type": "string",
+      "required": true
+    },
+    "description_en": {
       "type": "string",
       "required": true
     },

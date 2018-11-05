@@ -66,17 +66,17 @@
     "homeTutShowed": {
       "type": "boolean",
       "required": true,
-      "default": "false"
+      "default": false
     },
     "ChatTutShowed": {
       "type": "boolean",
       "required": true,
-      "default": "false"
+      "default": false
     },
     "tut3Showed": {
       "type": "boolean",
       "required": true,
-      "default": "false"
+      "default": false
     },
     "typeLogIn": {
       "type": "string",
