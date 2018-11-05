@@ -6,11 +6,9 @@
     "validateUpsert": true
   },
   "scope": {
-    "include": [
-      {
-        "relation": "typeGoods"
-      }
-    ]
+    "include": [{
+      "relation": "typeGoods"
+    }]
   },
   "properties": {
     "name_ar": {
@@ -30,6 +28,10 @@
     },
     "validity": {
       "type": "number"
+    },
+    "description": {
+      "type": "string",
+      "required": true
     },
     "description_ar": {
       "type": "string",
