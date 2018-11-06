@@ -61,7 +61,7 @@
     "registrationCompleted": {
       "type": "boolean",
       "required": true,
-      "default": "false"
+      "default": false
     },
     "homeTutShowed": {
       "type": "boolean",
