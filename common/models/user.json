@@ -405,6 +405,27 @@
         "verb": "get"
       }]
     },
+    "converToBool": {
+      "accepts": [{
+        "arg": "context",
+        "type": "object",
+        "http": {
+          "source": "context"
+        }
+      }],
+      "returns": [{
+        "arg": "result",
+        "type": "object",
+        "root": true,
+        "description": ""
+      }],
+      "description": "get my info",
+      "http": [{
+        "path": "/converToBool",
+        "verb": "get"
+      }]
+    },
+
     "deactiveUser": {
       "accepts": [{
         "arg": "id",
