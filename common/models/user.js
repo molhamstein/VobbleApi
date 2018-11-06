@@ -725,45 +725,45 @@ module.exports = function (User) {
     // TODO
   };
 
-  User.converToBool = function (context, callback) {
-    var result;
-    var userId = context.req.accessToken.userId;
-    User.find({}, function (err, allUser) {
-      if (err)
-        callback(err, null);
-      else {
-        allUser.forEach(function (oneUser) {
-          if (oneUser.registrationCompleted == "false") {
-            console.log(oneUser.email);
-            console.log("registrationCompleted");
-            oneUser.registrationCompleted = false
-          }
+  // User.converToBool = function (context, callback) {
+  //   var result;
+  //   var userId = context.req.accessToken.userId;
+  //   User.find({}, function (err, allUser) {
+  //     if (err)
+  //       callback(err, null);
+  //     else {
+  //       allUser.forEach(function (oneUser) {
+  //         if (oneUser.registrationCompleted == "false") {
+  //           console.log(oneUser.email);
+  //           console.log("registrationCompleted");
+  //           oneUser.registrationCompleted = false
+  //         }
 
-          if (oneUser.homeTutShowed == "false") {
-            console.log(oneUser.email);
-            console.log("homeTutShowed");
-            oneUser.homeTutShowed = false
-          }
+  //         if (oneUser.homeTutShowed == "false") {
+  //           console.log(oneUser.email);
+  //           console.log("homeTutShowed");
+  //           oneUser.homeTutShowed = false
+  //         }
 
-          if (oneUser.ChatTutShowed == "false") {
-            console.log(oneUser.email);
-            console.log("ChatTutShowed");
-            oneUser.ChatTutShowed = false
-          }
+  //         if (oneUser.ChatTutShowed == "false") {
+  //           console.log(oneUser.email);
+  //           console.log("ChatTutShowed");
+  //           oneUser.ChatTutShowed = false
+  //         }
 
-          if (oneUser.tut3Showed == "false") {
-            console.log(oneUser.email);
-            console.log("tut3Showed");
-            oneUser.tut3Showed = false
-          }
-          oneUser.save()
-        }, this);
-        callback(null, "done");
+  //         if (oneUser.tut3Showed == "false") {
+  //           console.log(oneUser.email);
+  //           console.log("tut3Showed");
+  //           oneUser.tut3Showed = false
+  //         }
+  //         oneUser.save()
+  //       }, this);
+  //       callback(null, "done");
 
-      }
-    })
-    // TODO
-  };
+  //     }
+  //   })
+  //   // TODO
+  // };
 
 
 
