@@ -36,7 +36,7 @@ module.exports = function (Useractivate) {
           return next(err);
         if (bottles[0]) {
           console.log("error");
-          return next(errors.account.youLoginToday());
+          return "";
         } else {
           console.log("continue");
           next();
