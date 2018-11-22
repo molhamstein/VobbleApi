@@ -434,36 +434,6 @@ module.exports = function (Bottle) {
     return found;
   }
 
-  // Bottle.getDataSource().connector.connect(function(err, db) {
-  //   var collection = db.collection('bottle');
-  //   var cursor = collection.aggregate([
-  //     { $match: { ownerId: id } },
-  //     { $group: {
-  //       _id: ownerId,
-  //      total: { $sum: "$weight" }
-  //     }}
-  //   ]);
-  //   cursor.get(function(err, data) {
-  //     console.log(data);
-  //     if (err) return callback(err);
-  //     return callback(err, data);
-  //   })
-  // });
-
-  // var bookCollection =Bottle.app.dataSources.db.connector.collection('bottle');
-  // bookCollection.aggregate({
-  //   $group: {
-  //     _id: { weight: "$weight"},
-  //     total: { $sum: 1 }
-  //   }
-  // }, function(err, groupByRecords) {
-  //   if(err) {
-  //     next(err);
-  //   } else {
-  //     next();
-  //   }
-  // });
-
 
   /**
    * report as time
@@ -790,6 +760,7 @@ module.exports = function (Bottle) {
     var gender = ""
     var ISOCode = ""
     var index
+    var username = "";
     if (filter != null)
       index = filter['where']['and'].length - 1;
     else
@@ -801,7 +772,12 @@ module.exports = function (Bottle) {
       } else if (filter['where']['and'][index]['owner.ISOCode'] != null) {
         ISOCode = filter['where']['and'][index]['owner.ISOCode'];
         filter['where']['and'].splice(index, 1)
+      } else if (filter['where']['and'][index]['owner.username'] != null) {
+        username = filter['where']['and'][index]['owner.username'];
+        filter['where']['and'].splice(index, 1)
       }
+
+
 
       index -= 1;
     }
@@ -827,7 +803,7 @@ module.exports = function (Bottle) {
           owner.country(function (err, country) {
             countryNaem = country.name
           })
-          if (((gender == "" || owner.gender == gender) && (ISOCode == "" || owner.ISOCode == ISOCode))) {
+          if (((gender == "" || owner.gender == gender) && (ISOCode == "" || owner.ISOCode == ISOCode)) && (username == "" || owner.username.include(username))) {
             if (owner['lastLogin'] != null)
               ownerObject = {
                 country: countryNaem,

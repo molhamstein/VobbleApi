@@ -55,23 +55,11 @@ module.exports = function (Item) {
 
   });
 
-  Item.getFilterItem = function (filter, callback) {
+  function getFilter(filter, callback) {
     var ISOCode = ""
     var goodId = ""
-
-    // filter['where']['and'].forEach(function (key, element,object) {
-    //   if (key['owner.ISOCode'] != null) {
-    //     ISOCode = key['owner.ISOCode'];
-    //     object.splice(element, 1)
-    //   } else if (key['product.typeGoodsId'] != null) {
-    //     console.log(goodId);
-    //     goodId = key['product.typeGoodsId'];
-    //     object.splice(element, 1)
-    //   }
-    //   console.log(key);
-    // }, this);
-
     var index
+    var username = ""
     if (filter != null)
       index = filter['where']['and'].length - 1;
     else
@@ -84,7 +72,11 @@ module.exports = function (Item) {
       } else if (filter['where']['and'][index]['product.typeGoodsId'] != null) {
         goodId = filter['where']['and'][index]['product.typeGoodsId'];
         filter['where']['and'].splice(index, 1)
+      } else if (filter['where']['and'][index]['owner.username'] != null) {
+        username = filter['where']['and'][index]['owner.username'];
+        filter['where']['and'].splice(index, 1)
       }
+
 
       index -= 1;
     }
@@ -104,7 +96,7 @@ module.exports = function (Item) {
             element.owner(function (err, owner) {
               element.product(function (err, product) {
                 console.log(goodId);
-                if (((ISOCode == "" || owner.ISOCode == ISOCode) && (goodId == "" || product.typeGoodsId == goodId))) {
+                if (((ISOCode == "" || owner.ISOCode == ISOCode) && (goodId == "" || product.typeGoodsId == goodId)) && (username == "" || owner.username.include(username))) {
                   result.push(element);
                 }
               })
@@ -113,10 +105,34 @@ module.exports = function (Item) {
         }
         callback(null, result);
       })
+  }
 
-
+  Item.getFilterItem = function (filter, callback) {
+    getFilter(filter, function (err, data) {
+      if (err)
+        callback(err, null);
+      callback(err, data);
+    })
 
   }
+
+
+  /**
+   *
+   * @param {object} filter filter item
+   * @param {Function(Error, object)} callback
+   */
+
+  item.countFilter = function (filter, callback) {
+    getFilter(filter, function (err, data) {
+      if (err)
+        callback(err, null);
+      callback(err, {
+        "count": data.length
+      });
+    })
+  };
+
 
 
   /**
@@ -188,7 +204,7 @@ module.exports = function (Item) {
 
     var ISOCode = ""
     var goodId = ""
-
+    var username = ""
     var index
     if (filter != null)
       index = filter['where']['and'].length - 1;
@@ -202,7 +218,11 @@ module.exports = function (Item) {
       } else if (filter['where']['and'][index]['product.typeGoodsId'] != null) {
         goodId = filter['where']['and'][index]['product.typeGoodsId'];
         filter['where']['and'].splice(index, 1)
+      } else if (filter['where']['and'][index]['owner.username'] != null) {
+        username = filter['where']['and'][index]['owner.username'];
+        filter['where']['and'].splice(index, 1)
       }
+
 
       index -= 1;
     }
@@ -229,7 +249,7 @@ module.exports = function (Item) {
           owner.country(function (err, country) {
             countryNaem = country.name
           })
-          if ((ISOCode == "" || owner.ISOCode == ISOCode)) {
+          if ((ISOCode == "" || owner.ISOCode == ISOCode) && (username == "" || owner.username.include(username))) {
             if (owner['lastLogin'] != null)
               ownerObject = {
                 country: countryNaem,

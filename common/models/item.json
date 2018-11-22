@@ -61,6 +61,31 @@
   },
   "acls": [],
   "methods": {
+    "countFilter": {
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "required": true,
+          "description": "filter item"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "result",
+          "type": "object",
+          "root": true,
+          "description": ""
+        }
+      ],
+      "description": "",
+      "http": [
+        {
+          "path": "/countItem",
+          "verb": "get"
+        }
+      ]
+    },
     "getFilterItem": {
       "accepts": [
         {
