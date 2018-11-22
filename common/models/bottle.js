@@ -188,7 +188,7 @@ module.exports = function (Bottle) {
    * @param {Function(Error, object)} callback
    */
 
-  Bottle.countFilter = function (callback) {
+  Bottle.countFilter = function (filter, callback) {
 
     getFilter(filter, function (err, data) {
       if (err)
