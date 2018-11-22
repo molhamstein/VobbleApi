@@ -41,6 +41,11 @@ module.exports = function (User) {
   // ulr save depend of folder name
   var urlFileRootSave = urlFileRoot + '/profile/download/'
 
+  User.beforeSave = function (next, modelInstance) {
+    console.log(modelInstance);
+    //your logic goes here
+    next();
+  };
 
   User.beforeRemote('create', function (context, result, next) {
     User.findOne({

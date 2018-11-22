@@ -14,7 +14,8 @@ app.use(loopback.token());
 app.use(function (req, res, next) {
   // console("App Use");
   if (!req.accessToken) return next();
-  // console("Token");
+  console.log("Token");
+  console.log(req.accessToken.userId);
   app.models.User.findById(req.accessToken.userId,
     function (err, user) {
       if (err) return next(err);
