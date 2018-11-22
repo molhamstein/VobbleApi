@@ -122,25 +122,13 @@ module.exports = function (Bottle) {
   //   }
   // ]
 
-  // get bottle to view
-  Bottle.getFilterBottle = function (filter, callback) {
+  function getFilter(filter, callback) {
     var shoreId = "";
     var gt = ""
     var ls = ""
     var gender = ""
     var username = ""
     var ISOCode = ""
-
-
-    // filter['where']['and'].forEach(function (key, element) {
-    //   if (key['owner.gender'] != null) {
-    //     gender = key['owner.gender'];
-    //     filter['where']['and'].splice(element, 1)
-    //   } else if (key['owner.ISOCode'] != null) {
-    //     ISOCode = key['owner.ISOCode'];
-    //     filter['where']['and'].splice(element, 1)
-    //   }
-    // }, this);
 
     var index
     if (filter != null)
@@ -182,10 +170,35 @@ module.exports = function (Bottle) {
         }
         callback(null, result);
       })
+  }
 
+  // get bottle to view
+  Bottle.getFilterBottle = function (filter, callback) {
 
+    getFilter(filter, function (err, data) {
+      if (err)
+        callback(err, null);
+      callback(err, data);
+    })
 
   }
+
+  /**
+   *
+   * @param {Function(Error, object)} callback
+   */
+
+  Bottle.countFilter = function (callback) {
+
+    getFilter(filter, function (err, data) {
+      if (err)
+        callback(err, null);
+      callback(err, {
+        "count": data.length
+      });
+    })
+
+  };
 
   Bottle.getOneBottle = function (gender, ISOCode, shoreId, req, callback) {
     var result;

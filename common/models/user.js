@@ -310,14 +310,14 @@ module.exports = function (User) {
 
   User.loginInstegram = function (data, callback) {
     var result;
-    // TODO
     var socialId = data.socialId;
     var token = data.token;
     var gender = data.gender;
     var image = data.image;
-    // var image = "https://www.idlidu.com/Content/images/default.png";
     var email = data.email;
     var name = data.name;
+    console.log("data")
+    console.log(data)
     User.findOne({
       where: {
         socialId: socialId,
@@ -327,6 +327,7 @@ module.exports = function (User) {
       if (err)
         callback(err, null);
       if (oneUser == null) {
+        console.log("new user")
         User.findOne({
           where: {
             username: name
@@ -392,6 +393,8 @@ module.exports = function (User) {
                       callback(err, null);
                     result = token;
                     result.isNew = true;
+                    console.log("new user Data")
+                    console.log(result)
                     callback(null, result);
                   });
                 })
@@ -402,6 +405,9 @@ module.exports = function (User) {
             })
         })
       } else {
+        console.log("old user")
+        console.log(oneUser)
+
         User.app.models.AccessToken.findOne({
           include: {
             relation: 'user',
@@ -424,9 +430,8 @@ module.exports = function (User) {
               ttl: 31536000000,
               userId: oneUser.id
             }, function (err, newToken) {
-              // get the token with user of new user
-              // User.app.models.AccessToken.findOne({ include: 'user', userId: newUser.id }, function (err, token) {
-              // User.app.models.AccessToken.findOne(, function (err, token) {
+              console.log("new token")
+              console.log(newToken)
               User.app.models.AccessToken.findOne({
                 include: {
                   relation: 'user',
@@ -444,10 +449,14 @@ module.exports = function (User) {
                   callback(err, null);
                 result = token;
                 result.isNew = false;
+                console.log("result")
+                console.log(result)
                 callback(null, result);
               });
             })
           } else {
+            console.log("old token")
+            console.log(result)
             result.isNew = false;
             callback(null, result);
           }
