@@ -128,6 +128,7 @@ module.exports = function (Bottle) {
     var gt = ""
     var ls = ""
     var gender = ""
+    var username = ""
     var ISOCode = ""
 
 
@@ -154,6 +155,9 @@ module.exports = function (Bottle) {
       } else if (filter['where']['and'][index]['owner.ISOCode'] != null) {
         ISOCode = filter['where']['and'][index]['owner.ISOCode'];
         filter['where']['and'].splice(index, 1)
+      } else if (filter['where']['and'][index]['owner.username'] != null) {
+        username = filter['where']['and'][index]['owner.username'];
+        filter['where']['and'].splice(index, 1)
       }
 
       index -= 1;
@@ -170,7 +174,7 @@ module.exports = function (Bottle) {
         if (bottles) {
           bottles.forEach(function (element) {
             element.owner(function (err, owner) {
-              if (((gender == "" || owner.gender == gender) && (ISOCode == "" || owner.ISOCode == ISOCode))) {
+              if (((gender == "" || owner.gender == gender) && (username == "" || owner.username.includes(username)) && (ISOCode == "" || owner.ISOCode == ISOCode))) {
                 result.push(element);
               }
             })
