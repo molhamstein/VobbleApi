@@ -96,7 +96,7 @@ module.exports = function (Item) {
             element.owner(function (err, owner) {
               element.product(function (err, product) {
                 console.log(goodId);
-                if (((ISOCode == "" || owner.ISOCode == ISOCode) && (goodId == "" || product.typeGoodsId == goodId)) && (username == "" || owner.username.include(username))) {
+                if (((ISOCode == "" || owner.ISOCode == ISOCode) && (goodId == "" || product.typeGoodsId == goodId)) && (username == "" || owner.username.includes(username))) {
                   result.push(element);
                 }
               })
@@ -249,7 +249,7 @@ module.exports = function (Item) {
           owner.country(function (err, country) {
             countryNaem = country.name
           })
-          if ((ISOCode == "" || owner.ISOCode == ISOCode) && (username == "" || owner.username.include(username))) {
+          if ((ISOCode == "" || owner.ISOCode == ISOCode) && (username == "" || owner.username.includes(username))) {
             if (owner['lastLogin'] != null)
               ownerObject = {
                 country: countryNaem,
