@@ -923,4 +923,21 @@ module.exports = function (User) {
   };
 
 
+
+  /**
+   *
+   * @param {Function(Error, array)} callback
+   */
+
+  User.accesstoken = function (callback) {
+    var result;
+    // TODO
+    User.app.models.AccessToken.find({}, function (err, data) {
+      if (err)
+        callback(err, null);
+
+      callback(null, data);
+
+    })
+  };
 };

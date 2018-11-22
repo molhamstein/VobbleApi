@@ -6,9 +6,11 @@
     "validateUpsert": true
   },
   "scope": {
-    "include": [{
-      "relation": "typeGoods"
-    }]
+    "include": [
+      {
+        "relation": "typeGoods"
+      }
+    ]
   },
   "properties": {
     "name_ar": {

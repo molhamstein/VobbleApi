@@ -7,7 +7,8 @@
   },
   "replaceOnPUT": false,
   "scope": {
-    "include": [{
+    "include": [
+      {
         "relation": "owner"
       },
       {
@@ -61,26 +62,33 @@
   "acls": [],
   "methods": {
     "getFilterItem": {
-      "accepts": [{
-        "arg": "filter",
-        "type": "object",
-        "required": false,
-        "description": "filter Item"
-      }],
-      "returns": [{
-        "arg": "result",
-        "type": "object",
-        "root": true,
-        "description": ""
-      }],
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "required": false,
+          "description": "filter Item"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "result",
+          "type": "object",
+          "root": true,
+          "description": ""
+        }
+      ],
       "description": "filter On the Item",
-      "http": [{
-        "path": "/filterItem",
-        "verb": "get"
-      }]
+      "http": [
+        {
+          "path": "/filterItem",
+          "verb": "get"
+        }
+      ]
     },
     "itemStateReport": {
-      "accepts": [{
+      "accepts": [
+        {
           "arg": "from",
           "type": "date",
           "required": false,
@@ -93,36 +101,21 @@
           "description": ""
         }
       ],
-      "returns": [{
-        "arg": "result",
-        "type": "array",
-        "root": true,
-        "description": ""
-      }],
+      "returns": [
+        {
+          "arg": "result",
+          "type": "array",
+          "root": true,
+          "description": ""
+        }
+      ],
       "description": "",
-      "http": [{
-        "path": "/itemStateReport",
-        "verb": "get"
-      }]
-    },
-    "export": {
-      "accepts": [{
-        "arg": "filter",
-        "type": "object",
-        "required": false,
-        "description": "filter Item"
-      }],
-      "returns": [{
-        "arg": "result",
-        "type": "object",
-        "root": true,
-        "description": ""
-      }],
-      "description": "Export To Excel",
-      "http": [{
-        "path": "/export",
-        "verb": "get"
-      }]
+      "http": [
+        {
+          "path": "/itemStateReport",
+          "verb": "get"
+        }
+      ]
     }
   }
 }

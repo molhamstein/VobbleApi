@@ -6,7 +6,8 @@
     "validateUpsert": true
   },
   "scope": {
-    "include": [{
+    "include": [
+      {
         "relation": "owner"
       },
       {
@@ -54,7 +55,8 @@
       "foreignKey": "ownerId"
     }
   },
-  "acls": [{
+  "acls": [
+    {
       "accessType": "*",
       "principalType": "ROLE",
       "principalId": "$everyone",
@@ -99,7 +101,8 @@
   ],
   "methods": {
     "getOneBottle": {
-      "accepts": [{
+      "accepts": [
+        {
           "arg": "gender",
           "type": "string",
           "required": false,
@@ -125,20 +128,25 @@
           }
         }
       ],
-      "returns": [{
-        "arg": "result",
-        "type": "object",
-        "root": true,
-        "description": ""
-      }],
+      "returns": [
+        {
+          "arg": "result",
+          "type": "object",
+          "root": true,
+          "description": ""
+        }
+      ],
       "description": "get one mthode with some logic",
-      "http": [{
-        "path": "/getOneBottle",
-        "verb": "get"
-      }]
+      "http": [
+        {
+          "path": "/getOneBottle",
+          "verb": "get"
+        }
+      ]
     },
     "getOneBottleTest": {
-      "accepts": [{
+      "accepts": [
+        {
           "arg": "gender",
           "type": "string",
           "required": false,
@@ -164,53 +172,68 @@
           }
         }
       ],
-      "returns": [{
-        "arg": "result",
-        "type": "object",
-        "root": true,
-        "description": ""
-      }],
+      "returns": [
+        {
+          "arg": "result",
+          "type": "object",
+          "root": true,
+          "description": ""
+        }
+      ],
       "description": "get one mthode with some logic",
-      "http": [{
-        "path": "/getOneBottleTest",
-        "verb": "get"
-      }]
+      "http": [
+        {
+          "path": "/getOneBottleTest",
+          "verb": "get"
+        }
+      ]
     },
     "getFilterBottle": {
-      "accepts": [{
-        "arg": "filter",
-        "type": "object",
-        "required": false,
-        "description": "filter bottle"
-      }],
-      "returns": [{
-        "arg": "result",
-        "type": "object",
-        "root": true,
-        "description": ""
-      }],
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "required": false,
+          "description": "filter bottle"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "result",
+          "type": "object",
+          "root": true,
+          "description": ""
+        }
+      ],
       "description": "filter On the bottle",
-      "http": [{
-        "path": "/filterBottle",
-        "verb": "get"
-      }]
+      "http": [
+        {
+          "path": "/filterBottle",
+          "verb": "get"
+        }
+      ]
     },
     "deactiveBottle": {
-      "accepts": [{
-        "arg": "id",
-        "type": "string",
-        "required": true,
-        "description": ""
-      }],
+      "accepts": [
+        {
+          "arg": "id",
+          "type": "string",
+          "required": true,
+          "description": ""
+        }
+      ],
       "returns": [],
       "description": "",
-      "http": [{
-        "path": "/deactiveBottle",
-        "verb": "delete"
-      }]
+      "http": [
+        {
+          "path": "/deactiveBottle",
+          "verb": "delete"
+        }
+      ]
     },
     "timeStateReport": {
-      "accepts": [{
+      "accepts": [
+        {
           "arg": "from",
           "type": "date",
           "required": false,
@@ -229,20 +252,25 @@
           "description": ""
         }
       ],
-      "returns": [{
-        "arg": "result",
-        "type": "object",
-        "root": true,
-        "description": ""
-      }],
+      "returns": [
+        {
+          "arg": "result",
+          "type": "object",
+          "root": true,
+          "description": ""
+        }
+      ],
       "description": "report as time",
-      "http": [{
-        "path": "/timeStateReport",
-        "verb": "get"
-      }]
+      "http": [
+        {
+          "path": "/timeStateReport",
+          "verb": "get"
+        }
+      ]
     },
     "timeStateExport": {
-      "accepts": [{
+      "accepts": [
+        {
           "arg": "from",
           "type": "date",
           "required": false,
@@ -261,37 +289,21 @@
           "description": ""
         }
       ],
-      "returns": [{
-        "arg": "result",
-        "type": "object",
-        "root": true,
-        "description": ""
-      }],
+      "returns": [
+        {
+          "arg": "result",
+          "type": "object",
+          "root": true,
+          "description": ""
+        }
+      ],
       "description": "Export as time",
-      "http": [{
-        "path": "/timeStateExport",
-        "verb": "get"
-      }]
-    },
-    "export": {
-      "accepts": [{
-        "arg": "filter",
-        "type": "object",
-        "required": false,
-        "description": "filter bottle"
-      }],
-      "returns": [{
-        "arg": "result",
-        "type": "object",
-        "root": true,
-        "description": ""
-      }],
-      "description": "Export To Excel",
-      "http": [{
-        "path": "/export",
-        "verb": "get"
-      }]
+      "http": [
+        {
+          "path": "/timeStateExport",
+          "verb": "get"
+        }
+      ]
     }
-
   }
 }
