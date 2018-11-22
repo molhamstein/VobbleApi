@@ -123,7 +123,7 @@ module.exports = function (Item) {
    * @param {Function(Error, object)} callback
    */
 
-  item.countFilter = function (filter, callback) {
+  Item.countFilter = function (filter, callback) {
     getFilter(filter, function (err, data) {
       if (err)
         callback(err, null);
