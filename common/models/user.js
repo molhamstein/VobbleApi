@@ -853,8 +853,9 @@ module.exports = function (User) {
         var countryNaem
         element.country(function (err, country) {
           if (country == null)
-            console.log(element)
-          countryNaem = country.name
+            countryNaem = ""
+          else
+            countryNaem = country.name
         })
 
         if (element['lastLogin'] != null)
