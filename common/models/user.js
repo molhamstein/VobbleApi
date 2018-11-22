@@ -852,6 +852,8 @@ module.exports = function (User) {
         var object = {};
         var countryNaem
         element.country(function (err, country) {
+          if (country == null)
+            console.log(element)
           countryNaem = country.name
         })
 
