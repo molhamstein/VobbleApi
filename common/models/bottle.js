@@ -180,6 +180,8 @@ module.exports = function (Bottle) {
       offset = 0;
     if (limit == null)
       limit = 10;
+    if (offset == 0)
+      offset = 1;
 
     getFilter(filter, function (err, data) {
       if (err)
