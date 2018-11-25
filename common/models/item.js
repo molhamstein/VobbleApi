@@ -88,14 +88,14 @@ module.exports = function (Item) {
       function (err, items) {
         if (err)
           callback(err, null);
-        console.log("items")
-        console.log(items)
+        // console.log("items")
+        // console.log(items)
         var result = [];
         if (items) {
           items.forEach(function (element) {
             element.owner(function (err, owner) {
               element.product(function (err, product) {
-                console.log(goodId);
+                // console.log(goodId);
                 if (((ISOCode == "" || owner.ISOCode == ISOCode) && (goodId == "" || product.typeGoodsId == goodId)) && (username == "" || owner.username.includes(username))) {
                   result.push(element);
                 }
@@ -117,10 +117,10 @@ module.exports = function (Item) {
     getFilter(filter, function (err, data) {
       if (err)
         callback(err, null);
-      console.log("data")
-      console.log(data)
-      data = data.splice(offset, offset - 1 + limit);
-      callback(err, data);
+      var newData = data.splice(offset, offset - 1 + limit);
+      console.log("newData")
+      console.log(newData)
+      callback(err, newData);
     })
 
   }
@@ -199,7 +199,7 @@ module.exports = function (Item) {
         }
       ]);
       cursor.get(function (err, data) {
-        console.log(data);
+        // console.log(data);
         if (err) return callback(err);
         return callback(null, data);
       })
