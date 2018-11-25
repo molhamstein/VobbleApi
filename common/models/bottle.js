@@ -174,10 +174,17 @@ module.exports = function (Bottle) {
 
   // get bottle to view
   Bottle.getFilterBottle = function (filter, callback) {
+    var offset = filter['offset'];
+    var limit = filter['limit'];
+    if (offset == null)
+      offset = 0;
+    if (limit == null)
+      limit = 10;
 
     getFilter(filter, function (err, data) {
       if (err)
         callback(err, null);
+      data = data.splice(offset, offset + limit);
       callback(err, data);
     })
 
