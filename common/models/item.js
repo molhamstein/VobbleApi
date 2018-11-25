@@ -117,7 +117,7 @@ module.exports = function (Item) {
     getFilter(filter, function (err, data) {
       if (err)
         callback(err, null);
-      var newData = data.slice(offset, offset - 1 + limit);
+      var newData = data.slice(offset, offset + limit);
       console.log("newData")
       console.log(newData)
       callback(err, newData);

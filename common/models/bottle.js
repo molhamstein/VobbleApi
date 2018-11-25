@@ -176,18 +176,18 @@ module.exports = function (Bottle) {
   Bottle.getFilterBottle = function (filter, callback) {
     var offset = filter['offset'];
     var limit = filter['limit'];
+    console.log(offset)
+    console.log(limit)
     if (offset == null)
       offset = 0;
     if (limit == null)
       limit = 10;
-    if (offset == 0)
-      offset = 1;
 
     getFilter(filter, function (err, data) {
       if (err)
         callback(err, null);
-      data = data.splice(offset-1, offset-1 + limit);
-      callback(err, data);
+      var newData = data.slice(offset, offset + limit);
+      callback(err, newData);
     })
 
   }
