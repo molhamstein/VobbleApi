@@ -123,7 +123,7 @@ module.exports = function (Item) {
         callback(err, null);
       console.log("data")
       console.log(data)
-      data = data.splice(offset, offset + limit);
+      data = data.splice(offset-1, offset-1 + limit);
       callback(err, data);
     })
 

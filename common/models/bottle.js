@@ -184,7 +184,7 @@ module.exports = function (Bottle) {
     getFilter(filter, function (err, data) {
       if (err)
         callback(err, null);
-      data = data.splice(offset, offset + limit);
+      data = data.splice(offset-1, offset-1 + limit);
       callback(err, data);
     })
 
