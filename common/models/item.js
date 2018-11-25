@@ -114,9 +114,15 @@ module.exports = function (Item) {
       offset = 0;
     if (limit == null)
       limit = 10;
+      console.log("offset")
+      console.log(offset)
+      console.log("limit")
+      console.log(limit)
     getFilter(filter, function (err, data) {
       if (err)
         callback(err, null);
+      console.log("data")
+      console.log(data)
       data = data.splice(offset, offset + limit);
       callback(err, data);
     })
