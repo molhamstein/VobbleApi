@@ -48,8 +48,8 @@ module.exports = function (Activechat) {
         "included_segments ": ["Active Users", "Inactive Users"],
         "send_after": new Date().addHours(2),
         "contents": {
-          "ar": "متبقي ساعى لنتهاء محادثتك مع " + firstUser.username,
-          "en": "متبقي ساعى لنتهاء محادثتك مع " + firstUser.username
+          "ar": "لم يتبقى الوقت الكثير حتى تنتهي محادثتك مع " + firstUser.username + " اسرع و ادخل قبل نفاذ الوقت",
+          "en": "your chat with " + firstUser.username + " is about to expire, hurry up an check it out "
         },
         "data": {
           "chatId": result.chatId
@@ -61,7 +61,8 @@ module.exports = function (Activechat) {
           "value": result.secondUser
         }],
         "headings": {
-          "en": "Vibo"
+          "en": "Time is running",
+          "ar": "الوقت يمضي",
         }
       }
       sendNewNotification(message1);
@@ -74,8 +75,8 @@ module.exports = function (Activechat) {
           "included_segments ": ["Active Users", "Inactive Users"],
           "send_after": new Date().addHours(2),
           "contents": {
-            "ar": "متبقي ساعى لنتهاء محادثتك مع " + secondUser.username,
-            "en": "متبقي ساعى لنتهاء محادثتك مع " + secondUser.username
+            "ar": "لم يتبقى الوقت الكثير حتى تنتهي محادثتك مع " + secondUser.username + " اسرع و ادخل قبل نفاذ الوقت",
+            "en": "your chat with " + secondUser.username + " is about to expire, hurry up an check it out "
           },
           "data": {
             "chatId": result.chatId
@@ -87,7 +88,8 @@ module.exports = function (Activechat) {
             "value": result.firstUser
           }],
           "headings": {
-            "en": "Vibo"
+            "en": "Time is running",
+            "ar": "الوقت يمضي",
           }
         }
         sendNewNotification(message2);
