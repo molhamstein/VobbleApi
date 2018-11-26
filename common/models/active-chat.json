@@ -1,0 +1,32 @@
+{
+  "name": "activeChat",
+  "plural": "activeChat",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "chatId": {
+      "type": "string",
+      "required": true
+    },
+    "firstUser": {
+      "type": "string",
+      "required": true
+    },
+    "secondUser": {
+      "type": "string",
+      "required": true
+    },
+    "createdAt": {
+      "type": "date",
+      "required": true,
+      "defaultFn": "now"
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

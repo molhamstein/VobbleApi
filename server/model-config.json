@@ -125,5 +125,9 @@
   "userActivate": {
     "dataSource": "db",
     "public": true
+  },
+  "activeChat": {
+    "dataSource": "db",
+    "public": true
   }
 }
