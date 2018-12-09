@@ -73,7 +73,7 @@ module.exports = function (Activechat) {
         var message2 = {
           "app_id": "e8a91e90-a766-4f1b-a47e-e3b3f569dbef",
           "included_segments ": ["Active Users", "Inactive Users"],
-          "send_after": new Date().addHours(23),
+          "send_after": new Date().addHours(3),
           "contents": {
             "ar": "لم يتبقى الوقت الكثير حتى تنتهي محادثتك مع " + secondUser.username + " اسرع و ادخل قبل نفاذ الوقت",
             "en": "your chat with " + secondUser.username + " is about to expire, hurry up an check it out "
