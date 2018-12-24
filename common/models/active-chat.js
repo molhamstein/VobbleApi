@@ -33,7 +33,7 @@ module.exports = function (Activechat) {
   };
 
   Date.prototype.addHours = function (h) {
-    this.setTime(this.getTime() + (h * 60 * 1000));
+    this.setTime(this.getTime() + (h * 60 * 60 * 1000));
     return this;
   }
 
@@ -44,7 +44,7 @@ module.exports = function (Activechat) {
         var message1 = {
           "app_id": "e8a91e90-a766-4f1b-a47e-e3b3f569dbef",
           "included_segments ": ["Active Users", "Inactive Users"],
-          "send_after": new Date().addHours(3),
+          "send_after": new Date().addHours(22),
           "contents": {
             "ar": "لم يتبقى الوقت الكثير حتى تنتهي محادثتك مع " + firstUser.username + " اسرع و ادخل قبل نفاذ الوقت",
             "en": "your chat with " + firstUser.username + " is about to expire, hurry up an check it out "
@@ -70,7 +70,7 @@ module.exports = function (Activechat) {
           var message2 = {
             "app_id": "e8a91e90-a766-4f1b-a47e-e3b3f569dbef",
             "included_segments ": ["Active Users", "Inactive Users"],
-            "send_after": new Date().addHours(3),
+            "send_after": new Date().addHours(22),
             "contents": {
               "ar": "لم يتبقى الوقت الكثير حتى تنتهي محادثتك مع " + secondUser.username + " اسرع و ادخل قبل نفاذ الوقت",
               "en": "your chat with " + secondUser.username + " is about to expire, hurry up an check it out "
