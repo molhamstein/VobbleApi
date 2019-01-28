@@ -786,14 +786,14 @@ module.exports = function (User) {
 
     var filter = {};
     if (from) {
-      filter['startAt'] = {
+      filter['createdAt'] = {
         '$gt': new Date(from)
       }
     }
     if (to) {
-      if (filter['startAt'] == null)
-        filter['startAt'] = {}
-      filter['startAt']['$lt'] = new Date(to)
+      if (filter['createdAt'] == null)
+        filter['createdAt'] = {}
+      filter['createdAt']['$lt'] = new Date(to)
     }
     User.getDataSource().connector.connect(function (err, db) {
 
@@ -833,9 +833,15 @@ module.exports = function (User) {
       cursor.get(function (err, data) {
         console.log(data);
         if (err) return callback(err);
+        var malePercent = 0
+        var femalePercent = 0
+        if (data[0] != null && data[0]['male'] != 0 && data[0]['total'] != 0)
+          malePercent = data[0]['male'] * 100 / data[0]['total']
+        if (data[0] != null && data[0]['female'] != 0 && data[0]['total'] != 0)
+          femalePercent = data[0]['female'] * 100 / data[0]['total']
         var result = {
-          "male": data[0]['male'] * 100 / data[0]['total'],
-          "female": data[0]['female'] * 100 / data[0]['total']
+          "male": malePercent,
+          "female": femalePercent
         }
         return callback(null, result);
       })

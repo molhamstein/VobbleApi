@@ -10,6 +10,14 @@
       "type": "date",
       "required": true,
       "defaultFn": "now"
+    },
+    "file": {
+      "type": "string",
+      "required": true
+    },
+    "thumbnail": {
+      "type": "string",
+      "required": true
     }
   },
   "validations": [],
