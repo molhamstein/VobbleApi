@@ -13,11 +13,11 @@
     },
     "file": {
       "type": "string",
-      "required": true
+      "required": false
     },
     "thumbnail": {
       "type": "string",
-      "required": true
+      "required": false
     }
   },
   "validations": [],
