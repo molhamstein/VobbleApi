@@ -6,6 +6,14 @@ const configPath = process.env.NODE_ENV === undefined ?
   `../../server/config.${process.env.NODE_ENV}.json`;
 const config = require(configPath);
 
+var appleReceiptVerify = require('node-apple-receipt-verify');
+appleReceiptVerify.config({
+  secret: "8622c3ec270a4f3eb4ec599daa8d5720",
+  environment: ['sandbox'],
+  verbose: true
+});
+
+
 module.exports = function (Item) {
 
   var urlFileRoot = config.domain + config.restApiRoot + "/uploadFiles";
@@ -13,24 +21,65 @@ module.exports = function (Item) {
   var urlFileRootexcel = urlFileRoot + '/excelFiles/download/';
 
 
-  Item.validatesInclusionOf('storeType', { in: ['playStore', 'iTunes']
+  Item.validatesInclusionOf('storeType', {
+    in: ['playStore', 'iTunes']
   });
 
   Item.beforeRemote('create', function (context, item, next) {
-    Item.app.models.Product.findById(context.req.body.productId, function (err, product) {
-      if (err) {
-        return next(err);
-      }
-      product.productSold++;
-      product.save();
-      if (context.req.body.ownerId == null && context.req.accessToken != null)
-        context.req.body.ownerId = context.req.accessToken.userId;
-      if (product == null) {
-        return next(errors.product.productNotFound());
-      }
-      context.req.body.price = product.price;
-      next();
-    })
+    if (context.req.body.receipt == undefined) {
+      Item.app.models.Product.findById(context.req.body.productId, function (err, product) {
+        if (err) {
+          return next(err);
+        }
+        product.productSold++;
+        product.save();
+        if (context.req.body.ownerId == null && context.req.accessToken != null)
+          context.req.body.ownerId = context.req.accessToken.userId;
+        if (product == null) {
+          return next(errors.product.productNotFound());
+        }
+        context.req.body.price = product.price;
+        next();
+      })
+    } else {
+      appleReceiptVerify.validate({
+        receipt: context.req.body.receipt
+      }, function (err, products) {
+        if (err) {
+          return next(errors.product.unvalidReceipt());
+        } else {
+          var transactionId = context.req.body.transactionId;
+          delete context.req.body.transactionId;
+          delete context.req.body.receipt;
+          if (products.length == 0)
+            return next(errors.product.unvalidReceipt());
+          var isInProcess = false;
+          for (let index = 0; index < products.length; index++) {
+            const element = products[index];
+            if (element.transactionId == transactionId) {
+              isInProcess = true;
+              Item.app.models.Product.findById(context.req.body.productId, function (err, product) {
+                if (err) {
+                  return next(err);
+                }
+                product.productSold++;
+                product.save();
+                if (context.req.body.ownerId == null && context.req.accessToken != null)
+                  context.req.body.ownerId = context.req.accessToken.userId;
+                if (product == null) {
+                  return next(errors.product.productNotFound());
+                }
+                context.req.body.price = product.price;
+                next();
+              })
+            } else if (index == products.length - 1 && isInProcess == false) {
+              return next(errors.product.unvalidReceipt());
+            }
+          }
+        }
+        // ok!
+      });
+    }
   });
 
   Item.afterRemote('create', function (context, item, next) {

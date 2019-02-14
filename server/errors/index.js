@@ -1,4 +1,3 @@
-
 const cError = require('./cError');
 
 module.exports.account = {
@@ -21,16 +20,16 @@ module.exports.account = {
     return new cError('USERNAME_NOT_VALID', 405, 'Username not valid', 405);
   },
   emailAlreadyExists: function () {
-    return new cError('EMAIL_ALREADY_EXISTS',413, 'Email already exists', 413);
+    return new cError('EMAIL_ALREADY_EXISTS', 413, 'Email already exists', 413);
   },
   emailAlreadyExistsSN: function () {
-    return new cError('EMAIL_ALREADY_EXISTS_SN',412, 'Email already exists SN', 412);
+    return new cError('EMAIL_ALREADY_EXISTS_SN', 412, 'Email already exists SN', 412);
   },
   youLoginToday: function () {
-    return new cError('YOU_ALREADY_LOGIN_TODAY',414, 'you already login today', 414);
+    return new cError('YOU_ALREADY_LOGIN_TODAY', 414, 'you already login today', 414);
   }
 
-  
+
 };
 
 
@@ -56,7 +55,7 @@ module.exports.block = {
   alreadyIsBlocked: function () {
     return new cError('ALREADY_IS_BLOCKED', 409, 'already is blocked', 409);
   },
-  noBlocked : function () {
+  noBlocked: function () {
     return new cError('NO_BLOCKED', 410, 'no blocked', 410);
   }
 };
@@ -65,6 +64,9 @@ module.exports.block = {
 module.exports.product = {
   productNotFound: function () {
     return new cError('PRODUCT_NOT_FOUND', 411, 'product not found', 411);
+  },
+  unvalidReceipt: function () {
+    return new cError('UNVALID_RECEIPT', 415, 'unvalid receipt', 415);
+
   }
 };
-
