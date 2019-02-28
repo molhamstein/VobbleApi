@@ -392,7 +392,7 @@ module.exports = function (Bottle) {
     var diffHour = timeDiff / (1000 * 3600 * 24);
     return diffHour;
   }
-  Bottle.reomndationTest = function (callback) {
+  Bottle.recommendationTest = function (callback) {
 
     // const
     var maxHourse = 7 * 24;

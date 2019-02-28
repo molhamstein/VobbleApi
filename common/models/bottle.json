@@ -99,7 +99,7 @@
       "principalType": "ROLE",
       "principalId": "$authenticated",
       "permission": "ALLOW",
-      "property": "reomndationTest"
+      "property": "recommendationTest"
     },
     {
       "principalType": "ROLE",
@@ -209,7 +209,7 @@
         }
       ]
     },
-    "reomndationTest": {
+    "recommendationTest": {
       "accepts": [],
       "returns": [
         {
@@ -222,7 +222,7 @@
       "description": "get one mthode with some logic",
       "http": [
         {
-          "path": "/reomndationTest",
+          "path": "/recommendationTest",
           "verb": "get"
         }
       ]
