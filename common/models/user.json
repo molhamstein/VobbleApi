@@ -28,6 +28,10 @@
     "image": {
       "type": "string"
     },
+    "totalPaid": {
+      "type": "number",
+      "default": 0
+    },
     "totalBottlesThrown": {
       "type": "number",
       "default": 0

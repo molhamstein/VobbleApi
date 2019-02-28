@@ -6,12 +6,12 @@ const configPath = process.env.NODE_ENV === undefined ?
   `../../server/config.${process.env.NODE_ENV}.json`;
 const config = require(configPath);
 
-var appleReceiptVerify = require('node-apple-receipt-verify');
-appleReceiptVerify.config({
-  secret: "8622c3ec270a4f3eb4ec599daa8d5720",
-  environment: ['sandbox'],
-  verbose: true
-});
+// var appleReceiptVerify = require('node-apple-receipt-verify');
+// appleReceiptVerify.config({
+//   secret: "8622c3ec270a4f3eb4ec599daa8d5720",
+//   environment: ['sandbox'],
+//   verbose: true
+// });
 
 
 module.exports = function (Item) {
@@ -87,19 +87,22 @@ module.exports = function (Item) {
       if (err) {
         return next(err);
       }
-      if (product.bottleCount > 0) {
-        Item.app.models.User.findById(context.req.body.ownerId).then(user => {
+      Item.app.models.User.findById(context.req.body.ownerId).then(user => {
+        user.totalPaid += product.price;
+        user.save();
+        if (product.bottleCount > 0) {
           user.extraBottlesCount += product.bottleCount;
           user.save();
           next();
-        }).catch(err => next(err));
-      } else {
-        var date = new Date().getTime();
-        date += (product.validity * 60 * 60 * 1000);
-        item.endAt = new Date(date);
-        item.save();
-        next();
-      }
+        } else {
+          var date = new Date().getTime();
+          date += (product.validity * 60 * 60 * 1000);
+          item.endAt = new Date(date);
+          item.save();
+          next();
+        }
+      }).catch(err => next(err));
+
     })
 
   });
@@ -411,5 +414,46 @@ module.exports = function (Item) {
     // TODO
   };
 
+  /**
+   *
+   * @param {Function(Error)} callback
+   */
 
+  Item.solveData = function (callback) {
+    Item.app.models.User.find({}, function (err, data) {
+      if (err) {
+        return callback(err)
+      }
+      data.forEach(element => {
+        calcToUser(element);
+        // console.log(element.id);
+      });
+    })
+  };
+
+  function calcToUser(user) {
+    var totalPrice = 0;
+    Item.find({
+      "where": {
+        "ownerId": user.id
+      }
+    }, function (err, data) {
+      if (err)
+        return
+      if (data.length == 0)
+        return
+
+      for (let index = 0; index < data.length; index++) {
+        const element = data[index];
+        totalPrice += element.price;
+        if (index == data.length - 1) {
+          console.log(user.email)
+          console.log(totalPrice);
+          user.totalPaid = totalPrice;
+          user.save();
+        }
+      }
+
+    })
+  }
 };

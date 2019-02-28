@@ -129,5 +129,9 @@
   "activeChat": {
     "dataSource": "db",
     "public": true
+  },
+  "topics": {
+    "dataSource": "db",
+    "public": true
   }
 }

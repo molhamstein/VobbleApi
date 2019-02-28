@@ -377,6 +377,92 @@ module.exports = function (Bottle) {
     });
   };
 
+  function diffHourse(date) {
+    var date1 = new Date()
+    var date2 = new Date(date);
+    var timeDiff = Math.abs(date2.getTime() - date1.getTime());
+    var diffHour = timeDiff / (1000 * 3600);
+    return diffHour;
+  }
+
+  function diffdays(date) {
+    var date1 = new Date()
+    var date2 = new Date(date);
+    var timeDiff = Math.abs(date2.getTime() - date1.getTime());
+    var diffHour = timeDiff / (1000 * 3600 * 24);
+    return diffHour;
+  }
+  Bottle.reomndationTest = function (callback) {
+
+    // const
+    var maxHourse = 7 * 24;
+
+    var hoursAvr = 0;
+    var dayAvr = 0;
+    var replyCountAvr = 0;
+    var paidAvr = 0;
+    Bottle.find({
+      order: 'createdAt DESC',
+      limit: 250,
+      include: { // include orders for the owner
+        relation: 'owner',
+      }
+
+
+    }, function (err, data) {
+      if (err) {
+        return callback(err)
+      }
+      var tempData = []
+      for (let index = 0; index < data.length; index++) {
+        const element = data[index];
+        hoursAvr += diffHourse(element.createdAt);
+        dayAvr += diffdays(element.createdAt);
+        replyCountAvr += element.repliesUserCount;
+        paidAvr += JSON.parse(JSON.stringify(element.owner())).totalPaid;
+
+        if (index == data.length - 1) {
+          replyCountAvr = replyCountAvr / data.length;
+          paidAvr = paidAvr / data.length;
+          var repliesCountWieght = 200 / replyCountAvr;
+          var paidWieght = 75 / paidAvr;
+          console.log("repliesUserCount wieght :" + 100 / replyCountAvr)
+          console.log("hoursAvr :" + hoursAvr / data.length)
+          console.log("dayAvr :" + dayAvr / data.length)
+          console.log("replyCountAvr :" + replyCountAvr / data.length)
+          console.log("paidAvr :" + paidAvr / data.length)
+          for (let secIndex = 0; secIndex < data.length; secIndex++) {
+            const element = data[secIndex];
+            var tempProject = {
+              "createdAt": element.createdAt,
+              "numDay": diffdays(element.createdAt),
+              "numHours": diffHourse(element.createdAt),
+              "repliesUserCount": element.repliesUserCount,
+              "totalPaid": JSON.parse(JSON.stringify(element.owner())).totalPaid,
+              "scoor1": ((maxHourse - diffHourse(element.createdAt)) * 10),
+              "scoor2": element.repliesUserCount * repliesCountWieght,
+              "scoor3": JSON.parse(JSON.stringify(element.owner())).totalPaid * paidWieght,
+              "scoor": (JSON.parse(JSON.stringify(element.owner())).totalPaid * paidWieght) + ((maxHourse - diffHourse(element.createdAt)) * 10) + (element.repliesUserCount * repliesCountWieght)
+            }
+            // if (JSON.parse(JSON.stringify(element.owner())).totalPaid * paidAvr != 0)
+            tempData.push(tempProject)
+            if (secIndex == data.length - 1) {
+              callback(err, tempData.sort(tempCompare));
+            }
+          }
+
+        }
+      }
+    })
+  }
+
+  function tempCompare(a, b) {
+    if (a.scoor > b.scoor)
+      return -1;
+    if (a.scoor < b.scoor)
+      return 1;
+    return 0;
+  }
 
   function sortBottle(ranking, userId, seenBottle, blockList, filter) {
     var index = ranking.length - 1;
