@@ -14,7 +14,8 @@ module.exports = function (Bottle) {
   var urlFileRootexcel = urlFileRoot + '/excelFiles/download/';
 
 
-  Bottle.validatesInclusionOf('status', { in: ['deactive', 'active']
+  Bottle.validatesInclusionOf('status', {
+    in: ['deactive', 'active']
   });
 
   /**
@@ -123,7 +124,7 @@ module.exports = function (Bottle) {
   // ]
 
   function getFilter(filter, callback) {
-    var shoreId = "";
+    var shoreId = ""
     var gt = ""
     var ls = ""
     var gender = ""
@@ -224,6 +225,7 @@ module.exports = function (Bottle) {
       filter.shoreId = shoreId;
     }
     var seenBottle = [];
+    var blockList = [];
     // get bottle seen 
     Bottle.app.models.bottleUserseen.find({
       where: {
@@ -231,67 +233,65 @@ module.exports = function (Bottle) {
       }
     }, function (err, bottles) {
       seenBottle = bottles;
-    })
 
-    var blockList = [];
-    // get id user block list 
-    Bottle.app.models.block.find({
-      where: {
-        or: [{
-            "ownerId": req.accessToken.userId
-          },
-          {
-            "userId": req.accessToken.userId
-          },
-        ]
-      }
-    }, function (err, blocksList) {
-      blockList = blocksList.map(function (block) {
-        if (new String(req.accessToken.userId).valueOf() === new String(block.ownerId).valueOf())
-          return block.userId;
-        else
-          return block.ownerId;
-
-      });
-    })
-
-    // get all bottle
-    Bottle.find({
-      where: {
-        status: 'active'
-      },
-      order: 'createdAt DESC'
-    }, function (err, bottles) {
-      if (err) {
-        callback(err, null);
-      }
-      var ranking = bottles;
-
-      // process bottle sort
-      ranking = sortBottle(bottles, req.accessToken.userId, seenBottle, blockList, filter)
-      if (ranking[0]) {
-        var bottleUserseenObject = {
-          "userId": req.accessToken.userId,
-          "bottleId": ranking[0].id
+      // get id user block list 
+      Bottle.app.models.block.find({
+        where: {
+          or: [{
+              "ownerId": req.accessToken.userId
+            },
+            {
+              "userId": req.accessToken.userId
+            },
+          ]
         }
-        Bottle.app.models.bottleUserseen.create(bottleUserseenObject)
-          .then()
-          .catch(err => console.log(err));
+      }, function (err, blocksList) {
+        blockList = blocksList.map(function (block) {
+          if (new String(req.accessToken.userId).valueOf() === new String(block.ownerId).valueOf())
+            return block.userId;
+          else
+            return block.ownerId;
 
-        Bottle.app.models.user.findById(req.accessToken.userId, function (err, oneUser) {
+        });
+        Bottle.find({
+          where: {
+            status: 'active'
+          },
+          order: 'createdAt DESC'
+        }, function (err, bottles) {
           if (err) {
-            return next(err);
+            callback(err, null);
           }
-          oneUser.foundBottlesCount++;
-          oneUser.save();
-          callback(null, ranking[0]);
+          var ranking = bottles;
 
-        })
+          // process bottle sort
+          ranking = sortBottle(bottles, req.accessToken.userId, seenBottle, blockList, filter)
+          if (ranking[0]) {
+            var bottleUserseenObject = {
+              "userId": req.accessToken.userId,
+              "bottleId": ranking[0].id
+            }
+            Bottle.app.models.bottleUserseen.create(bottleUserseenObject)
+              .then()
+              .catch(err => console.log(err));
 
-      } else {
-        callback(errors.bottle.noNewBottle(), null);
-      }
-    });
+            Bottle.app.models.user.findById(req.accessToken.userId, function (err, oneUser) {
+              if (err) {
+                return next(err);
+              }
+              oneUser.foundBottlesCount++;
+              oneUser.save();
+              callback(null, ranking[0]);
+
+            })
+
+          } else {
+            callback(errors.bottle.noNewBottle(), null);
+          }
+        });
+      })
+    })
+
   };
 
   Bottle.getOneBottleTest = function (gender, ISOCode, shoreId, req, callback) {
@@ -351,9 +351,6 @@ module.exports = function (Bottle) {
         callback(err, null);
       }
       var ranking = bottles;
-      // callback(null, bottles);
-      // console.log("DDDDD");
-      // process bottle sort
       ranking = sortBottle(bottles, req.accessToken.userId, seenBottle, blockList, filter)
       if (ranking[0]) {
         var bottleUserseenObject = {
