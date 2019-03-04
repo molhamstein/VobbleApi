@@ -9,7 +9,7 @@ const config = require(configPath);
 var appleReceiptVerify = require('node-apple-receipt-verify');
 appleReceiptVerify.config({
   secret: "8622c3ec270a4f3eb4ec599daa8d5720",
-  environment: ['sandbox'],
+  environment: ['production', 'sandbox'],
   verbose: true
 });
 
@@ -42,10 +42,17 @@ module.exports = function (Item) {
         next();
       })
     } else {
+      console.log("receipt")
+      console.log(context.req.body.receipt)
+      console.log("context.req.body.transactionId")
+      console.log(context.req.body.transactionId)
+
       appleReceiptVerify.validate({
         receipt: context.req.body.receipt
       }, function (err, products) {
         if (err) {
+          console.log("err")
+          console.log(err)
           return next(errors.product.unvalidReceipt());
         } else {
           var transactionId = context.req.body.transactionId;
@@ -73,6 +80,7 @@ module.exports = function (Item) {
                 next();
               })
             } else if (index == products.length - 1 && isInProcess == false) {
+              console.log("transactionId not found")
               return next(errors.product.unvalidReceipt());
             }
           }
