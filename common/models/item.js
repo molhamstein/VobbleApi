@@ -9,7 +9,7 @@ const config = require(configPath);
 var appleReceiptVerify = require('node-apple-receipt-verify');
 appleReceiptVerify.config({
   secret: "8622c3ec270a4f3eb4ec599daa8d5720",
-  environment: ['production', 'sandbox'],
+  environment: ['production'],
   verbose: true
 });
 
