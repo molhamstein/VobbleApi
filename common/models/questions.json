@@ -17,7 +17,7 @@
     "status": {
       "type": "string",
       "required": true,
-      "defult": "active"
+      "default": "active"
     },
     "createdAt": {
       "type": "date",
