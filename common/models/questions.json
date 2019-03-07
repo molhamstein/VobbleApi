@@ -6,7 +6,7 @@
     "validateUpsert": true
   },
   "properties": {
-    "test_en": {
+    "text_en": {
       "type": "string",
       "required": true
     },
