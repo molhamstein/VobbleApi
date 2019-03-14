@@ -133,5 +133,9 @@
   "topics": {
     "dataSource": "db",
     "public": true
+  },
+  "bottleUserComplete": {
+    "dataSource": "db",
+    "public": true
   }
 }

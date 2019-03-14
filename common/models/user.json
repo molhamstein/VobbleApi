@@ -101,6 +101,18 @@
     },
     "lastLogin": {
       "type": "date"
+    },
+    "has24Not": {
+      "type": "boolean",
+      "default": false
+    },
+    "has48Not": {
+      "type": "boolean",
+      "default": false
+    },
+    "has168Not": {
+      "type": "boolean",
+      "default": false
     }
   },
   "validations": [],

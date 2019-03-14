@@ -6,6 +6,9 @@ const configPath = process.env.NODE_ENV === undefined ?
   `../../server/config.${process.env.NODE_ENV}.json`;
 const config = require(configPath);
 const datesBetween = require('dates-between');
+var cron = require('node-schedule');
+var rule = new cron.RecurrenceRule();
+
 
 module.exports = function (Bottle) {
 
@@ -68,8 +71,6 @@ module.exports = function (Bottle) {
         next();
       })
 
-
-
     })
 
 
@@ -100,7 +101,19 @@ module.exports = function (Bottle) {
     else
       user.bottlesCount--;
     user.save();
-    next();
+    if (context.req.body.topicId == null)
+      next();
+    else {
+      Bottle.app.models.topics.findById(context.req.body.topicId, function (err, oneTopic) {
+        if (err)
+          return next(err)
+          console.log("ssss")
+          console.log(oneTopic)
+        oneTopic.bottleCount++;
+        oneTopic.save();
+        next()
+      })
+    }
   });
 
 
@@ -226,68 +239,80 @@ module.exports = function (Bottle) {
     }
     var seenBottle = [];
     var blockList = [];
-    // get bottle seen 
-    Bottle.app.models.bottleUserseen.find({
-      where: {
-        userId: req.accessToken.userId
+    Bottle.app.models.user.findById(req.accessToken.userId, function (err, oneUser) {
+      if (err) {
+        return next(err);
       }
-    }, function (err, bottles) {
-      seenBottle = bottles;
 
-      // get id user block list 
-      Bottle.app.models.block.find({
+      // get bottle seen 
+      Bottle.app.models.bottleUserseen.find({
         where: {
-          or: [{
-              "ownerId": req.accessToken.userId
-            },
-            {
-              "userId": req.accessToken.userId
-            },
-          ]
+          userId: req.accessToken.userId
         }
-      }, function (err, blocksList) {
-        blockList = blocksList.map(function (block) {
-          if (new String(req.accessToken.userId).valueOf() === new String(block.ownerId).valueOf())
-            return block.userId;
-          else
-            return block.ownerId;
+      }, function (err, bottles) {
+        seenBottle = bottles;
 
-        });
-        Bottle.find({
+        // get id user block list 
+        Bottle.app.models.block.find({
           where: {
-            status: 'active'
-          },
-          order: 'createdAt DESC'
-        }, function (err, bottles) {
-          if (err) {
-            callback(err, null);
+            or: [{
+                "ownerId": req.accessToken.userId
+              },
+              {
+                "userId": req.accessToken.userId
+              },
+            ]
           }
-          var ranking = bottles;
+        }, function (err, blocksList) {
+          blockList = blocksList.map(function (block) {
+            if (new String(req.accessToken.userId).valueOf() === new String(block.ownerId).valueOf())
+              return block.userId;
+            else
+              return block.ownerId;
 
-          // process bottle sort
-          ranking = sortBottle(bottles, req.accessToken.userId, seenBottle, blockList, filter)
-          if (ranking[0]) {
-            var bottleUserseenObject = {
-              "userId": req.accessToken.userId,
-              "bottleId": ranking[0].id
+          });
+          var filter = {
+            where: {
+              status: 'active'
+            },
+            order: 'createdAt DESC'
+          }
+          if (oneUser.foundBottlesCount < 5) {
+            filter = {
+              where: {
+                status: 'active'
+              },
+              order: 'totalWeight DESC'
             }
-            Bottle.app.models.bottleUserseen.create(bottleUserseenObject)
-              .then()
-              .catch(err => console.log(err));
+          }
+          Bottle.find(filter, function (err, bottles) {
+            if (err) {
+              callback(err, null);
+            }
+            var ranking = bottles;
 
-            Bottle.app.models.user.findById(req.accessToken.userId, function (err, oneUser) {
-              if (err) {
-                return next(err);
+            // process bottle sort
+            ranking = sortBottle(bottles, req.accessToken.userId, seenBottle, blockList, filter)
+            if (ranking[0]) {
+              var bottleUserseenObject = {
+                "userId": req.accessToken.userId,
+                "bottleId": ranking[0].id
               }
+              Bottle.app.models.bottleUserseen.create(bottleUserseenObject)
+                .then()
+                .catch(err => console.log(err));
+
               oneUser.foundBottlesCount++;
               oneUser.save();
+              ranking[0].bottleViewCount++;
+              ranking[0].save();
               callback(null, ranking[0]);
 
-            })
+            } else {
+              callback(errors.bottle.noNewBottle(), null);
+            }
 
-          } else {
-            callback(errors.bottle.noNewBottle(), null);
-          }
+          })
         });
       })
     })
@@ -392,67 +417,114 @@ module.exports = function (Bottle) {
     var diffHour = timeDiff / (1000 * 3600 * 24);
     return diffHour;
   }
-  Bottle.recommendationTest = function (callback) {
-
-    // const
-    var maxHourse = 7 * 24;
-
-    var hoursAvr = 0;
-    var dayAvr = 0;
-    var replyCountAvr = 0;
-    var paidAvr = 0;
-    Bottle.find({
-      order: 'createdAt DESC',
-      limit: 250,
-      include: { // include orders for the owner
-        relation: 'owner',
-      }
 
 
-    }, function (err, data) {
-      if (err) {
-        return callback(err)
-      }
-      var tempData = []
-      for (let index = 0; index < data.length; index++) {
-        const element = data[index];
-        hoursAvr += diffHourse(element.createdAt);
-        dayAvr += diffdays(element.createdAt);
-        replyCountAvr += element.repliesUserCount;
-        paidAvr += JSON.parse(JSON.stringify(element.owner())).totalPaid;
+  rule.minute = 2;
+  cron.scheduleJob('0 */2 * * *', function () {
+    console.log(new Date(), 'Every 4 hours');
+    Bottle.updateAll({
+      totalWeight: '-99999999999999999999999'
+    }, function (err, info) {
 
-        if (index == data.length - 1) {
-          replyCountAvr = replyCountAvr / data.length;
-          paidAvr = paidAvr / data.length;
-          var repliesCountWieght = 200 / replyCountAvr;
-          var paidWieght = 75 / paidAvr;
-          console.log("repliesUserCount wieght :" + 100 / replyCountAvr)
-          console.log("hoursAvr :" + hoursAvr / data.length)
-          console.log("dayAvr :" + dayAvr / data.length)
-          console.log("replyCountAvr :" + replyCountAvr / data.length)
-          console.log("paidAvr :" + paidAvr / data.length)
-          for (let secIndex = 0; secIndex < data.length; secIndex++) {
-            const element = data[secIndex];
-            var tempProject = {
-              "createdAt": element.createdAt,
-              "numDay": diffdays(element.createdAt),
-              "numHours": diffHourse(element.createdAt),
-              "repliesUserCount": element.repliesUserCount,
-              "totalPaid": JSON.parse(JSON.stringify(element.owner())).totalPaid,
-              "scoor1": ((maxHourse - diffHourse(element.createdAt)) * 10),
-              "scoor2": element.repliesUserCount * repliesCountWieght,
-              "scoor3": JSON.parse(JSON.stringify(element.owner())).totalPaid * paidWieght,
-              "scoor": (JSON.parse(JSON.stringify(element.owner())).totalPaid * paidWieght) + ((maxHourse - diffHourse(element.createdAt)) * 10) + (element.repliesUserCount * repliesCountWieght)
-            }
-            // if (JSON.parse(JSON.stringify(element.owner())).totalPaid * paidAvr != 0)
-            tempData.push(tempProject)
-            if (secIndex == data.length - 1) {
-              callback(err, tempData.sort(tempCompare));
-            }
-          }
+      var maxHourse = 7 * 24;
 
+      var replyCountAvr = 0;
+      var paidAvr = 0;
+      Bottle.find({
+        order: 'createdAt DESC',
+        limit: 250,
+        include: {
+          relation: 'owner',
         }
-      }
+      }, function (err, data) {
+        for (let index = 0; index < data.length; index++) {
+          const element = data[index];
+          // hoursAvr += diffHourse(element.createdAt);
+          // dayAvr += diffdays(element.createdAt);
+          replyCountAvr += element.repliesUserCount;
+          paidAvr += JSON.parse(JSON.stringify(element.owner())).totalPaid;
+
+          if (index == data.length - 1) {
+            replyCountAvr = replyCountAvr / data.length;
+            paidAvr = paidAvr / data.length;
+            var repliesCountWieght = 200 / replyCountAvr;
+            var paidWieght = 75 / paidAvr;
+            for (let secIndex = 0; secIndex < data.length; secIndex++) {
+              const element = data[secIndex];
+              // var tempProject = {
+              //   "createdAt": element.createdAt,
+              //   "numDay": diffdays(element.createdAt),
+              //   "numHours": diffHourse(element.createdAt),
+              //   "repliesUserCount": element.repliesUserCount,
+              //   "totalPaid": JSON.parse(JSON.stringify(element.owner())).totalPaid,
+              //   "scoor1": ((maxHourse - diffHourse(element.createdAt)) * 10),
+              //   "scoor2": element.repliesUserCount * repliesCountWieght,
+              //   "scoor3": JSON.parse(JSON.stringify(element.owner())).totalPaid * paidWieght,
+              //   "scoor": (JSON.parse(JSON.stringify(element.owner())).totalPaid * paidWieght) + ((maxHourse - diffHourse(element.createdAt)) * 10) + (element.repliesUserCount * repliesCountWieght)
+              // }
+              element.totalWeight = (JSON.parse(JSON.stringify(element.owner())).totalPaid * paidWieght) + ((maxHourse - diffHourse(element.createdAt)) * 10) + (element.repliesUserCount * repliesCountWieght);
+              element.save();
+            }
+
+          }
+        }
+      })
+    })
+  });
+  Bottle.recommendationTest = function (callback) {
+    Bottle.updateAll({
+      totalWeight: '-99999999999999999999999'
+    }, function (err, info) {
+
+      var maxHourse = 7 * 24;
+
+      var replyCountAvr = 0;
+      var paidAvr = 0;
+      Bottle.find({
+        order: 'createdAt DESC',
+        limit: 250,
+        include: {
+          relation: 'owner',
+        }
+      }, function (err, data) {
+        if (err) {
+          return callback(err)
+        }
+        for (let index = 0; index < data.length; index++) {
+          const element = data[index];
+          // hoursAvr += diffHourse(element.createdAt);
+          // dayAvr += diffdays(element.createdAt);
+          replyCountAvr += element.repliesUserCount;
+          paidAvr += JSON.parse(JSON.stringify(element.owner())).totalPaid;
+
+          if (index == data.length - 1) {
+            replyCountAvr = replyCountAvr / data.length;
+            paidAvr = paidAvr / data.length;
+            var repliesCountWieght = 200 / replyCountAvr;
+            var paidWieght = 75 / paidAvr;
+            for (let secIndex = 0; secIndex < data.length; secIndex++) {
+              const element = data[secIndex];
+              var tempProject = {
+                "createdAt": element.createdAt,
+                "numDay": diffdays(element.createdAt),
+                "numHours": diffHourse(element.createdAt),
+                "repliesUserCount": element.repliesUserCount,
+                "totalPaid": JSON.parse(JSON.stringify(element.owner())).totalPaid,
+                "scoor1": ((maxHourse - diffHourse(element.createdAt)) * 10),
+                "scoor2": element.repliesUserCount * repliesCountWieght,
+                "scoor3": JSON.parse(JSON.stringify(element.owner())).totalPaid * paidWieght,
+                "scoor": (JSON.parse(JSON.stringify(element.owner())).totalPaid * paidWieght) + ((maxHourse - diffHourse(element.createdAt)) * 10) + (element.repliesUserCount * repliesCountWieght)
+              }
+              element.totalWeight = (JSON.parse(JSON.stringify(element.owner())).totalPaid * paidWieght) + ((maxHourse - diffHourse(element.createdAt)) * 10) + (element.repliesUserCount * repliesCountWieght);
+              element.save();
+              if (secIndex == data.length - 1) {
+                callback(err, 0);
+              }
+            }
+
+          }
+        }
+      })
     })
   }
 

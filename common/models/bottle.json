@@ -40,7 +40,19 @@
     "weight": {
       "type": "number"
     },
+    "totalWeight": {
+      "type": "number",
+      "default": -1e+23
+    },
     "repliesUserCount": {
+      "type": "number",
+      "default": 0
+    },
+    "bottleViewCount": {
+      "type": "number",
+      "default": 0
+    },
+    "bottleCompleteCount": {
       "type": "number",
       "default": 0
     },
