@@ -958,7 +958,7 @@ module.exports = function (User) {
     })
   };
 
-  cron.scheduleJob('*/1 * * * *', function () {
+  cron.scheduleJob('* */2 * * *', function () {
     var todayDate = new Date(),
       weekDate = new Date(),
       yesterday = new Date();
@@ -984,80 +984,79 @@ module.exports = function (User) {
     }, function (err, users) {
       if (!err) {
         users.forEach(element => {
-          if (element.email == "fatherboard1@gmail.com") {
-            var diffHour = calcDiff(element.lastLogin, todayDate)
-            console.log(diffHour)
-            if (diffHour >= 24 && diffHour < 48 && !element.has24Not) {
-              console.log("in 24 hourse");
-              var message = {
-                "app_id": "e8a91e90-a766-4f1b-a47e-e3b3f569dbef",
-                "included_segments ": ["Active Users", "Inactive Users"],
-                "contents": {
-                  "ar": "عروس البحر تركت لك فيديو في البحر، تعال شوفه!!!",
-                  "en": "You signed in yesterday! Why don't you check in today?"
-                },
-                "filters": [{
-                  "field": "tag",
-                  "key": "user_id",
-                  "relation": "=",
-                  "value": element.id
-                }],
-                "headings": {
-                  "en": "Hey " + element.username + " !",
-                  "ar": "مرحباً " + element.username + " !"
-                }
+          // if (element.email == "fatherboard1@gmail.com") {
+          var diffHour = calcDiff(element.lastLogin, todayDate)
+          console.log(diffHour)
+          if (diffHour >= 24 && diffHour < 48 && !element.has24Not) {
+            console.log("in 24 hourse");
+            var message = {
+              "app_id": "e8a91e90-a766-4f1b-a47e-e3b3f569dbef",
+              "included_segments ": ["Active Users", "Inactive Users"],
+              "contents": {
+                "ar": "عروس البحر تركت لك فيديو في البحر، تعال شوفه!!!",
+                "en": "You signed in yesterday! Why don't you check in today?"
+              },
+              "filters": [{
+                "field": "tag",
+                "key": "user_id",
+                "relation": "=",
+                "value": element.id
+              }],
+              "headings": {
+                "en": "Hey " + element.username + " !",
+                "ar": "مرحباً " + element.username + " !"
               }
-              element.updateAttributes({
-                has24Not: true
-              }, sendNewNotification(message))
-
-            } else if (diffHour >= 48 && diffHour < 72 && !element.has48Not) {
-              console.log("in 48 hourse");
-              var message = {
-                "app_id": "e8a91e90-a766-4f1b-a47e-e3b3f569dbef",
-                "included_segments ": ["Active Users", "Inactive Users"],
-                "contents": {
-                  "ar": "روح البحر واكتشف أسراره..",
-                  "en": "you missed lots of fun, come and check what have you missed."
-                },
-                "filters": [{
-                  "field": "tag",
-                  "key": "user_id",
-                  "relation": "=",
-                  "value": element.id
-                }],
-                "headings": {
-                  "en": "48h Where are you??",
-                  "ar": "مشغول؟؟"
-                }
-              }
-              element.updateAttributes({
-                has48Not: true
-              }, sendNewNotification(message))
-            } else if (diffHour >= 168 && diffHour < 192 && !element.has168Not) {
-              console.log("in 168 hourse");
-              var message = {
-                "app_id": "e8a91e90-a766-4f1b-a47e-e3b3f569dbef",
-                "included_segments ": ["Active Users", "Inactive Users"],
-                "contents": {
-                  "ar": "ادخل وفضفض همك للبحر..",
-                  "en": "life is very short.. lets enjoy it together with Vibo!!!"
-                },
-                "filters": [{
-                  "field": "tag",
-                  "key": "user_id",
-                  "relation": "=",
-                  "value": element.id
-                }],
-                "headings": {
-                  "en": "7 days " + element.username + " seems you are busy",
-                  "ar": "ايش عندك؟"
-                }
-              }
-              element.updateAttributes({
-                has168Not: true
-              }, sendNewNotification(message))
             }
+            element.updateAttributes({
+              has24Not: true
+            }, sendNewNotification(message))
+
+          } else if (diffHour >= 48 && diffHour < 72 && !element.has48Not) {
+            console.log("in 48 hourse");
+            var message = {
+              "app_id": "e8a91e90-a766-4f1b-a47e-e3b3f569dbef",
+              "included_segments ": ["Active Users", "Inactive Users"],
+              "contents": {
+                "ar": "روح البحر واكتشف أسراره..",
+                "en": "you missed lots of fun, come and check what have you missed."
+              },
+              "filters": [{
+                "field": "tag",
+                "key": "user_id",
+                "relation": "=",
+                "value": element.id
+              }],
+              "headings": {
+                "en": "48h Where are you??",
+                "ar": "مشغول؟؟"
+              }
+            }
+            element.updateAttributes({
+              has48Not: true
+            }, sendNewNotification(message))
+          } else if (diffHour >= 168 && diffHour < 192 && !element.has168Not) {
+            console.log("in 168 hourse");
+            var message = {
+              "app_id": "e8a91e90-a766-4f1b-a47e-e3b3f569dbef",
+              "included_segments ": ["Active Users", "Inactive Users"],
+              "contents": {
+                "ar": "ادخل وفضفض همك للبحر..",
+                "en": "life is very short.. lets enjoy it together with Vibo!!!"
+              },
+              "filters": [{
+                "field": "tag",
+                "key": "user_id",
+                "relation": "=",
+                "value": element.id
+              }],
+              "headings": {
+                "en": "7 days " + element.username + " seems you are busy",
+                "ar": "ايش عندك؟"
+              }
+            }
+            element.updateAttributes({
+              has168Not: true
+            }, sendNewNotification(message))
           }
         });
       }
