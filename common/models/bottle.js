@@ -563,9 +563,9 @@ module.exports = function (Bottle) {
             newRanking.unshift(ranking[index]);
             ranking.splice(index, 1);
           }
+          index -= 1;
         });
       });
-      index -= 1;
     }
     newRanking.sort(compare);
     ranking = ranking.concat(newRanking);
