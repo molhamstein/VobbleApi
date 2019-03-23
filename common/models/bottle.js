@@ -546,7 +546,7 @@ module.exports = function (Bottle) {
         console.log("element.id");
         console.log(element.id);
       }
-      element.owner(function (err, owner) {
+     element.owner(function (err, owner) {
         element.shore(function (err, shore) {
           var numberOfSeenThisBottle = findInSeenUser(seenBottle, userId, element.id);
           if (owner == undefined) {
@@ -556,16 +556,16 @@ module.exports = function (Bottle) {
           var isBlocked = true
           if (owner != null)
             isBlocked = isInBlockList(blockList, owner.id)
-          if (owner && (element.status == "deactive" || owner.status == "deactive" || isBlocked || (new String(userId).valueOf() === new String(owner.id).valueOf()) || (filter.gender && filter.gender != owner.gender) || (filter.ISOCode && filter.ISOCode != owner.ISOCode) || (filter.shoreId && (new String(filter.shoreId).valueOf() != new String(shore.id).valueOf())))) {
+          if (owner==null || element.status == "deactive" || owner.status == "deactive" || isBlocked || (new String(userId).valueOf() === new String(owner.id).valueOf()) || (filter.gender && filter.gender != owner.gender) || (filter.ISOCode && filter.ISOCode != owner.ISOCode) || (filter.shoreId && (new String(filter.shoreId).valueOf() != new String(shore.id).valueOf()))) {
             ranking.splice(index, 1);
           } else if (numberOfSeenThisBottle > 0) {
             ranking[index].numberRepeted = numberOfSeenThisBottle;
             newRanking.unshift(ranking[index]);
             ranking.splice(index, 1);
           }
-          index -= 1;
         });
       });
+      index -= 1;
     }
     newRanking.sort(compare);
     ranking = ranking.concat(newRanking);
