@@ -553,7 +553,9 @@ module.exports = function (Bottle) {
             console.log("element.id");
             console.log(element.id);
           }
-          var isBlocked = isInBlockList(blockList, owner.id)
+          var isBlocked = true
+          if (owner != null)
+            isBlocked = isInBlockList(blockList, owner.id)
           if (element.status == "deactive" || owner.status == "deactive" || isBlocked || (new String(userId).valueOf() === new String(owner.id).valueOf()) || (filter.gender && filter.gender != owner.gender) || (filter.ISOCode && filter.ISOCode != owner.ISOCode) || (filter.shoreId && (new String(filter.shoreId).valueOf() != new String(shore.id).valueOf()))) {
             ranking.splice(index, 1);
           } else if (numberOfSeenThisBottle > 0) {
