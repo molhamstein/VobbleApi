@@ -542,12 +542,17 @@ module.exports = function (Bottle) {
     var blocking = false;
     while (index >= 0) {
       var element = ranking[index];
-      if (element.owner() == null)
+      if (element.owner() == null) {
         console.log("element.id");
         console.log(element.id);
+      }
       element.owner(function (err, owner) {
         element.shore(function (err, shore) {
           var numberOfSeenThisBottle = findInSeenUser(seenBottle, userId, element.id);
+          if (owner == undefined) {
+            console.log("element.id");
+            console.log(element.id);
+          }
           var isBlocked = isInBlockList(blockList, owner.id)
           if (element.status == "deactive" || owner.status == "deactive" || isBlocked || (new String(userId).valueOf() === new String(owner.id).valueOf()) || (filter.gender && filter.gender != owner.gender) || (filter.ISOCode && filter.ISOCode != owner.ISOCode) || (filter.shoreId && (new String(filter.shoreId).valueOf() != new String(shore.id).valueOf()))) {
             ranking.splice(index, 1);
