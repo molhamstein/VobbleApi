@@ -107,8 +107,8 @@ module.exports = function (Bottle) {
       Bottle.app.models.topics.findById(context.req.body.topicId, function (err, oneTopic) {
         if (err)
           return next(err)
-          console.log("ssss")
-          console.log(oneTopic)
+        console.log("ssss")
+        console.log(oneTopic)
         oneTopic.bottleCount++;
         oneTopic.save();
         next()
@@ -542,6 +542,9 @@ module.exports = function (Bottle) {
     var blocking = false;
     while (index >= 0) {
       var element = ranking[index];
+      if (element.owner() == null)
+        console.log("element.id");
+        console.log(element.id);
       element.owner(function (err, owner) {
         element.shore(function (err, shore) {
           var numberOfSeenThisBottle = findInSeenUser(seenBottle, userId, element.id);
