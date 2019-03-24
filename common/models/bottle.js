@@ -556,7 +556,7 @@ module.exports = function (Bottle) {
           var isBlocked = true
           if (owner != null)
             isBlocked = isInBlockList(blockList, owner.id)
-          if (owner==null || element.status == "deactive" || owner.status == "deactive" || isBlocked || (new String(userId).valueOf() === new String(owner.id).valueOf()) || (filter.gender && filter.gender != owner.gender) || (filter.ISOCode && filter.ISOCode != owner.ISOCode) || (filter.shoreId && (new String(filter.shoreId).valueOf() != new String(shore.id).valueOf()))) {
+          if (element.status == "deactive" || owner.status == "deactive" || isBlocked || (new String(userId).valueOf() === new String(owner.id).valueOf()) || (filter.gender && filter.gender != owner.gender) || (filter.ISOCode && filter.ISOCode != owner.ISOCode) || (filter.shoreId && (new String(filter.shoreId).valueOf() != new String(shore.id).valueOf()))) {
             ranking.splice(index, 1);
           } else if (numberOfSeenThisBottle > 0) {
             ranking[index].numberRepeted = numberOfSeenThisBottle;
