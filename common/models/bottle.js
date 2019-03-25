@@ -621,6 +621,7 @@ module.exports = function (Bottle) {
                 "repliesUserCount": element.repliesUserCount,
                 "totalPaid": JSON.parse(JSON.stringify(element.owner())).totalPaid,
                 "gender": JSON.parse(JSON.stringify(element.owner())).gender,
+                "username": JSON.parse(JSON.stringify(element.owner())).username,
                 "time score": ((maxHourse - diffHourse(element.createdAt)) * 10),
                 "reply score": element.repliesUserCount * repliesCountWieght,
                 "totalPaid score": JSON.parse(JSON.stringify(element.owner())).totalPaid * paidWieght,
