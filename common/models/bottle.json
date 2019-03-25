@@ -198,6 +198,12 @@
           "description": "shore id of  bottle"
         },
         {
+          "arg": "userId",
+          "type": "string",
+          "required": false,
+          "description": "user id"
+        },
+        {
           "arg": "req",
           "type": "object",
           "http": {

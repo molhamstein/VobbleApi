@@ -411,87 +411,104 @@ module.exports = function (Bottle) {
 
   // };
 
-  Bottle.getOneBottleTest = function (gender, ISOCode, shoreId, req, callback) {
+  Bottle.getOneBottleTest = function (gender, ISOCode, shoreId, userId, req, callback) {
     var result;
-    var filter = {};
+    var secFilter = {};
+    var mainUserId = req.accessToken.userId
+    if (userId != undefined)
+      mainUserId = userId
     if (gender) {
-      filter.gender = gender;
+      secFilter.gender = gender;
     }
 
     if (ISOCode) {
-      filter.ISOCode = ISOCode;
+      secFilter.ISOCode = ISOCode;
     }
 
-    if (shoreId) {
-      filter.shoreId = shoreId;
-    }
     var seenBottle = [];
-    // get bottle seen 
-    Bottle.app.models.bottleUserseen.find({
-      where: {
-        userId: req.accessToken.userId
-      }
-    }, function (err, bottles) {
-      seenBottle = bottles;
-    })
-
     var blockList = [];
-    // get id user block list 
-    Bottle.app.models.block.find({
-      where: {
-        or: [{
-            "ownerId": req.accessToken.userId
-          },
-          {
-            "userId": req.accessToken.userId
-          },
-        ]
-      }
-    }, function (err, blocksList) {
-      blockList = blocksList.map(function (block) {
-        if (new String(req.accessToken.userId).valueOf() === new String(block.ownerId).valueOf())
-          return block.userId;
-        else
-          return block.ownerId;
-
-      });
-    })
-
-    // get all bottle
-    Bottle.find({
-      where: {
-        status: 'active'
-      },
-      order: 'createdAt DESC'
-    }, function (err, bottles) {
+    Bottle.app.models.user.findById(mainUserId, function (err, oneUser) {
       if (err) {
-        callback(err, null);
+        return next(err);
       }
-      var ranking = bottles;
-      ranking = sortBottle(bottles, req.accessToken.userId, seenBottle, blockList, filter)
-      if (ranking[0]) {
-        var bottleUserseenObject = {
-          "userId": req.accessToken.userId,
-          "bottleId": ranking[0].id
+
+      // get bottle seen 
+      Bottle.app.models.bottleUserseen.find({
+        "where": {
+          "userId": oneUser['id']
         }
-        Bottle.app.models.bottleUserseen.create(bottleUserseenObject)
-          .then()
-          .catch(err => console.log(err));
-
-        Bottle.app.models.user.findById(req.accessToken.userId, function (err, oneUser) {
-          if (err) {
-            return next(err);
+      }, function (err, bottles) {
+        seenBottle = bottles;
+        console.log("err");
+        console.log(err);
+        console.log("seenBottle")
+        console.log(bottles)
+        console.log("oneUser['id']")
+        console.log(oneUser['id'])
+        // return (null, [])
+        // get id user block list 
+        Bottle.app.models.block.find({
+          where: {
+            or: [{
+                "ownerId": oneUser['id']
+              },
+              {
+                "userId": oneUser['id']
+              },
+            ]
           }
-          oneUser.foundBottlesCount++;
-          oneUser.save();
-          callback(null, ranking);
+        }, function (err, blocksList) {
+          blockList = blocksList.map(function (block) {
+            if (new String(oneUser['id']).valueOf() === new String(block.ownerId).valueOf())
+              return block.userId;
+            else
+              return block.ownerId;
 
-        })
+          });
+          var filter = {
+            where: {
+              status: 'active'
+            },
+            order: 'totalWeight DESC'
 
-      } else {
-        callback(errors.bottle.noNewBottle(), null);
-      }
-    });
+          }
+          if (shoreId) {
+            filter.where.shoreId = shoreId;
+          }
+
+          Bottle.find(filter, function (err, bottles) {
+            if (err) {
+              callback(err, null);
+            }
+            var ranking = bottles;
+
+            // process bottle sort
+            ranking = sortBottle(bottles, oneUser['id'], seenBottle, blockList, secFilter, function (data) {
+
+
+              if (ranking[0]) {
+                var bottleUserseenObject = {
+                  "userId": oneUser['id'],
+                  "bottleId": ranking[0].id
+                }
+                Bottle.app.models.bottleUserseen.create(bottleUserseenObject)
+                  .then()
+                  .catch(err => console.log(err));
+
+                oneUser.foundBottlesCount++;
+                oneUser.save();
+                ranking[0].bottleViewCount++;
+                ranking[0].save();
+                callback(null, ranking);
+
+              } else {
+                callback(errors.bottle.noNewBottle(), null);
+              }
+            })
+          })
+        });
+      })
+    })
   };
 
   function diffHourse(date) {
@@ -594,10 +611,10 @@ module.exports = function (Bottle) {
             for (let secIndex = 0; secIndex < data.length; secIndex++) {
               const element = data[secIndex];
               var tempProject = {
-                "paidWieght":paidWieght,
-                "repliesCountWieght":repliesCountWieght,
-                "replyCountAvr":replyCountAvr,
-                "paidAvr":paidAvr,
+                "paidWieght": paidWieght,
+                "repliesCountWieght": repliesCountWieght,
+                "replyCountAvr": replyCountAvr,
+                "paidAvr": paidAvr,
                 "createdAt": element.createdAt,
                 "numDay": diffdays(element.createdAt),
                 "numHours": diffHourse(element.createdAt),
@@ -638,8 +655,6 @@ module.exports = function (Bottle) {
 
   function sortBottle(ranking, userId, seenBottle, blockList, filter, mainCallback) {
     var length = ranking.length - 1;
-    console.log("length")
-    console.log(length)
     const tempRanking = Object.assign({}, ranking);
     var newRanking = [];
     var numofDeleted = 0
@@ -648,10 +663,7 @@ module.exports = function (Bottle) {
       element.owner(function (err, owner) {
         element.shore(function (err, shore) {
           var numberOfSeenThisBottle = findInSeenUser(seenBottle, userId, element.id);
-          if (owner == undefined) {
-            console.log("element.id");
-            console.log(element.id);
-          }
+          if (owner == undefined) {}
           var isBlocked = true
           if (owner != null)
             isBlocked = isInBlockList(blockList, owner.id)
@@ -660,15 +672,13 @@ module.exports = function (Bottle) {
             numofDeleted++
           } else if (numberOfSeenThisBottle > 0) {
             ranking[index - numofDeleted].numberRepeted = numberOfSeenThisBottle;
+            console.log("numberOfSeenThisBottle");
+            console.log(ranking[index - numofDeleted].numberRepeted);
+            console.log(ranking[index - numofDeleted].id);
             newRanking.unshift(ranking[index - numofDeleted]);
             ranking.splice(index - numofDeleted, 1);
             numofDeleted++
           }
-          console.log("i")
-          console.log(index)
-          console.log("length")
-          console.log(ranking.length)
-
           callback();
         });
       });
