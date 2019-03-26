@@ -547,8 +547,6 @@ module.exports = function (Bottle) {
       }, function (err, data) {
         for (let index = 0; index < data.length; index++) {
           const element = data[index];
-          // hoursAvr += diffHourse(element.createdAt);
-          // dayAvr += diffdays(element.createdAt);
           replyCountAvr += element.repliesUserCount;
           paidAvr += JSON.parse(JSON.stringify(element.owner())).totalPaid;
 
@@ -557,31 +555,46 @@ module.exports = function (Bottle) {
             paidAvr = paidAvr / data.length;
             var repliesCountWieght = 200 / replyCountAvr;
             var paidWieght = 60 / paidAvr;
-            for (let secIndex = 0; secIndex < data.length; secIndex++) {
-              const element = data[secIndex];
+
+            async.forEachOf(data, function (element, index, callback) {
+              var gender = element.owner().gender;
+              var totalPaid = element.owner().totalPaid;
+              var username = element.owner().username;
               // var tempProject = {
+              //   "paidWieght": paidWieght,
+              //   "repliesCountWieght": repliesCountWieght,
+              //   "replyCountAvr": replyCountAvr,
+              //   "paidAvr": paidAvr,
               //   "createdAt": element.createdAt,
               //   "numDay": diffdays(element.createdAt),
               //   "numHours": diffHourse(element.createdAt),
               //   "repliesUserCount": element.repliesUserCount,
-              //   "totalPaid": JSON.parse(JSON.stringify(element.owner())).totalPaid,
-              //   "score1": ((maxHourse - diffHourse(element.createdAt)) * 10),
-              //   "score2": element.repliesUserCount * repliesCountWieght,
-              //   "score3": JSON.parse(JSON.stringify(element.owner())).totalPaid * paidWieght,
-              //   "score": (JSON.parse(JSON.stringify(element.owner())).totalPaid * paidWieght) + ((maxHourse - diffHourse(element.createdAt)) * 10) + (element.repliesUserCount * repliesCountWieght)
+              //   "totalPaid": totalPaid,
+              //   "gender": gender,
+              //   "username": username,
+              //   "time score": ((maxHourse - diffHourse(element.createdAt)) * 10),
+              //   "reply score": element.repliesUserCount * repliesCountWieght,
+              //   "totalPaid score": totalPaid * paidWieght,
+              //   "score": (totalPaid * paidWieght) + ((maxHourse - diffHourse(element.createdAt)) * 10) + (element.repliesUserCount * repliesCountWieght)
               // }
-              element.totalWeight = (JSON.parse(JSON.stringify(element.owner())).totalPaid * paidWieght) + ((maxHourse - diffHourse(element.createdAt)) * 10) + (element.repliesUserCount * repliesCountWieght);
-              if (JSON.parse(JSON.stringify(element.owner())).gender == "female")
+              element.totalWeight = (totalPaid * paidWieght) + ((maxHourse - diffHourse(element.createdAt)) * 10) + (element.repliesUserCount * repliesCountWieght);
+              if (gender == "female") {
+                // tempProject['score'] = tempProject['score'] * 0.6
                 element.totalWeight = element.totalWeight * 0.6
-              element.save();
-            }
-
+              }
+              // result.push(tempProject);
+              element.save(callback);
+            }, function () {
+              console.log("Finish loop")
+              // result.sort(tempCompare);
+              // return mainCallback(null, result);
+            })
           }
         }
       })
     })
   });
-  Bottle.recommendationTest = function (callback) {
+  Bottle.recommendationTest = function (mainCallback) {
     var result = []
     Bottle.updateAll({
       totalWeight: '-99999999999999999999999'
@@ -608,8 +621,11 @@ module.exports = function (Bottle) {
             paidAvr = paidAvr / data.length;
             var repliesCountWieght = 200 / replyCountAvr;
             var paidWieght = 60 / paidAvr;
-            for (let secIndex = 0; secIndex < data.length; secIndex++) {
-              const element = data[secIndex];
+
+            async.forEachOf(data, function (element, index, callback) {
+              var gender = element.owner().gender;
+              var totalPaid = element.owner().totalPaid;
+              var username = element.owner().username;
               var tempProject = {
                 "paidWieght": paidWieght,
                 "repliesCountWieght": repliesCountWieght,
@@ -619,27 +635,26 @@ module.exports = function (Bottle) {
                 "numDay": diffdays(element.createdAt),
                 "numHours": diffHourse(element.createdAt),
                 "repliesUserCount": element.repliesUserCount,
-                "totalPaid": JSON.parse(JSON.stringify(element.owner())).totalPaid,
-                "gender": JSON.parse(JSON.stringify(element.owner())).gender,
-                "username": JSON.parse(JSON.stringify(element.owner())).username,
+                "totalPaid": totalPaid,
+                "gender": gender,
+                "username": username,
                 "time score": ((maxHourse - diffHourse(element.createdAt)) * 10),
                 "reply score": element.repliesUserCount * repliesCountWieght,
-                "totalPaid score": JSON.parse(JSON.stringify(element.owner())).totalPaid * paidWieght,
-                "score": (JSON.parse(JSON.stringify(element.owner())).totalPaid * paidWieght) + ((maxHourse - diffHourse(element.createdAt)) * 10) + (element.repliesUserCount * repliesCountWieght)
+                "totalPaid score": totalPaid * paidWieght,
+                "score": (totalPaid * paidWieght) + ((maxHourse - diffHourse(element.createdAt)) * 10) + (element.repliesUserCount * repliesCountWieght)
               }
-              element.totalWeight = (JSON.parse(JSON.stringify(element.owner())).totalPaid * paidWieght) + ((maxHourse - diffHourse(element.createdAt)) * 20) + (element.repliesUserCount * repliesCountWieght);
-              if (JSON.parse(JSON.stringify(element.owner())).gender == "female") {
+              element.totalWeight = (totalPaid * paidWieght) + ((maxHourse - diffHourse(element.createdAt)) * 10) + (element.repliesUserCount * repliesCountWieght);
+              if (gender == "female") {
                 tempProject['score'] = tempProject['score'] * 0.6
                 element.totalWeight = element.totalWeight * 0.6
               }
               result.push(tempProject);
-              element.save();
-              if (secIndex == data.length - 1) {
-                result.sort(tempCompare);
-                return callback(null, result);
-              }
-            }
-
+              element.save(callback);
+            }, function () {
+              console.log("Finish loop")
+              result.sort(tempCompare);
+              return mainCallback(null, result);
+            })
           }
         }
       })
