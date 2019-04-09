@@ -13,6 +13,9 @@
       },
       {
         "relation": "product"
+      },
+      {
+        "relation": "relatedUser"
       }
     ]
   },
@@ -57,6 +60,11 @@
       "type": "belongsTo",
       "model": "user",
       "foreignKey": "ownerId"
+    },
+    "relatedUser": {
+      "type": "belongsTo",
+      "model": "user",
+      "foreignKey": "relatedUser"
     }
   },
   "acls": [],
