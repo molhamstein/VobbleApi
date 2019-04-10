@@ -6,8 +6,7 @@
     "validateUpsert": true
   },
   "scope": {
-    "include": [
-      {
+    "include": [{
         "relation": "owner"
       },
       {
@@ -44,5 +43,26 @@
     }
   },
   "acls": [],
-  "methods": {}
+  "methods": {
+    "export": {
+      "accepts": [{
+        "arg": "filter",
+        "type": "object",
+        "required": false,
+        "description": "filter Item"
+      }],
+      "returns": [{
+        "arg": "result",
+        "type": "object",
+        "root": true,
+        "description": ""
+      }],
+      "description": "Export To Excel",
+      "http": [{
+        "path": "/export",
+        "verb": "get"
+      }]
+    }
+
+  }
 }

@@ -39,7 +39,6 @@ module.exports = function (Bottle) {
       bottle.save();
       callback(null);
     });
-    callback(null);
   };
 
   // Set owner Id
@@ -1003,18 +1002,36 @@ module.exports = function (Bottle) {
           var From = startDate(firstData[0], secondetData[0], thierdData[0])
           var To = endDate(firstData[firstData.length - 1], secondetData[secondetData.length - 1], thierdData[thierdData.length - 1])
           var dates = convertDates(Array.from(datesBetween(new Date(From), new Date(To))));
-          resultData.forEach(function (element) {
-            // console.log("//////////////////////////")
-            dates = convertDates(Array.from(datesBetween(new Date(From), new Date(To))));
-            for (var prop in dates) {
-              if (element[prop] == null)
-                dates[prop] = 0;
-              else
-                dates[prop] = element[prop]
+          // resultData.forEach(function (element) {
+          //   dates = convertDates(Array.from(datesBetween(new Date(From), new Date(To))));
+          //   for (var prop in dates) {
+          //     if (element[prop] == null)
+          //       dates[prop] = 0;
+          //     else
+          //       dates[prop] = element[prop]
+          //   }
+          //   mainData.push(dates);
+          //   console.log(mainData)
+          //   // }
+          // }, this);
+          for (var prop in dates) {
+            var object = {
+              "date": "",
+              "user": 0,
+              "bootle": 0,
+              "user active": 0
             }
-            mainData.push(dates);
-            // }
-          }, this);
+            if (resultData[0][prop] != null || resultData[1][prop] != null || resultData[2][prop] != null) {
+              object['date'] = prop;
+              if (resultData[0][prop] != null)
+                object['user'] = resultData[0][prop];
+              if (resultData[1][prop] != null)
+                object['bootle'] = resultData[1][prop];
+              if (resultData[2][prop] != null)
+                object['user active'] = resultData[2][prop];
+              mainData.push(object);
+            }
+          }
           var config = {
             path: 'uploadFiles/excelFiles',
             save: true,

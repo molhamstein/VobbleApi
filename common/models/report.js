@@ -49,21 +49,68 @@ module.exports = function (Report) {
     Report.find(filter, function (err, reports) {
       reports.forEach(function (element) {
         var object = {};
+        var secObject={}
         var typeObject;
         var objectreport;
+        var ownerObject;
+        var countryNaem = ""
         element.report_Type(function (err, report_Type) {
           typeObject = {
             "report type EN": report_Type['reportName_en'],
             "report type AR": report_Type['reportName_ar']
           }
         })
+        element.owner(function (err, owner) {
+          owner.country(function (err, country) {
+            countryNaem = country.name
+          })
+          if (owner['lastLogin'] != null)
+            ownerObject = {
+              country: countryNaem,
+              image: owner['image'],
+              totalBottlesThrown: owner['totalBottlesThrown'],
+              repliesBottlesCount: owner['repliesBottlesCount'],
+              repliesReceivedCount: owner['repliesReceivedCount'],
+              foundBottlesCount: owner['foundBottlesCount'],
+              extraBottlesCount: owner['extraBottlesCount'],
+              bottlesCount: owner['bottlesCount'],
+              registrationCompleted: owner['registrationCompleted'],
+              gender: owner['gender'],
+              nextRefill: owner['nextRefill'].toString(),
+              ownerCreatedAt: owner['createdAt'].toString(),
+              lastLogin: owner['lastLogin'].toString(),
+              email: owner['email'],
+              status: owner['status'],
+              typeLogIn: owner['typeLogIn'],
+              username: owner['username']
+            }
+          else
+            ownerObject = {
+              country: countryNaem,
+              image: owner['image'],
+              totalBottlesThrown: owner['totalBottlesThrown'],
+              repliesBottlesCount: owner['repliesBottlesCount'],
+              repliesReceivedCount: owner['repliesReceivedCount'],
+              foundBottlesCount: owner['foundBottlesCount'],
+              extraBottlesCount: owner['extraBottlesCount'],
+              bottlesCount: owner['bottlesCount'],
+              registrationCompleted: owner['registrationCompleted'],
+              gender: owner['gender'],
+              nextRefill: owner['nextRefill'].toString(),
+              ownerCreatedAt: owner['createdAt'].toString(),
+              email: owner['email'],
+              status: owner['status'],
+              typeLogIn: owner['typeLogIn'],
+              username: owner['username']
+            }
+        })
         var objectreport = {
           CreatedAt: element['createdAt'].toString(),
         }
 
         object = Object.assign({}, objectreport, typeObject);
-        //   secObject = Object.assign({}, object, ownerObject);
-        data.push(object);
+        secObject = Object.assign({}, object, ownerObject);
+        data.push(secObject);
       }, this);
       /* Generate automatic model for processing (A static model should be used) */
       var model = mongoXlsx.buildDynamicModel(data);

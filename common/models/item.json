@@ -7,8 +7,7 @@
   },
   "replaceOnPUT": false,
   "scope": {
-    "include": [
-      {
+    "include": [{
         "relation": "owner"
       },
       {
@@ -70,58 +69,45 @@
   "acls": [],
   "methods": {
     "countFilter": {
-      "accepts": [
-        {
-          "arg": "filter",
-          "type": "object",
-          "required": true,
-          "description": "filter item"
-        }
-      ],
-      "returns": [
-        {
-          "arg": "result",
-          "type": "object",
-          "root": true,
-          "description": ""
-        }
-      ],
+      "accepts": [{
+        "arg": "filter",
+        "type": "object",
+        "required": true,
+        "description": "filter item"
+      }],
+      "returns": [{
+        "arg": "result",
+        "type": "object",
+        "root": true,
+        "description": ""
+      }],
       "description": "",
-      "http": [
-        {
-          "path": "/countItem",
-          "verb": "get"
-        }
-      ]
+      "http": [{
+        "path": "/countItem",
+        "verb": "get"
+      }]
     },
     "getFilterItem": {
-      "accepts": [
-        {
-          "arg": "filter",
-          "type": "object",
-          "required": false,
-          "description": "filter Item"
-        }
-      ],
-      "returns": [
-        {
-          "arg": "result",
-          "type": "object",
-          "root": true,
-          "description": ""
-        }
-      ],
+      "accepts": [{
+        "arg": "filter",
+        "type": "object",
+        "required": false,
+        "description": "filter Item"
+      }],
+      "returns": [{
+        "arg": "result",
+        "type": "object",
+        "root": true,
+        "description": ""
+      }],
       "description": "filter On the Item",
-      "http": [
-        {
-          "path": "/filterItem",
-          "verb": "get"
-        }
-      ]
+      "http": [{
+        "path": "/filterItem",
+        "verb": "get"
+      }]
     },
     "itemStateReport": {
-      "accepts": [
-        {
+      "accepts": [{
           "arg": "from",
           "type": "date",
           "required": false,
@@ -134,32 +120,45 @@
           "description": ""
         }
       ],
-      "returns": [
-        {
-          "arg": "result",
-          "type": "array",
-          "root": true,
-          "description": ""
-        }
-      ],
+      "returns": [{
+        "arg": "result",
+        "type": "array",
+        "root": true,
+        "description": ""
+      }],
       "description": "",
-      "http": [
-        {
-          "path": "/itemStateReport",
-          "verb": "get"
-        }
-      ]
+      "http": [{
+        "path": "/itemStateReport",
+        "verb": "get"
+      }]
+    },
+    "export": {
+      "accepts": [{
+        "arg": "filter",
+        "type": "object",
+        "required": false,
+        "description": "filter Item"
+      }],
+      "returns": [{
+        "arg": "result",
+        "type": "object",
+        "root": true,
+        "description": ""
+      }],
+      "description": "Export To Excel",
+      "http": [{
+        "path": "/export",
+        "verb": "get"
+      }]
     },
     "solveData": {
       "accepts": [],
       "returns": [],
       "description": "",
-      "http": [
-        {
-          "path": "/solveData",
-          "verb": "get"
-        }
-      ]
+      "http": [{
+        "path": "/solveData",
+        "verb": "get"
+      }]
     }
   }
 }
