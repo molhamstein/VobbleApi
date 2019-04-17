@@ -46,6 +46,10 @@
     "price": {
       "type": "number",
       "required": true
+    },
+    "type": {
+      "type": "string",
+      "default": "normal"
     }
   },
   "validations": [],
@@ -63,7 +67,7 @@
     "relatedUser": {
       "type": "belongsTo",
       "model": "user",
-      "foreignKey": "relatedUser"
+      "foreignKey": "relatedUserId"
     }
   },
   "acls": [],
@@ -157,6 +161,44 @@
       "description": "",
       "http": [{
         "path": "/solveData",
+        "verb": "get"
+      }]
+    },
+    "chatExtendReportOwner": {
+      "accepts": [{
+        "arg": "filter",
+        "type": "object",
+        "required": false,
+        "description": "filter Item"
+      }],
+      "returns": [{
+        "arg": "result",
+        "type": "object",
+        "root": true,
+        "description": ""
+      }],
+      "description": "get report about chatExtend",
+      "http": [{
+        "path": "/chatExtendReportOwner",
+        "verb": "get"
+      }]
+    },
+    "chatExtendReportRelated": {
+      "accepts": [{
+        "arg": "filter",
+        "type": "object",
+        "required": false,
+        "description": "filter Item"
+      }],
+      "returns": [{
+        "arg": "result",
+        "type": "object",
+        "root": true,
+        "description": ""
+      }],
+      "description": "get report about chatExtend",
+      "http": [{
+        "path": "/chatExtendReportRelated",
         "verb": "get"
       }]
     }

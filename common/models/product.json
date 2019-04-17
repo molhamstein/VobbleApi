@@ -55,6 +55,10 @@
     "productSold": {
       "type": "number",
       "default": 0
+    },
+    "type": {
+      "type": "string",
+      "default": "normal"
     }
   },
   "validations": [],

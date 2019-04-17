@@ -11,7 +11,7 @@ module.exports.account = {
     return new cError('NOT_FOUND', 404, 'User not found', 404);
   },
   notActive: function () {
-    return new cError('NOT_ACTIVE_USER', 403, 'User not active', 403);
+    return new cError('NOT_ACTIVE_USER', 416, 'User not active', 416);
   },
   emailNotValid: function () {
     return new cError('EMAIL_NOT_VALID', 400, 'Email not valid', 400);

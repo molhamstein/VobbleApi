@@ -5,6 +5,8 @@ const configPath = process.env.NODE_ENV === undefined ?
   '../../server/config.json' :
   `../../server/config.${process.env.NODE_ENV}.json`;
 const config = require(configPath);
+var ObjectId = require('mongodb').ObjectID;
+
 
 var appleReceiptVerify = require('node-apple-receipt-verify');
 appleReceiptVerify.config({
@@ -38,6 +40,7 @@ module.exports = function (Item) {
         if (product == null) {
           return next(errors.product.productNotFound());
         }
+        context.req.body.type = product.type;
         context.req.body.price = product.price;
         next();
       })
@@ -76,6 +79,7 @@ module.exports = function (Item) {
                 if (product == null) {
                   return next(errors.product.productNotFound());
                 }
+                context.req.body.type = product.type;
                 context.req.body.price = product.price;
                 next();
               })
@@ -184,6 +188,7 @@ module.exports = function (Item) {
     })
 
   }
+
 
 
   /**
@@ -421,6 +426,172 @@ module.exports = function (Item) {
 
     // TODO
   };
+
+  Item.chatExtendReportOwner = function (filter, callback) {
+    var ownerMatch = {
+      type: "Chat Extend",
+
+    };
+
+    if (filter && filter.from) {
+      ownerMatch['startAt'] = {
+        '$gt': new Date(filter.from)
+      }
+    }
+
+    if (filter && filter.to) {
+      if (ownerMatch['startAt'] == null)
+        ownerMatch['startAt'] = {}
+      ownerMatch['startAt']['$lt'] = new Date(filter.to)
+    }
+
+    if (filter && filter.userId) {
+      ownerMatch['ownerId'] = ObjectId(filter.userId)
+    }
+
+    console.log(ownerMatch)
+
+    Item.getDataSource().connector.connect(function (err, db) {
+
+      var collection = db.collection('item');
+      var cursor = collection.aggregate([{
+          $match: ownerMatch
+        },
+        {
+          $group: {
+            "_id": {
+              "ownerId": "$ownerId",
+              "productId": "$productId"
+            },
+            count: {
+              $sum: 1
+            }
+          }
+        },
+        {
+          $lookup: {
+            from: "user",
+            localField: "_id.ownerId",
+            foreignField: "_id",
+            as: "owner"
+          }
+        },
+        {
+          $unwind: "$owner"
+        },
+        {
+          "$addFields": {
+            "owner.id": {
+              "$toString": "$owner._id"
+            }
+          }
+        },
+        {
+          $project: {
+            owner: 1,
+            count: 1,
+            _id: 0
+          }
+        },
+        {
+          $sort: {
+            "count": 1,
+          }
+        },
+      ]);
+      cursor.get(function (err, ownerData) {
+        if (err) return callback(err);
+
+        return callback(null,
+          ownerData
+        );
+      })
+    })
+  };
+
+  Item.chatExtendReportRelated = function (filter, callback) {
+    var relatedUserMatch = {
+      type: "Chat Extend",
+
+    };
+
+    if (filter && filter.from) {
+      relatedUserMatch['startAt'] = {
+        '$gt': new Date(filter.from)
+      }
+    }
+
+    if (filter && filter.to) {
+      if (relatedUserMatch['startAt'] == null)
+        relatedUserMatch['startAt'] = {}
+      relatedUserMatch['startAt']['$lt'] = new Date(filter.to)
+    }
+
+
+    if (filter && filter.userId) {
+      relatedUserMatch['relatedUserId'] = ObjectId(filter.userId)
+    }
+
+    Item.getDataSource().connector.connect(function (err, db) {
+
+      var collection = db.collection('item');
+
+      var cursor = collection.aggregate([{
+          $match: relatedUserMatch
+        },
+        {
+          $group: {
+            "_id": {
+              "relatedUserId": "$relatedUserId",
+              "productId": "$productId"
+            },
+            count: {
+              $sum: 1
+            }
+          }
+        },
+        {
+          $lookup: {
+            from: "user",
+            localField: "_id.relatedUserId",
+            foreignField: "_id",
+            as: "relatedUser"
+          }
+        },
+        {
+          $unwind: "$relatedUser"
+        },
+        {
+          "$addFields": {
+            "relatedUser.id": {
+              "$toString": "$relatedUser._id"
+            }
+          }
+        },
+        {
+          $project: {
+            relatedUser: 1,
+            count: 1,
+            _id: 0
+          }
+        },
+        {
+          $sort: {
+            "count": 1,
+          }
+        },
+      ]);
+      cursor.get(function (err, relatedUserData) {
+        if (err) return callback(err);
+        return callback(null,
+          relatedUserData
+        );
+      })
+    })
+  };
+
+
+
 
   /**
    *

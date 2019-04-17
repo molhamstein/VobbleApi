@@ -239,7 +239,9 @@ module.exports = function (Bottle) {
       if (err) {
         return next(err);
       }
-
+      if (oneUser.status !== 'active') {
+        return next(errors.account.notActive());
+      }
       // get bottle seen 
       Bottle.app.models.bottleUserseen.find({
         where: {

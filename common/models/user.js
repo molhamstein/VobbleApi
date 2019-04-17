@@ -156,8 +156,16 @@ module.exports = function (User) {
     // check if user is new or old in the system 
     User.findOne({
       where: {
-        socialId: socialId,
-        typeLogIn: "facebook"
+        "and": [{
+          "or": [{
+            socialId: socialId
+          }, {
+            username: name
+          }]
+        }, {
+          typeLogIn: "facebook"
+        }]
+
       }
     }, function (err, oneUser) {
       if (err)
@@ -256,6 +264,9 @@ module.exports = function (User) {
       }
       // old user
       else {
+        oneUser.updateAttributes({
+          "socialId": socialId
+        })
         // get the token with user
         User.app.models.AccessToken.findOne({
           include: {
