@@ -158,10 +158,19 @@ module.exports = function (User) {
       where: {
         "and": [{
           "or": [{
-            socialId: socialId
-          }, {
-            username: name
-          }]
+              socialId: socialId
+            },
+            {
+              "and": [{
+                "username": {
+                  "like": name,
+                  options: "i"
+                }
+              }, {
+                email: email
+              }]
+            }
+          ]
         }, {
           typeLogIn: "facebook"
         }]
