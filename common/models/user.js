@@ -162,8 +162,8 @@ module.exports = function (User) {
             },
             {
               "and": [{
-                "username": {
-                  "like": name,
+                username: {
+                  like: name,
                   options: "i"
                 }
               }, {
@@ -179,7 +179,8 @@ module.exports = function (User) {
     }, function (err, oneUser) {
       if (err)
         callback(err, null);
-      // new user
+        console.log("oneUser");
+        console.log(oneUser);
       if (oneUser == null) {
         // cheack if username is userd befor
         User.findOne({
