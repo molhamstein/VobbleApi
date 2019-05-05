@@ -482,7 +482,10 @@ module.exports = function (Item) {
         {
           "$addFields": {
             "owner.id": {
-              "$toString": "$owner._id"
+              $convert: {
+                input: "$owner._id",
+                to: "string"
+              }
             }
           }
         },
@@ -564,7 +567,10 @@ module.exports = function (Item) {
         {
           "$addFields": {
             "relatedUser.id": {
-              "$toString": "$relatedUser._id"
+              $convert: {
+                input: "$relatedUser._id",
+                to: "string"
+              }
             }
           }
         },
