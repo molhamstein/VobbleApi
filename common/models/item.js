@@ -8,12 +8,12 @@ const config = require(configPath);
 var ObjectId = require('mongodb').ObjectID;
 
 
-var appleReceiptVerify = require('node-apple-receipt-verify');
-appleReceiptVerify.config({
-  secret: "8622c3ec270a4f3eb4ec599daa8d5720",
-  environment: ['sandbox'],
-  verbose: true
-});
+// var appleReceiptVerify = require('node-apple-receipt-verify');
+// appleReceiptVerify.config({
+//   secret: "8622c3ec270a4f3eb4ec599daa8d5720",
+//   environment: ['sandbox'],
+//   verbose: true
+// });
 
 
 module.exports = function (Item) {
@@ -482,7 +482,7 @@ module.exports = function (Item) {
         {
           "$addFields": {
             "owner.id": {
-              "$toString": ObjectId("$owner._id")
+              "$toString": "$owner._id"
             }
           }
         },
@@ -564,8 +564,7 @@ module.exports = function (Item) {
         {
           "$addFields": {
             "relatedUser.id": {
-              "$toString": ObjectId("$relatedUser._id")
-
+              "$toString": "$relatedUser._id"
             }
           }
         },

@@ -1,14 +1,14 @@
 {
     "restApiRoot": "/api",
     "host": "0.0.0.0",
-    "domain": "http://localhost:3000",
-    "siteDomain": "http://localhost:3000",
+    "domain": "http://localhost:3003",
+    "siteDomain": "http://localhost:3003",
     "thumbUrl": "C:/FFmpeg/bin/",
     "programFFmpegName": [
         "ffmpeg.exe",
         "ffprobe.exe"
     ],
-    "port": 3000,
+    "port": 3003,
     "remoting": {
         "context": false,
         "rest": {
