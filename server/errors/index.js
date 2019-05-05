@@ -22,6 +22,9 @@ module.exports.account = {
   emailAlreadyExists: function () {
     return new cError('EMAIL_ALREADY_EXISTS', 413, 'Email already exists', 413);
   },
+  phoneAlreadyExists: function () {
+    return new cError('PHONE_ALREADY_EXISTS', 417, 'Phone already exists', 417);
+  },
   emailAlreadyExistsSN: function () {
     return new cError('EMAIL_ALREADY_EXISTS_SN', 412, 'Email already exists SN', 412);
   },

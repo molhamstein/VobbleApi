@@ -57,6 +57,9 @@
     "email": {
       "type": "string"
     },
+    "phonenumber": {
+      "type": "string"
+    },
     "status": {
       "type": "string",
       "required": true,
@@ -249,7 +252,14 @@
       "principalId": "$authenticated",
       "permission": "ALLOW",
       "property": "me"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$unauthenticated",
+      "permission": "ALLOW",
+      "property": "loginByPhonenumber"
     }
+    
   ],
   "methods": {
     "export": {
@@ -505,6 +515,32 @@
       "http": [{
         "path": "/accessToken",
         "verb": "get"
+      }]
+    },
+    "loginByPhonenumber": {
+      "accepts": [{
+          "arg": "credentials",
+          "type": "Object",
+          "required": true,
+          "description": ""
+        },
+        {
+          "arg": "include",
+          "type": "string",
+          "required": false,
+          "description": ""
+        }
+      ],
+      "returns": [{
+        "arg": "result",
+        "type": "array",
+        "root": true,
+        "description": ""
+      }],
+      "description": "",
+      "http": [{
+        "path": "/loginByPhonenumber",
+        "verb": "post"
       }]
     }
   }
