@@ -482,7 +482,7 @@ module.exports = function (Item) {
         {
           "$addFields": {
             "owner.id": {
-              "$toString": "$owner._id"
+              "$toString": ObjectId("$owner._id")
             }
           }
         },
@@ -564,7 +564,8 @@ module.exports = function (Item) {
         {
           "$addFields": {
             "relatedUser.id": {
-              "$toString": "$relatedUser._id"
+              "$toString": ObjectId("$relatedUser._id")
+
             }
           }
         },
