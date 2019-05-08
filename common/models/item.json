@@ -50,6 +50,9 @@
     "type": {
       "type": "string",
       "default": "normal"
+    },
+    "transactionId": {
+      "type": "string"
     }
   },
   "validations": [],

@@ -608,6 +608,9 @@ module.exports = function (Bottle) {
       Bottle.find({
         order: 'createdAt DESC',
         limit: 2000,
+        where:{
+          "status":"active"
+        },
         include: {
           relation: 'owner',
         }
