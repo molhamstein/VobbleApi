@@ -707,7 +707,6 @@ module.exports = function (User) {
       }
     })
   }
-  sendSMS("+963957465876", "55555")
 
   function sendSMS(from, code, callback) {
     // console.log(code);
@@ -716,25 +715,24 @@ module.exports = function (User) {
     // var auth = sinchAuth("fba316e8-69a8-4c11-ae17-b18ad1e16234", "ivqHSHS/fEOEOnPcJVPPNg==");
     // sinchSms.sendMessage("+963957465876", "your verification code is : " + code);
 
-
-    const curl = new(require('curl-request'))();
+    var accountSid = 'AC5c12c580a60b8affaa414a5ab1367817'; // Your Account SID f$
+    var authToken = '579447a49d7dd4f733d3f3071d7781b6'; // Your Auth Token fr$
 
     var twilio = require('twilio');
-    var accountSid = 'AC9366e1efb73ed812183cdfe326f9d448'; // Your Account SID from www.twilio.com/console
-    var authToken = 'd2d1e2bb0fb6568213f42946b2fd13a1';   // Your Auth Token from www.twilio.com/console
-    
-    // var twilio = require('twilio');
-    // var client = new twilio(accountSid, authToken);
-    
-    // client.messages.create({
-    //     body: 'Hello from Node',
-    //     to: '+963933074900',  // Text this number
-    //     from: '+12345678901' // From a valid Twilio number
-    // })
-    // .then((message) => console.log(message.sid)); 
+    var client = new twilio(accountSid, authToken);
 
-   
-    // callback();
+    client.messages.create({
+        body: 'Hello from Node',
+        to: '+963 933 074 900', // Text this number
+        from: '+14107775954' // From a valid Twilio number
+      })
+      .then((message) => console.log(message.sid))
+      .catch((e) => {
+        console.log("e");
+        console.log(e);
+      });
+
+    callback();
   }
 
 

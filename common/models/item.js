@@ -8,12 +8,12 @@ const config = require(configPath);
 var ObjectId = require('mongodb').ObjectID;
 
 
-// var appleReceiptVerify = require('node-apple-receipt-verify');
-// appleReceiptVerify.config({
-//   secret: "8622c3ec270a4f3eb4ec599daa8d5720",
-//   environment: ['sandbox','production'],
-//   verbose: true
-// });
+var appleReceiptVerify = require('node-apple-receipt-verify');
+appleReceiptVerify.config({
+  secret: "8622c3ec270a4f3eb4ec599daa8d5720",
+  environment: ['sandbox', 'production'],
+  verbose: true
+});
 
 
 module.exports = function (Item) {
@@ -45,61 +45,67 @@ module.exports = function (Item) {
         next();
       })
     } else {
-      console.log("receipt")
-      console.log(context.req.body.receipt)
-      console.log("context.req.body.transactionId")
-      console.log(context.req.body.transactionId)
-      Item.find({
-        "where": {
-          "and": [{
-            "transactionId": context.req.body.transactionId
-          }]
-        }
-      }, function (err, oldItem) {
-        if (oldItem.length > 0)
+      Item.app.models.User.findById(context.req.accessToken.userId, function (err, user) {
+        if (err)
+          return next(err, null);
+        if (user.status != 'active') {
           return next(errors.product.unvalidReceipt());
-        appleReceiptVerify.validate({
-          receipt: context.req.body.receipt
-        }, function (err, products) {
-          if (err) {
-            console.log("err")
-            console.log(err)
+        }
+        console.log("receipt")
+        console.log(context.req.body.receipt)
+        console.log("context.req.body.transactionId")
+        console.log(context.req.body.transactionId)
+        Item.find({
+          "where": {
+            "and": [{
+              "transactionId": context.req.body.transactionId
+            }]
+          }
+        }, function (err, oldItem) {
+          if (oldItem.length > 0)
             return next(errors.product.unvalidReceipt());
-          } else {
-            var transactionId = context.req.body.transactionId;
-            delete context.req.body.receipt;
-            if (products.length == 0)
+          appleReceiptVerify.validate({
+            receipt: context.req.body.receipt
+          }, function (err, products) {
+            if (err) {
+              console.log("err")
+              console.log(err)
               return next(errors.product.unvalidReceipt());
-            var isInProcess = false;
-            for (let index = 0; index < products.length; index++) {
-              const element = products[index];
-              if (element.transactionId == transactionId) {
-                isInProcess = true;
-                Item.app.models.Product.findById(context.req.body.productId, function (err, product) {
-                  if (err) {
-                    return next(err);
-                  }
-                  product.productSold++;
-                  product.save();
-                  if (context.req.body.ownerId == null && context.req.accessToken != null)
-                    context.req.body.ownerId = context.req.accessToken.userId;
-                  if (product == null) {
-                    return next(errors.product.productNotFound());
-                  }
-                  context.req.body.type = product.type;
-                  context.req.body.price = product.price;
-                  next();
-                })
-              } else if (index == products.length - 1 && isInProcess == false) {
-                console.log("transactionId not found")
+            } else {
+              var transactionId = context.req.body.transactionId;
+              delete context.req.body.receipt;
+              if (products.length == 0)
                 return next(errors.product.unvalidReceipt());
+              var isInProcess = false;
+              for (let index = 0; index < products.length; index++) {
+                const element = products[index];
+                if (element.transactionId == transactionId) {
+                  isInProcess = true;
+                  Item.app.models.Product.findById(context.req.body.productId, function (err, product) {
+                    if (err) {
+                      return next(err);
+                    }
+                    product.productSold++;
+                    product.save();
+                    if (context.req.body.ownerId == null && context.req.accessToken != null)
+                      context.req.body.ownerId = context.req.accessToken.userId;
+                    if (product == null) {
+                      return next(errors.product.productNotFound());
+                    }
+                    context.req.body.type = product.type;
+                    context.req.body.price = product.price;
+                    next();
+                  })
+                } else if (index == products.length - 1 && isInProcess == false) {
+                  console.log("transactionId not found")
+                  return next(errors.product.unvalidReceipt());
+                }
               }
             }
-          }
-          // ok!
-        });
+            // ok!
+          });
+        })
       })
-
     }
   });
 
