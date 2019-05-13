@@ -30,6 +30,9 @@ module.exports.account = {
   },
   youLoginToday: function () {
     return new cError('YOU_ALREADY_LOGIN_TODAY', 414, 'you already login today', 414);
+  },
+  codeNotFound: function () {
+    return new cError('CODE_NOT_FOUND',418, 'code not found', 418);
   }
 
 

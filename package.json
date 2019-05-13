@@ -18,6 +18,7 @@
     "cls-hooked": "^4.2.2",
     "compression": "^1.0.3",
     "cors": "^2.5.2",
+    "curl-request": "^1.1.1",
     "dates-between": "^1.1.0",
     "express-session": "^1.15.6",
     "ffprobe": "^1.1.0",
@@ -39,8 +40,12 @@
     "passport": "^0.4.0",
     "passport-facebook": "^2.1.1",
     "serve-favicon": "^2.0.1",
+    "sinch-auth": "0.0.1",
+    "sinch-messaging": "0.0.1",
+    "sinch-sms": "0.0.8",
     "strong-error-handler": "^2.0.0",
     "thumbsupply": "^0.2.1",
+    "twilio": "^3.30.3",
     "video-thumb": "0.0.3"
   },
   "devDependencies": {

@@ -90,6 +90,10 @@
     "dataSource": "db",
     "public": true
   },
+  "code": {
+    "dataSource": "db",
+    "public": true
+  },
   "item": {
     "dataSource": "db",
     "public": true

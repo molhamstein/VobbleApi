@@ -68,22 +68,24 @@ module.exports = function (User) {
         else
           next();
       })
-    } else if (context.req.body.phonenumber) {
-      context.req.body.typeLogIn = "phonenumber"
-      User.findOne({
-        where: {
-          phonenumber: context.req.body.phonenumber
-        }
-      }, function (err, user) {
-        if (err)
-          return next(err)
-        if (user)
-          return next(errors.account.phoneAlreadyExists());
-        else
-          next();
-      })
     }
-
+    // else if (context.req.body.phonenumber) {
+    //   context.req.body.typeLogIn = "phonenumber"
+    //   User.findOne({
+    //     where: {
+    //       phonenumber: context.req.body.phonenumber
+    //     }
+    //   }, function (err, user) {
+    //     if (err)
+    //       return next(err)
+    //     if (user)
+    //       return next(errors.account.phoneAlreadyExists());
+    //     else {
+    //       context.req.body.password = "password"
+    //       next();
+    //     }
+    //   })
+    // }
   });
 
 
@@ -661,6 +663,122 @@ module.exports = function (User) {
    * @param {Function(Error, boolean)} callback
    */
 
+  User.signupByPhone = function (phonenumber, callback) {
+    var code = Math.floor(100000 + Math.random() * 900000)
+    var expiryDate = new Date().addHours(6)
+    User.findOne({
+      "where": {
+        "phonenumber": phonenumber
+      }
+    }, function (err, user) {
+      if (err)
+        return callback(err, null)
+      if (user) {
+        User.app.models.Code.create({
+          "userId": user.id,
+          "code": code,
+          "expiryDate": expiryDate
+        }, function (err, codeData) {
+          if (err)
+            return next(err)
+          // sendSMS(phoneNumber, code, function () {
+          return callback(null, codeData)
+          // });
+        })
+      } else {
+        User.create({
+          "phonenumber": phonenumber,
+          "password": "password"
+        }, function (err, newUser) {
+          if (err)
+            return callback(err)
+          User.app.models.Code.create({
+            "userId": newUser.id,
+            "code": code,
+            "expiryDate": expiryDate
+          }, function (err, codeData) {
+            if (err)
+              return next(err)
+            // sendSMS(phoneNumber, code, function () {
+            return callback(null, codeData)
+            // });
+          })
+        })
+      }
+    })
+  }
+  sendSMS("+963957465876", "55555")
+
+  function sendSMS(from, code, callback) {
+    // console.log(code);
+    // var sinchAuth = require('sinch-auth');
+    // var sinchSms = require('sinch-messaging');
+    // var auth = sinchAuth("fba316e8-69a8-4c11-ae17-b18ad1e16234", "ivqHSHS/fEOEOnPcJVPPNg==");
+    // sinchSms.sendMessage("+963957465876", "your verification code is : " + code);
+
+
+    const curl = new(require('curl-request'))();
+
+    var twilio = require('twilio');
+    var accountSid = 'AC9366e1efb73ed812183cdfe326f9d448'; // Your Account SID from www.twilio.com/console
+    var authToken = 'd2d1e2bb0fb6568213f42946b2fd13a1';   // Your Auth Token from www.twilio.com/console
+    
+    // var twilio = require('twilio');
+    // var client = new twilio(accountSid, authToken);
+    
+    // client.messages.create({
+    //     body: 'Hello from Node',
+    //     to: '+963933074900',  // Text this number
+    //     from: '+12345678901' // From a valid Twilio number
+    // })
+    // .then((message) => console.log(message.sid)); 
+
+   
+    // callback();
+  }
+
+
+  User.loginByPhone = function (phonenumber, code, callback) {
+    console.log(new Date());
+    User.findOne({
+      "where": {
+        "phonenumber": phonenumber
+      }
+    }, function (err, user) {
+      if (err)
+        return callback(err)
+      User.app.models.Code.findOne({
+        "where": {
+          "code": code,
+          "userId": user.id,
+          "expiryDate": {
+            "gt": new Date()
+          },
+          "status": "active"
+        }
+      }, function (err, codes) {
+        if (err)
+          return callback(err, null);
+        if (codes == null)
+          return callback(null, errors.account.codeNotFound())
+        User.loginByPhonenumber({
+          phonenumber: phonenumber,
+          password: 'password',
+        }, ["user"], function (err, data) {
+          if (err)
+            return callback(err)
+          codes.updateAttributes({
+            "status": "used"
+          });
+          if (data.user.gender == null)
+            data.isNew = true
+          else
+            data.isNew = false
+          return callback(err, data);
+        })
+      })
+    })
+  }
   User.checkUsername = function (newUsername, callback) {
     var result;
     User.findOne({

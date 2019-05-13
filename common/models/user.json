@@ -21,7 +21,7 @@
   "properties": {
     "gender": {
       "type": "string",
-      "required": true
+      "required": false
     },
     "image": {
       "type": "string"
@@ -229,6 +229,12 @@
       "property": "checkUsername"
     },
     {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW",
+      "property": "signupByPhone"
+    },
+    {
       "accessType": "*",
       "principalType": "ROLE",
       "principalId": "$owner",
@@ -257,9 +263,9 @@
       "principalType": "ROLE",
       "principalId": "$unauthenticated",
       "permission": "ALLOW",
-      "property": "loginByPhonenumber"
+      "property": "loginByPhone"
     }
-    
+
   ],
   "methods": {
     "export": {
@@ -366,6 +372,58 @@
       "description": "check username is unique",
       "http": [{
         "path": "/checkUsername",
+        "verb": "post"
+      }]
+    },
+    "signupByPhone": {
+      "accepts": [{
+        "arg": "phonenumber",
+        "type": "string",
+        "required": true,
+        "description": "",
+        "http": {
+          "source": "form"
+        }
+      }],
+      "returns": [{
+        "arg": "result",
+        "type": "object",
+        "root": true,
+        "description": ""
+      }],
+      "description": "signup by phonenumber",
+      "http": [{
+        "path": "/signupByPhone",
+        "verb": "post"
+      }]
+    },
+    "loginByPhone": {
+      "accepts": [{
+        "arg": "phonenumber",
+        "type": "string",
+        "required": true,
+        "description": "",
+        "http": {
+          "source": "form"
+        }
+      }, {
+        "arg": "code",
+        "type": "number",
+        "required": true,
+        "description": "",
+        "http": {
+          "source": "form"
+        }
+      }],
+      "returns": [{
+        "arg": "result",
+        "type": "object",
+        "root": true,
+        "description": ""
+      }],
+      "description": "login by phonenumber",
+      "http": [{
+        "path": "/loginByPhone",
         "verb": "post"
       }]
     },
