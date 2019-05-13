@@ -226,6 +226,12 @@
       "principalType": "ROLE",
       "principalId": "$everyone",
       "permission": "ALLOW",
+      "property": "twitterLogin"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW",
       "property": "checkUsername"
     },
     {
@@ -350,6 +356,28 @@
       "description": "login by google account",
       "http": [{
         "path": "/googleLogin",
+        "verb": "post"
+      }]
+    },
+    "loginTwitter": {
+      "accepts": [{
+        "arg": "data",
+        "type": "object",
+        "required": true,
+        "description": "",
+        "http": {
+          "source": "body"
+        }
+      }],
+      "returns": [{
+        "arg": "result",
+        "type": "object",
+        "root": true,
+        "description": ""
+      }],
+      "description": "login by twitter account",
+      "http": [{
+        "path": "/twitterLogin",
         "verb": "post"
       }]
     },

@@ -102,7 +102,7 @@ module.exports = function (Useractivate) {
             if (err)
               return callback(err, null);
             console.log("created");
-            return callback(err, data);
+            return callback(err, {});
           })
         }
       })

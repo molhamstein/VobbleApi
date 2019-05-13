@@ -656,6 +656,154 @@ module.exports = function (User) {
       }
     });
   };
+  
+
+  User.twitterLogin = function (data, callback) {
+    var result;
+    var socialId = data.socialId;
+    var token = data.token;
+    var gender = data.gender;
+    var image = data.image;
+    // var image = "https://www.idlidu.com/Content/images/default.png";
+    var email = data.email;
+    var name = data.name;
+    User.findOne({
+      where: {
+        socialId: socialId,
+        typeLogIn: "twitter"
+      }
+    }, function (err, oneUser) {
+      if (err)
+        callback(err, null);
+      if (oneUser == null) {
+        User.findOne({
+          where: {
+            username: name
+          }
+        }, function (err, userByUsername) {
+          if (userByUsername) {
+            var randVal = 100 + (Math.random() * (999 - 100));
+            var x = Math.round(randVal);
+            name = name + "_" + x;
+          }
+          const parts = image.split('.');
+          // extension = parts[parts.length - 1];
+          var extension = "jpg";
+
+          var newFilename = (new Date()).getTime() + '.' + extension;
+
+          const options = {
+            url: image,
+            dest: 'uploadFiles/profile/' + newFilename // Save to /path/to/dest/image.jpg
+          }
+          download.image(options)
+            .then(({
+              filename,
+              imageFile
+            }) => {
+              image = urlFileRootSave + newFilename;
+
+              var date = new Date();
+              var nextRefillVar = new Date();
+              nextRefillVar.setHours(24, 0, 0, 0);
+              User.create({
+                nextRefill: nextRefillVar,
+                socialId: socialId,
+                gender: gender,
+                image: image,
+                username: name,
+                email: email,
+                status: "active",
+                password: "123",
+                typeLogIn: "twitter"
+              }, function (err, newUser) {
+                if (err)
+                  if (err.statusCode == 422)
+                    callback(errors.account.emailAlreadyExistsSN(), null);
+                  else
+                    callback(err, null);
+                User.app.models.AccessToken.create({
+                  ttl: 31536000000,
+                  userId: newUser.id
+                }, function (err, newToken) {
+                  User.app.models.AccessToken.findOne({
+                    include: {
+                      relation: 'user',
+                      scope: {
+                        include: {
+                          relation: 'country'
+                        }
+                      }
+                    },
+                    where: {
+                      userId: newUser.id
+                    }
+                  }, function (err, token) {
+                    if (err)
+                      callback(err, null);
+                    result = token;
+                    result.isNew = true;
+                    callback(null, result);
+                  });
+                })
+              })
+            })
+        })
+      } else {
+        User.app.models.AccessToken.findOne({
+          include: {
+            relation: 'user',
+            scope: {
+              include: {
+                relation: 'country'
+              }
+            }
+          },
+          where: {
+            userId: oneUser.id
+          }
+        }, function (err, token) {
+
+          if (err)
+            callback(err, null);
+          result = token;
+          if (result == null) {
+            User.app.models.AccessToken.create({
+              ttl: 31536000000,
+              userId: oneUser.id
+            }, function (err, newToken) {
+              // get the token with user of new user
+              // User.app.models.AccessToken.findOne({ include: 'user', userId: newUser.id }, function (err, token) {
+              // User.app.models.AccessToken.findOne(, function (err, token) {
+              User.app.models.AccessToken.findOne({
+                include: {
+                  relation: 'user',
+                  scope: {
+                    include: {
+                      relation: 'country'
+                    }
+                  }
+                },
+                where: {
+                  userId: oneUser.id
+                }
+              }, function (err, token) {
+                if (err)
+                  callback(err, null);
+                result = token;
+                result.isNew = false;
+                callback(null, result);
+              });
+            })
+          } else {
+            result.isNew = false;
+            callback(null, result);
+          }
+        });
+      }
+    });
+  };
+
 
   /**
    * check username is unique
