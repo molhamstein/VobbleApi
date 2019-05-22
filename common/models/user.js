@@ -856,7 +856,7 @@ module.exports = function (User) {
     })
   }
 
-  sendSMS("+963957465876", 5555)
+  // sendSMS("+963957465876", 5555)
 
   function sendSMS(from, code, callback) {
     // console.log(code);
@@ -882,22 +882,76 @@ module.exports = function (User) {
     //     console.log(e);
     //   });
 
-    var sinchVerification = require('sinch-verification')({
-      key: '4cf160fb-c939-491d-8ba0-de6fa91eb274',
-      secret: 'Bj1ApGmdoEGq3Pdng92VgA=='
-    });
+    // var sinchVerification = require('sinch-verification')({
+    //   key: '4cf160fb-c939-491d-8ba0-de6fa91eb274',
+    //   secret: 'Bj1ApGmdoEGq3Pdng92VgA=='
+    // });
 
-    var verification = sinchVerification.createVerification(number);
+    // var verification = sinchVerification.createVerification(number);
 
-    verification.initiate().then(function (result) {
-      verification.verify(code).then(function (result) {
-        console.log('Success', result);
-      }).fail(function (error) {
-        console.log('Failure', error);
-      });
-    }).fail(function (error) {
-      console.log('Failure initializing', error);
-    })
+    // verification.initiate().then(function (result) {
+    //   verification.verify(code).then(function (result) {
+    //     console.log('Success', result);
+    //   }).fail(function (error) {
+    //     console.log('Failure', error);
+    //   });
+    // }).fail(function (error) {
+    //   console.log('Failure initializing', error);
+    // })
+
+
+    // import { google } from 'googleapis';
+
+    // const {google} = require('googleapis');
+
+    //     const identityToolkit = google.identitytoolkit({
+    //       auth: 'AIzaSyAJprOHs-hz4wCaFeoOr731FpFZGlK8uMc',
+    //       version: 'v3',
+    //     });
+
+    //     const response =  identityToolkit.relyingparty.sendVerificationCode({
+    //       phoneNumber:"+963957465876",
+    //       recaptchaToken: "recaptcha",
+    //     }).then(({
+    //         }) => {
+    //           // console.log(statusCode, body, headers)
+    //         })
+    //         .catch((e) => {
+    //           console.log("eeeeeeeeeeeeeeeee");
+    //           console.log(e);
+    //         });
+
+    // save sessionInfo into db. You will need this to verify the SMS code
+    //  const sessionInfo = response.data.sessionInfo;
+    // const curl = new(require('curl-request'))();
+
+    // curl
+    //   .setHeaders([
+    //     'authorization: application 4cf160fb-c939-491d-8ba0-de6fa91eb274:lRhBBuY//G+Z1Cr7lpeYhajmiUTV4G9Q6nOCR4KO6Go=', 'content-type: application/json; charset=UTF-8','x-timestamp: 2019-05-22T10:30:45.811Z'
+    //   ])
+    //     .setBody({
+    //       "identity": {
+    //         "type": "number",
+    //         "endpoint": "+963957465876"
+    //       },
+    //       "method": "sms",
+    //       "code":"555",
+    //       "metadata": {
+    //         "os": "rest",
+    //         "platform": "N/A"
+    //       }
+    //     })
+    //   .post('https://verificationapi-v1.sinch.com/verification/v1/verifications')
+    //   .then(({
+    //     statusCode,
+    //     body,
+    //     headers
+    //   }) => {
+    //     console.log(statusCode, body, headers)
+    //   })
+    //   .catch((e) => {
+    //     console.log(e);
+    //   });
 
     // callback();
   }
