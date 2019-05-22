@@ -33,15 +33,20 @@ module.exports = function (Item) {
         if (err) {
           return next(err);
         }
+
+        if (product == null) {
+          return next(errors.product.productNotFound());
+        }
         product.productSold++;
         product.save();
         if (context.req.body.ownerId == null && context.req.accessToken != null)
           context.req.body.ownerId = context.req.accessToken.userId;
-        if (product == null) {
-          return next(errors.product.productNotFound());
-        }
+
         context.req.body.type = product.type;
         context.req.body.price = product.price;
+        console.log("context.req.body");
+        console.log(context.req.body);
+
         next();
       })
     } else {
@@ -162,27 +167,34 @@ module.exports = function (Item) {
 
     if (filter == null || filter['where']['and'][0] == null)
       filter = {}
+    console.log("filter.where.and");
+    console.log(filter.where.and);
     Item.find(
       filter,
       function (err, items) {
         if (err)
           callback(err, null);
-        // console.log("items")
-        // console.log(items)
+        console.log("items")
+        console.log(items.length)
+        console.log(items)
         var result = [];
-        if (items) {
-          items.forEach(function (element) {
+        if (items && items.length != 0) {
+          items.forEach(function (element, index) {
             element.owner(function (err, owner) {
               element.product(function (err, product) {
                 // console.log(goodId);
                 if (((ISOCode == "" || owner.ISOCode == ISOCode) && (goodId == "" || product.typeGoodsId == goodId)) && (username == "" || owner.username.includes(username))) {
                   result.push(element);
+
+                  if (index + 1 == items.length)
+                    callback(null, result);
                 }
               })
             })
           }, this);
+        } else {
+          callback(null, [])
         }
-        callback(null, result);
       })
   }
 
@@ -193,6 +205,7 @@ module.exports = function (Item) {
       offset = 0;
     if (limit == null)
       limit = 10;
+    console.log(filter.where.and)
     getFilter(filter, function (err, data) {
       if (err)
         callback(err, null);
@@ -480,6 +493,98 @@ module.exports = function (Item) {
             },
             count: {
               $sum: 1
+            },
+            cost: {
+              $sum: "$price"
+            },
+          }
+        },
+        {
+          $lookup: {
+            from: "user",
+            localField: "_id.ownerId",
+            foreignField: "_id",
+            as: "owner"
+          }
+        },
+        {
+          $unwind: "$owner"
+        },
+        {
+          "$addFields": {
+            "owner.id": {
+              $convert: {
+                input: "$owner._id",
+                to: "string"
+              }
+            }
+          }
+        },
+
+
+        {
+          $lookup: {
+            from: "product",
+            localField: "_id.productId",
+            foreignField: "_id",
+            as: "product"
+          }
+        },
+        {
+          $unwind: "$product"
+        },
+        {
+          "$addFields": {
+            "product.id": {
+              $convert: {
+                input: "$product._id",
+                to: "string"
+              }
+            }
+          }
+        },
+        {
+          "$addFields": {
+            "product.count": {
+              $convert: {
+                input: "$count",
+                to: "string"
+              }
+            }
+          }
+        },
+        {
+          "$addFields": {
+            "product.cost": {
+              $convert: {
+                input: "$cost",
+                to: "string"
+              }
+            }
+          }
+        },
+
+        {
+          $project: {
+            count: 1,
+            cost: 1,
+            product: 1,
+            _id: 1
+          }
+        },
+        {
+          $group: {
+            "_id": {
+              "ownerId": "$_id.ownerId",
+            },
+            products: {
+              $addToSet: "$product"
+            },
+            totalCount: {
+              $sum: "$count"
+            },
+            totalCost: {
+              $sum: "$cost"
             }
           }
         },
@@ -507,13 +612,10 @@ module.exports = function (Item) {
         {
           $project: {
             owner: 1,
-            count: 1,
+            products: 1,
+            totalCost: 1,
+            totalCount: 1,
             _id: 0
-          }
-        },
-        {
-          $sort: {
-            "count": 1,
           }
         },
       ]);
@@ -527,6 +629,28 @@ module.exports = function (Item) {
     })
   };
 
+  Item.getUserRelated = function (userId, isOwner, callback) {
+    var where = {}
+    if (isOwner == true) {
+      where = {
+        "ownerId": userId,
+        "type": "Chat Extend"
+      }
+    } else {
+      where = {
+        "relatedUserId": userId,
+        "type": "Chat Extend"
+      }
+    }
+
+    Item.find({
+      "where": where
+    }, function (err, items) {
+      if (err)
+        return callback(err)
+      return callback(null, items)
+    })
+  }
   Item.chatExtendReportRelated = function (filter, callback) {
     var relatedUserMatch = {
       type: "Chat Extend",
@@ -565,6 +689,95 @@ module.exports = function (Item) {
             },
             count: {
               $sum: 1
+            },
+            cost: {
+              $sum: "$price"
+            },
+          }
+        },
+        {
+          $lookup: {
+            from: "user",
+            localField: "_id.relatedUserId",
+            foreignField: "_id",
+            as: "relatedUser"
+          }
+        },
+        {
+          $unwind: "$relatedUser"
+        },
+        {
+          "$addFields": {
+            "relatedUser.id": {
+              $convert: {
+                input: "$relatedUser._id",
+                to: "string"
+              }
+            }
+          }
+        },
+        {
+          $lookup: {
+            from: "product",
+            localField: "_id.productId",
+            foreignField: "_id",
+            as: "product"
+          }
+        },
+        {
+          $unwind: "$product"
+        },
+        {
+          "$addFields": {
+            "product.id": {
+              $convert: {
+                input: "$product._id",
+                to: "string"
+              }
+            }
+          }
+        },
+        {
+          "$addFields": {
+            "product.count": {
+              $convert: {
+                input: "$count",
+                to: "string"
+              }
+            }
+          }
+        },
+        {
+          "$addFields": {
+            "product.cost": {
+              $convert: {
+                input: "$cost",
+                to: "string"
+              }
+            }
+          }
+        },
+        {
+          $project: {
+            count: 1,
+            cost: 1,
+            product: 1,
+            _id: 1
+          }
+        },
+        {
+          $group: {
+            "_id": {
+              "relatedUserId": "$_id.relatedUserId",
+            },
+            products: {
+              $addToSet: "$product"
+            },
+            totalCount: {
+              $sum: "$count"
+            },
+            totalCost: {
+              $sum: "$cost"
             }
           }
         },
@@ -592,16 +805,15 @@ module.exports = function (Item) {
         {
           $project: {
             relatedUser: 1,
-            count: 1,
+            products: 1,
+            totalCost: 1,
+            totalCount: 1,
             _id: 0
           }
         },
-        {
-          $sort: {
-            "count": 1,
-          }
-        },
       ]);
+
+
       cursor.get(function (err, relatedUserData) {
         if (err) return callback(err);
         return callback(null,

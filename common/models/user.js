@@ -656,7 +656,7 @@ module.exports = function (User) {
       }
     });
   };
-  
+
 
   User.twitterLogin = function (data, callback) {
     var result;
@@ -856,31 +856,50 @@ module.exports = function (User) {
     })
   }
 
+  sendSMS("+963957465876", 5555)
+
   function sendSMS(from, code, callback) {
     // console.log(code);
-    // var sinchAuth = require('sinch-auth');
-    // var sinchSms = require('sinch-messaging');
-    // var auth = sinchAuth("fba316e8-69a8-4c11-ae17-b18ad1e16234", "ivqHSHS/fEOEOnPcJVPPNg==");
-    // sinchSms.sendMessage("+963957465876", "your verification code is : " + code);
 
-    var accountSid = 'AC5c12c580a60b8affaa414a5ab1367817'; // Your Account SID f$
-    var authToken = '579447a49d7dd4f733d3f3071d7781b6'; // Your Auth Token fr$
+    // var accountSid = 'AC9366e1efb73ed812183cdfe326f9d448'; // Your Account SID f$
+    // var authToken = '677f9e630acf489086cd21bf6ab33eca'; // Your Auth Token fr$
 
-    var twilio = require('twilio');
-    var client = new twilio(accountSid, authToken);
+    // // var accountSid = 'AC5c12c580a60b8affaa414a5ab1367817'; // Your Account SID f$
+    // // var authToken = '579447a49d7dd4f733d3f3071d7781b6'; // Your Auth Token fr$
 
-    client.messages.create({
-        body: 'Hello from Node',
-        to: '+963 933 074 900', // Text this number
-        from: '+14107775954' // From a valid Twilio number
-      })
-      .then((message) => console.log(message.sid))
-      .catch((e) => {
-        console.log("e");
-        console.log(e);
+    // var twilio = require('twilio');
+    // var client = new twilio(accountSid, authToken);
+
+    // client.messages.create({
+    //     body: 'your code is ' + code,
+    //     to: '+971 50 334 8851', // Text this number
+    //     from: '+1 971 302 4220'
+    //     // from: '+14107775954' // From a valid Twilio number
+    //   })
+    //   .then((message) => console.log(message.sid))
+    //   .catch((e) => {
+    //     console.log("e");
+    //     console.log(e);
+    //   });
+
+    var sinchVerification = require('sinch-verification')({
+      key: '4cf160fb-c939-491d-8ba0-de6fa91eb274',
+      secret: 'Bj1ApGmdoEGq3Pdng92VgA=='
+    });
+
+    var verification = sinchVerification.createVerification(number);
+
+    verification.initiate().then(function (result) {
+      verification.verify(code).then(function (result) {
+        console.log('Success', result);
+      }).fail(function (error) {
+        console.log('Failure', error);
       });
+    }).fail(function (error) {
+      console.log('Failure initializing', error);
+    })
 
-    callback();
+    // callback();
   }
 
 
@@ -906,7 +925,7 @@ module.exports = function (User) {
         if (err)
           return callback(err, null);
         if (codes == null)
-          return callback(null, errors.account.codeNotFound())
+          return callback(errors.account.codeNotFound())
         User.loginByPhonenumber({
           phonenumber: phonenumber,
           password: 'password',

@@ -114,6 +114,10 @@
     "has168Not": {
       "type": "boolean",
       "default": false
+    },
+    "logBootleOwner": {
+      "type": ["string"],
+      "default": []
     }
   },
   "validations": [],

@@ -291,20 +291,44 @@ module.exports = function (Bottle) {
 
 
               if (ranking[0]) {
-                var bottleUserseenObject = {
-                  "userId": req.accessToken.userId,
-                  "bottleId": ranking[0].id
+                for (let index = 0; index < ranking.length; index++) {
+                  const element = ranking[index];
+                  if (cheackLogBootleOwner(oneUser, ranking[index].ownerId)) {
+                    console.log("log is fine")
+                    var bottleUserseenObject = {
+                      "userId": req.accessToken.userId,
+                      "bottleId": ranking[index].id
+                    }
+                    Bottle.app.models.bottleUserseen.create(bottleUserseenObject)
+                      .then()
+                      .catch(err => console.log(err));
+
+                    addOwnerBootle(oneUser, ranking[index].ownerId)
+                    // oneUser.save();
+                    ranking[index].bottleViewCount++;
+                    ranking[index].save();
+                    return callback(null, ranking[index]);
+                  } else {
+                    console.log("log is not fine")
+                    if (index + 1 == ranking.length) {
+                      console.log("log is good")
+                      var bottleUserseenObject = {
+                        "userId": req.accessToken.userId,
+                        "bottleId": ranking[0].id
+                      }
+                      Bottle.app.models.bottleUserseen.create(bottleUserseenObject)
+                        .then()
+                        .catch(err => console.log(err));
+
+                      addOwnerBootle(oneUser, ranking[0].ownerId)
+                      // oneUser.save();
+                      ranking[0].bottleViewCount++;
+                      ranking[0].save();
+                      return callback(null, ranking[0
+                      ]);
+                    }
+                  }
                 }
-                Bottle.app.models.bottleUserseen.create(bottleUserseenObject)
-                  .then()
-                  .catch(err => console.log(err));
-
-                oneUser.foundBottlesCount++;
-                oneUser.save();
-                ranking[0].bottleViewCount++;
-                ranking[0].save();
-                callback(null, ranking[0]);
-
               } else {
                 callback(errors.bottle.noNewBottle(), null);
               }
@@ -316,6 +340,36 @@ module.exports = function (Bottle) {
 
   };
 
+
+  function addOwnerBootle(oneUser, ownerId) {
+    oneUser.foundBottlesCount++;
+    if (oneUser.logBootleOwner.length < 3)
+      oneUser.logBootleOwner.push(ownerId)
+    else {
+      oneUser.logBootleOwner.shift()
+      oneUser.logBootleOwner.push(ownerId)
+    }
+    oneUser.updateAttributes({
+      "logBootleOwner": oneUser.logBootleOwner.toString(),
+      "foundBottlesCount": oneUser.foundBottlesCount
+    })
+  }
+
+  function cheackLogBootleOwner(oneUser, ownerId) {
+    var countRepeted = 0;
+    for (let index = 0; index < oneUser.logBootleOwner.length; index++) {
+      const element = oneUser.logBootleOwner[index];
+      if (element == ownerId.toString())
+        countRepeted++;
+      if (index + 1 == oneUser.logBootleOwner.length) {
+        if (countRepeted < 2)
+          return true;
+        else
+          return false
+      }
+
+    }
+  }
   // Bottle.getOneBottle = function (gender, ISOCode, shoreId, req, callback) {
   //   var result;
   //   var filter = {};
@@ -608,8 +662,8 @@ module.exports = function (Bottle) {
       Bottle.find({
         order: 'createdAt DESC',
         limit: 2000,
-        where:{
-          "status":"active"
+        where: {
+          "status": "active"
         },
         include: {
           relation: 'owner',
@@ -692,9 +746,9 @@ module.exports = function (Bottle) {
             numofDeleted++
           } else if (numberOfSeenThisBottle > 0) {
             ranking[index - numofDeleted].numberRepeted = numberOfSeenThisBottle;
-            console.log("numberOfSeenThisBottle");
-            console.log(ranking[index - numofDeleted].numberRepeted);
-            console.log(ranking[index - numofDeleted].id);
+            // console.log("numberOfSeenThisBottle");
+            // console.log(ranking[index - numofDeleted].numberRepeted);
+            // console.log(ranking[index - numofDeleted].id);
             newRanking.unshift(ranking[index - numofDeleted]);
             ranking.splice(index - numofDeleted, 1);
             numofDeleted++
