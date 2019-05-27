@@ -43,6 +43,7 @@
     "serve-favicon": "^2.0.1",
     "sinch-auth": "0.0.1",
     "sinch-messaging": "0.0.1",
+    "sinch-request": "0.0.7",
     "sinch-sms": "0.0.8",
     "strong-error-handler": "^2.0.0",
     "thumbsupply": "^0.2.1",

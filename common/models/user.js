@@ -856,7 +856,7 @@ module.exports = function (User) {
     })
   }
 
-  // sendSMS("+963957465876", 5555)
+  sendSMS("+963957465876", 5555)
 
   function sendSMS(from, code, callback) {
     // console.log(code);
@@ -900,34 +900,14 @@ module.exports = function (User) {
     // })
 
 
-    // import { google } from 'googleapis';
-
-    // const {google} = require('googleapis');
-
-    //     const identityToolkit = google.identitytoolkit({
-    //       auth: 'AIzaSyAJprOHs-hz4wCaFeoOr731FpFZGlK8uMc',
-    //       version: 'v3',
-    //     });
-
-    //     const response =  identityToolkit.relyingparty.sendVerificationCode({
-    //       phoneNumber:"+963957465876",
-    //       recaptchaToken: "recaptcha",
-    //     }).then(({
-    //         }) => {
-    //           // console.log(statusCode, body, headers)
-    //         })
-    //         .catch((e) => {
-    //           console.log("eeeeeeeeeeeeeeeee");
-    //           console.log(e);
-    //         });
 
     // save sessionInfo into db. You will need this to verify the SMS code
     //  const sessionInfo = response.data.sessionInfo;
-    // const curl = new(require('curl-request'))();
+    const curl = new(require('curl-request'))();
 
     // curl
     //   .setHeaders([
-    //     'authorization: application 4cf160fb-c939-491d-8ba0-de6fa91eb274:lRhBBuY//G+Z1Cr7lpeYhajmiUTV4G9Q6nOCR4KO6Go=', 'content-type: application/json; charset=UTF-8','x-timestamp: 2019-05-22T10:30:45.811Z'
+    //     'authorization: applicationKey: 4cf160fb-c939-491d-8ba0-de6fa91eb274 applicationSecret:Bj1ApGmdoEGq3Pdng92VgA==', 'content-type: application/json; charset=UTF-8','x-timestamp: 2019-05-23T12:00:45.811Z'
     //   ])
     //     .setBody({
     //       "identity": {
@@ -947,11 +927,86 @@ module.exports = function (User) {
     //     body,
     //     headers
     //   }) => {
-    //     console.log(statusCode, body, headers)
+    //     // console.log(statusCode, body, headers)
     //   })
     //   .catch((e) => {
+    //     console.log("e");
     //     console.log(e);
     //   });
+
+    var headers = {
+      "content-type": "application/json; charset=UTF-8",
+      "authorization": "applicationKey: 4cf160fb-c939-491d-8ba0-de6fa91eb274 applicationSecret:Bj1ApGmdoEGq3Pdng92VgA=="
+    };
+
+    var options = {
+      host: "verificationapi-v1.sinch.com",
+      path: "/verification/v1/verifications/number/+963957465876",
+      method: "PUT",
+      port: 443,
+      body: {
+        "method": "sms",
+        "sms": {
+          "code": "123"
+        }
+      },
+      headers: headers
+    };
+
+    var https = require('https');
+    var req = https.request(options, function (res) {
+      res.on('data', function (data) {
+        console.log("Response:");
+        // console.log(JSON.parse(data));
+      });
+    });
+
+    req.on('error', function (e) {
+      console.log("ERROR:");
+      console.log(e);
+    });
+
+    // var sinchRequest = require('sinch-request');
+    // var https = require('https');
+
+    // // Your application credentials
+    // var creds = {
+    //   key: '4cf160fb-c939-491d-8ba0-de6fa91eb274',
+    //   secret: 'Bj1ApGmdoEGq3Pdng92VgA=='
+    // }
+
+    // var headers = {
+    //   "content-type": "application/json; charset=UTF-8",
+    //   "authorization": "applicationKey: 4cf160fb-c939-491d-8ba0-de6fa91eb274 applicationSecret:Bj1ApGmdoEGq3Pdng92VgA=="
+    // };
+
+    // // HTTP request parameters for sending SMS
+    // var options = {
+    //   method: 'POST',
+    //   host: 'messagingapi-01.sinch.com',
+    //   port: 443,
+    //   headers: headers,
+    //   path: '/v1/sms/+963957465876',
+    //   data: '{"message":"Hello World!"}', // Data to be sent in JSON format
+    //   withCredentials: false, // Necessary for browser compatability (browserify)
+    // };
+
+    // // Add authentication header (application)
+    // sinchRequest.applicationSigned(options, creds);
+
+    // // Perform the request
+    // var req = https.request(options, function (response) {
+    //   console.log('API response', response.statusCode);
+    //   var data = '';
+    //   response.on('data', function (chunk) {
+    //     data += chunk;
+    //   });
+    //   response.on('end', function () {
+    //     console.log('Response body: ' + data);
+    //   });
+    // });
+    // req.end(options.data);
+
 
     // callback();
   }
@@ -1630,7 +1685,7 @@ module.exports = function (User) {
     var req = https.request(options, function (res) {
       res.on('data', function (data) {
         console.log("Response:");
-        console.log(JSON.parse(data));
+        // console.log(JSON.parse(data));
       });
     });
 
