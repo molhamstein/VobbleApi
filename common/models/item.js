@@ -37,17 +37,26 @@ module.exports = function (Item) {
         if (product == null) {
           return next(errors.product.productNotFound());
         }
-        product.productSold++;
-        product.save();
-        if (context.req.body.ownerId == null && context.req.accessToken != null)
-          context.req.body.ownerId = context.req.accessToken.userId;
+        Item.app.models.User.findById(context.req.accessToken.userId, function (err, user) {
+          if (err)
+            return next(err, null);
+          if (user.status != 'active') {
+            return next(errors.product.unvalidReceipt());
+          }
 
-        context.req.body.type = product.type;
-        context.req.body.price = product.price;
-        console.log("context.req.body");
-        console.log(context.req.body);
+          product.productSold++;
+          product.save();
+          if (context.req.body.ownerId == null && context.req.accessToken != null)
+            context.req.body.ownerId = context.req.accessToken.userId;
 
-        next();
+
+          context.req.body.type = product.type;
+          context.req.body.price = product.price;
+          console.log("context.req.body");
+          console.log(context.req.body);
+
+          next();
+        })
       })
     } else {
       Item.app.models.User.findById(context.req.accessToken.userId, function (err, user) {

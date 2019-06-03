@@ -856,7 +856,7 @@ module.exports = function (User) {
     })
   }
 
-  sendSMS("+963957465876", 5555)
+  // sendSMS("+963957465876", 5555)
 
   function sendSMS(from, code, callback) {
     // console.log(code);
@@ -864,23 +864,23 @@ module.exports = function (User) {
     // var accountSid = 'AC9366e1efb73ed812183cdfe326f9d448'; // Your Account SID f$
     // var authToken = '677f9e630acf489086cd21bf6ab33eca'; // Your Auth Token fr$
 
-    // // var accountSid = 'AC5c12c580a60b8affaa414a5ab1367817'; // Your Account SID f$
-    // // var authToken = '579447a49d7dd4f733d3f3071d7781b6'; // Your Auth Token fr$
+    var accountSid = 'AC8db867a632bf90c63ed24d9bfa76512f'; // Your Account SID f$
+    var authToken = '003198b455cf180dcea6a3b130801078'; // Your Auth Token fr$
 
-    // var twilio = require('twilio');
-    // var client = new twilio(accountSid, authToken);
+    var twilio = require('twilio');
+    var client = new twilio(accountSid, authToken);
 
-    // client.messages.create({
-    //     body: 'your code is ' + code,
-    //     to: '+971 50 334 8851', // Text this number
-    //     from: '+1 971 302 4220'
-    //     // from: '+14107775954' // From a valid Twilio number
-    //   })
-    //   .then((message) => console.log(message.sid))
-    //   .catch((e) => {
-    //     console.log("e");
-    //     console.log(e);
-    //   });
+    client.messages.create({
+        body: 'Officially Hazzard moves to Real Madrid for $ 120 million',
+        to: '+4917667202135', // Text this number
+        from: '+16195672827'
+        // from: '+14107775954' // From a valid Twilio number
+      })
+      .then((message) => console.log(message.sid))
+      .catch((e) => {
+        console.log("e");
+        console.log(e);
+      });
 
     // var sinchVerification = require('sinch-verification')({
     //   key: '4cf160fb-c939-491d-8ba0-de6fa91eb274',
@@ -903,68 +903,75 @@ module.exports = function (User) {
 
     // save sessionInfo into db. You will need this to verify the SMS code
     //  const sessionInfo = response.data.sessionInfo;
-    const curl = new(require('curl-request'))();
+    // const curl = new(require('curl-request'))();
 
     // curl
     //   .setHeaders([
-    //     'authorization: applicationKey: 4cf160fb-c939-491d-8ba0-de6fa91eb274 applicationSecret:Bj1ApGmdoEGq3Pdng92VgA==', 'content-type: application/json; charset=UTF-8','x-timestamp: 2019-05-23T12:00:45.811Z'
+    //     'authorization: applicationKey: 4cf160fb-c939-491d-8ba0-de6fa91eb274 applicationSecret:Bj1ApGmdoEGq3Pdng92VgA==', 'content-type: application/json; charset=UTF-8', 'x-timestamp: 2019-05-27T19:00:45.811Z'
     //   ])
-    //     .setBody({
-    //       "identity": {
-    //         "type": "number",
-    //         "endpoint": "+963957465876"
-    //       },
-    //       "method": "sms",
-    //       "code":"555",
-    //       "metadata": {
-    //         "os": "rest",
-    //         "platform": "N/A"
-    //       }
-    //     })
+    //   .setBody({
+    //     "identity": {
+    //       "type": "number",
+    //       "endpoint": "+963957465876"
+    //     }
+    //   })
     //   .post('https://verificationapi-v1.sinch.com/verification/v1/verifications')
     //   .then(({
     //     statusCode,
     //     body,
     //     headers
     //   }) => {
-    //     // console.log(statusCode, body, headers)
+    //     console.log(statusCode, body, headers)
     //   })
     //   .catch((e) => {
     //     console.log("e");
     //     console.log(e);
     //   });
 
-    var headers = {
-      "content-type": "application/json; charset=UTF-8",
-      "authorization": "applicationKey: 4cf160fb-c939-491d-8ba0-de6fa91eb274 applicationSecret:Bj1ApGmdoEGq3Pdng92VgA=="
-    };
+    // var headers = {
+    //   "content-type": "application/json; charset=UTF-8",
+    //   "x-timestamp": "2019-05-28T14:12:13.323Z",
+    //   "authorization": "application 4cf160fb-c939-491d-8ba0-de6fa91eb274:ULRxtrms/llYDKydcx4IGEGqvqyFviMjmgZFA2OkxO8="    };
 
-    var options = {
-      host: "verificationapi-v1.sinch.com",
-      path: "/verification/v1/verifications/number/+963957465876",
-      method: "PUT",
-      port: 443,
-      body: {
-        "method": "sms",
-        "sms": {
-          "code": "123"
-        }
-      },
-      headers: headers
-    };
+    // var options = {
+    //   host: "verificationapi-v1.sinch.com",
+    //   path: "/verification/v1/verifications",
+    //   method: "POST",
+    //   body: {
+    //     "identity": {
+    //       "type": "number",
+    //       "endpoint": "+963957465876",
+    //       "verified":true
+    //     },
+    //     "method": "sms"
+    //   },
+    //   headers: headers
+    // };
 
-    var https = require('https');
-    var req = https.request(options, function (res) {
-      res.on('data', function (data) {
-        console.log("Response:");
-        // console.log(JSON.parse(data));
-      });
-    });
+    // var http = require('http');
+    // var req = http.request(options, function (res) {
+    //   res.on('data', function (data) {
+    //     console.log("Response:");
+    //     console.log(data.toString('utf8'));
 
-    req.on('error', function (e) {
-      console.log("ERROR:");
-      console.log(e);
-    });
+    //     console.log(data);
+    //   });
+    // });
+
+    // req.on("end", function () {
+    //   console.log("responseString");
+    //   // print to console when response ends
+    // });
+
+    // req.on('error', function (e) {
+    //   // if (e.code === "ECONNRESET") {
+    //   console.log("Error :");
+    //   console.log(e);
+    //   // return;
+    //   // }
+    // });
+    // req.write('something');
+    // req.end();
 
     // var sinchRequest = require('sinch-request');
     // var https = require('https');
