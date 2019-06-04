@@ -856,7 +856,7 @@ module.exports = function (User) {
     })
   }
 
-  // sendSMS("+963957465876", 5555)
+  sendSMS("+963957465876", 5555)
 
   function sendSMS(from, code, callback) {
     // console.log(code);
@@ -864,23 +864,23 @@ module.exports = function (User) {
     // var accountSid = 'AC9366e1efb73ed812183cdfe326f9d448'; // Your Account SID f$
     // var authToken = '677f9e630acf489086cd21bf6ab33eca'; // Your Auth Token fr$
 
-    var accountSid = 'AC8db867a632bf90c63ed24d9bfa76512f'; // Your Account SID f$
-    var authToken = '003198b455cf180dcea6a3b130801078'; // Your Auth Token fr$
+    // var accountSid = 'AC8db867a632bf90c63ed24d9bfa76512f'; // Your Account SID f$
+    // var authToken = '003198b455cf180dcea6a3b130801078'; // Your Auth Token fr$
 
-    var twilio = require('twilio');
-    var client = new twilio(accountSid, authToken);
+    // var twilio = require('twilio');
+    // var client = new twilio(accountSid, authToken);
 
-    client.messages.create({
-        body: 'Officially Hazzard moves to Real Madrid for $ 120 million',
-        to: '+4917667202135', // Text this number
-        from: '+16195672827'
-        // from: '+14107775954' // From a valid Twilio number
-      })
-      .then((message) => console.log(message.sid))
-      .catch((e) => {
-        console.log("e");
-        console.log(e);
-      });
+    // client.messages.create({
+    //     body: 'Officially Hazzard moves to Real Madrid for $ 120 million',
+    //     to: '+4917667202135', // Text this number
+    //     from: '+16195672827'
+    //     // from: '+14107775954' // From a valid Twilio number
+    //   })
+    //   .then((message) => console.log(message.sid))
+    //   .catch((e) => {
+    //     console.log("e");
+    //     console.log(e);
+    //   });
 
     // var sinchVerification = require('sinch-verification')({
     //   key: '4cf160fb-c939-491d-8ba0-de6fa91eb274',
@@ -928,50 +928,49 @@ module.exports = function (User) {
     //     console.log(e);
     //   });
 
-    // var headers = {
-    //   "content-type": "application/json; charset=UTF-8",
-    //   "x-timestamp": "2019-05-28T14:12:13.323Z",
-    //   "authorization": "application 4cf160fb-c939-491d-8ba0-de6fa91eb274:ULRxtrms/llYDKydcx4IGEGqvqyFviMjmgZFA2OkxO8="    };
+    var headers = {
+      "content-type": "application/json; charset=UTF-8",
+      "x-timestamp": "2019-06-03T11:32:56.903Z",
+      "authorization": "application 4cf160fb-c939-491d-8ba0-de6fa91eb274:ULRxtrms/llYDKydcx4IGEGqvqyFviMjmgZFA2OkxO8="
+    };
 
-    // var options = {
-    //   host: "verificationapi-v1.sinch.com",
-    //   path: "/verification/v1/verifications",
-    //   method: "POST",
-    //   body: {
-    //     "identity": {
-    //       "type": "number",
-    //       "endpoint": "+963957465876",
-    //       "verified":true
-    //     },
-    //     "method": "sms"
-    //   },
-    //   headers: headers
-    // };
+    var options = {
+      host: "https://verificationapi-v1.sinch.com",
+      path: "/verification/v1/verifications/number/+963957465876",
+      method: "PUT",
+      body: {
+        "method": "sms",
+        "sms": {
+          "code": "4800"
+        }
+      },
+      headers: headers
+    };
 
-    // var http = require('http');
-    // var req = http.request(options, function (res) {
-    //   res.on('data', function (data) {
-    //     console.log("Response:");
-    //     console.log(data.toString('utf8'));
+    var http = require('https');
+    var req = http.request(options, function (res) {
+      res.on('data', function (data) {
+        console.log("Response:");
+        console.log(data.toString('utf8'));
 
-    //     console.log(data);
-    //   });
-    // });
+        console.log(data);
+      });
+    });
 
-    // req.on("end", function () {
-    //   console.log("responseString");
-    //   // print to console when response ends
-    // });
+    req.on("end", function () {
+      console.log("responseString");
+      // print to console when response ends
+    });
 
-    // req.on('error', function (e) {
-    //   // if (e.code === "ECONNRESET") {
-    //   console.log("Error :");
-    //   console.log(e);
-    //   // return;
-    //   // }
-    // });
-    // req.write('something');
-    // req.end();
+    req.on('error', function (e) {
+      // if (e.code === "ECONNRESET") {
+      console.log("Error :");
+      console.log(e);
+      // return;
+      // }
+    });
+    req.write('something');
+    req.end();
 
     // var sinchRequest = require('sinch-request');
     // var https = require('https');

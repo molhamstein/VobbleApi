@@ -186,6 +186,25 @@
         "verb": "get"
       }]
     },
+    "chatExtendReportOwnerCount": {
+      "accepts": [{
+        "arg": "filter",
+        "type": "object",
+        "required": false,
+        "description": "filter Item"
+      }],
+      "returns": [{
+        "arg": "result",
+        "type": "object",
+        "root": true,
+        "description": ""
+      }],
+      "description": "get report about chatExtend",
+      "http": [{
+        "path": "/chatExtendReportOwnerCount",
+        "verb": "get"
+      }]
+    },
     "chatExtendReportRelated": {
       "accepts": [{
         "arg": "filter",
@@ -202,6 +221,25 @@
       "description": "get report about chatExtend",
       "http": [{
         "path": "/chatExtendReportRelated",
+        "verb": "get"
+      }]
+    },
+    "chatExtendReportRelatedCount": {
+      "accepts": [{
+        "arg": "filter",
+        "type": "object",
+        "required": false,
+        "description": "filter Item"
+      }],
+      "returns": [{
+        "arg": "result",
+        "type": "object",
+        "root": true,
+        "description": ""
+      }],
+      "description": "get report about chatExtend",
+      "http": [{
+        "path": "/chatExtendReportRelatedCount",
         "verb": "get"
       }]
     },

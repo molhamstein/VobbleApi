@@ -637,7 +637,180 @@ module.exports = function (Item) {
       })
     })
   };
+  Item.chatExtendReportOwnerCount = function (filter, callback) {
+    var ownerMatch = {
+      type: "Chat Extend",
 
+    };
+
+    if (filter && filter.from) {
+      ownerMatch['startAt'] = {
+        '$gt': new Date(filter.from)
+      }
+    }
+
+    if (filter && filter.to) {
+      if (ownerMatch['startAt'] == null)
+        ownerMatch['startAt'] = {}
+      ownerMatch['startAt']['$lt'] = new Date(filter.to)
+    }
+
+    if (filter && filter.userId) {
+      ownerMatch['ownerId'] = ObjectId(filter.userId)
+    }
+
+    console.log(ownerMatch)
+
+    Item.getDataSource().connector.connect(function (err, db) {
+
+      var collection = db.collection('item');
+      var cursor = collection.aggregate([{
+          $match: ownerMatch
+        },
+        {
+          $group: {
+            "_id": {
+              "ownerId": "$ownerId",
+              "productId": "$productId"
+            },
+            count: {
+              $sum: 1
+            },
+            cost: {
+              $sum: "$price"
+            },
+          }
+        },
+        {
+          $lookup: {
+            from: "user",
+            localField: "_id.ownerId",
+            foreignField: "_id",
+            as: "owner"
+          }
+        },
+        {
+          $unwind: "$owner"
+        },
+        {
+          "$addFields": {
+            "owner.id": {
+              $convert: {
+                input: "$owner._id",
+                to: "string"
+              }
+            }
+          }
+        },
+
+
+        {
+          $lookup: {
+            from: "product",
+            localField: "_id.productId",
+            foreignField: "_id",
+            as: "product"
+          }
+        },
+        {
+          $unwind: "$product"
+        },
+        {
+          "$addFields": {
+            "product.id": {
+              $convert: {
+                input: "$product._id",
+                to: "string"
+              }
+            }
+          }
+        },
+        {
+          "$addFields": {
+            "product.count": {
+              $convert: {
+                input: "$count",
+                to: "string"
+              }
+            }
+          }
+        },
+        {
+          "$addFields": {
+            "product.cost": {
+              $convert: {
+                input: "$cost",
+                to: "string"
+              }
+            }
+          }
+        },
+
+        {
+          $project: {
+            count: 1,
+            cost: 1,
+            product: 1,
+            _id: 1
+          }
+        },
+        {
+          $group: {
+            "_id": {
+              "ownerId": "$_id.ownerId",
+            },
+            products: {
+              $addToSet: "$product"
+            },
+            totalCount: {
+              $sum: "$count"
+            },
+            totalCost: {
+              $sum: "$cost"
+            }
+          }
+        },
+        {
+          $lookup: {
+            from: "user",
+            localField: "_id.ownerId",
+            foreignField: "_id",
+            as: "owner"
+          }
+        },
+        {
+          $unwind: "$owner"
+        },
+        {
+          "$addFields": {
+            "owner.id": {
+              $convert: {
+                input: "$owner._id",
+                to: "string"
+              }
+            }
+          }
+        },
+        {
+          $project: {
+            owner: 1,
+            products: 1,
+            totalCost: 1,
+            totalCount: 1,
+            _id: 0
+          }
+        },
+      ]);
+      cursor.get(function (err, ownerData) {
+        if (err) return callback(err);
+
+        return callback(null,
+          {"count":ownerData.length}
+        );
+      })
+    })
+  };
+  
   Item.getUserRelated = function (userId, isOwner, callback) {
     var where = {}
     if (isOwner == true) {
@@ -828,6 +1001,178 @@ module.exports = function (Item) {
         return callback(null,
           relatedUserData
         );
+      })
+    })
+  };
+
+  Item.chatExtendReportRelatedCount = function (filter, callback) {
+    var relatedUserMatch = {
+      type: "Chat Extend",
+
+    };
+
+    if (filter && filter.from) {
+      relatedUserMatch['startAt'] = {
+        '$gt': new Date(filter.from)
+      }
+    }
+
+    if (filter && filter.to) {
+      if (relatedUserMatch['startAt'] == null)
+        relatedUserMatch['startAt'] = {}
+      relatedUserMatch['startAt']['$lt'] = new Date(filter.to)
+    }
+
+
+    if (filter && filter.userId) {
+      relatedUserMatch['relatedUserId'] = ObjectId(filter.userId)
+    }
+
+    Item.getDataSource().connector.connect(function (err, db) {
+
+      var collection = db.collection('item');
+
+      var cursor = collection.aggregate([{
+          $match: relatedUserMatch
+        },
+        {
+          $group: {
+            "_id": {
+              "relatedUserId": "$relatedUserId",
+              "productId": "$productId"
+            },
+            count: {
+              $sum: 1
+            },
+            cost: {
+              $sum: "$price"
+            },
+          }
+        },
+        {
+          $lookup: {
+            from: "user",
+            localField: "_id.relatedUserId",
+            foreignField: "_id",
+            as: "relatedUser"
+          }
+        },
+        {
+          $unwind: "$relatedUser"
+        },
+        {
+          "$addFields": {
+            "relatedUser.id": {
+              $convert: {
+                input: "$relatedUser._id",
+                to: "string"
+              }
+            }
+          }
+        },
+        {
+          $lookup: {
+            from: "product",
+            localField: "_id.productId",
+            foreignField: "_id",
+            as: "product"
+          }
+        },
+        {
+          $unwind: "$product"
+        },
+        {
+          "$addFields": {
+            "product.id": {
+              $convert: {
+                input: "$product._id",
+                to: "string"
+              }
+            }
+          }
+        },
+        {
+          "$addFields": {
+            "product.count": {
+              $convert: {
+                input: "$count",
+                to: "string"
+              }
+            }
+          }
+        },
+        {
+          "$addFields": {
+            "product.cost": {
+              $convert: {
+                input: "$cost",
+                to: "string"
+              }
+            }
+          }
+        },
+        {
+          $project: {
+            count: 1,
+            cost: 1,
+            product: 1,
+            _id: 1
+          }
+        },
+        {
+          $group: {
+            "_id": {
+              "relatedUserId": "$_id.relatedUserId",
+            },
+            products: {
+              $addToSet: "$product"
+            },
+            totalCount: {
+              $sum: "$count"
+            },
+            totalCost: {
+              $sum: "$cost"
+            }
+          }
+        },
+        {
+          $lookup: {
+            from: "user",
+            localField: "_id.relatedUserId",
+            foreignField: "_id",
+            as: "relatedUser"
+          }
+        },
+        {
+          $unwind: "$relatedUser"
+        },
+        {
+          "$addFields": {
+            "relatedUser.id": {
+              $convert: {
+                input: "$relatedUser._id",
+                to: "string"
+              }
+            }
+          }
+        },
+        {
+          $project: {
+            relatedUser: 1,
+            products: 1,
+            totalCost: 1,
+            totalCount: 1,
+            _id: 0
+          }
+        },
+      ]);
+
+
+      cursor.get(function (err, relatedUserData) {
+        if (err) return callback(err);
+        return callback(null, {
+          "count": relatedUserData.length
+        });
       })
     })
   };

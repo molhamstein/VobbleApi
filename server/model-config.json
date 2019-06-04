@@ -80,7 +80,7 @@
   },
   "country": {
     "dataSource": "db",
-    "public": false
+    "public": true
   },
   "typeGoods": {
     "dataSource": "db",
