@@ -856,7 +856,7 @@ module.exports = function (User) {
     })
   }
 
-  sendSMS("+963957465876", 5555)
+  // sendSMS("+963957465876", 5555)
 
   function sendSMS(from, code, callback) {
     // console.log(code);

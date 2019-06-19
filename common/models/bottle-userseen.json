@@ -5,7 +5,18 @@
   "options": {
     "validateUpsert": true
   },
-  "properties": {},
+  "scope": {
+    "include": [{
+      "relation": "users"
+    }]
+  },
+  "properties": {
+    "createdAt": {
+      "type": "date",
+      "required": true,
+      "defaultFn": "now"
+    }
+  },
   "validations": [],
   "relations": {
     "bottles": {
@@ -14,7 +25,7 @@
       "foreignKey": "bottleId"
     },
     "users": {
-      "type": "hasMany",
+      "type": "belongsTo",
       "model": "user",
       "foreignKey": "userId"
     }

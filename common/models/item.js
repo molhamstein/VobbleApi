@@ -185,7 +185,7 @@ module.exports = function (Item) {
           callback(err, null);
         console.log("items")
         console.log(items.length)
-        console.log(items)
+        // console.log(items)
         var result = [];
         if (items && items.length != 0) {
           items.forEach(function (element, index) {
@@ -194,9 +194,11 @@ module.exports = function (Item) {
                 // console.log(goodId);
                 if (((ISOCode == "" || owner.ISOCode == ISOCode) && (goodId == "" || product.typeGoodsId == goodId)) && (username == "" || owner.username.includes(username))) {
                   result.push(element);
+                }
 
-                  if (index + 1 == items.length)
-                    callback(null, result);
+                if (index + 1 == items.length) {
+                  console.log("resuuuuuuuult");
+                  callback(null, result);
                 }
               })
             })
@@ -353,7 +355,9 @@ module.exports = function (Item) {
       items.forEach(function (element) {
         var object = {};
         var secObject = {};
+        var thierdObject = {};
         var ownerObject
+        var relatedUserObject
         var productObject;
         element.owner(function (err, owner) {
           var countryNaem
@@ -437,9 +441,60 @@ module.exports = function (Item) {
         }
 
         if (ownerObject != null || productObject != null) {
+          if (element.type == "Chat Extend") {
+            element.relatedUser(function (err, relatedUser) {
+              var countryNaem=""
+              relatedUser.country(function (err, country) {
+                countryNaem = country.name
+              })
+
+              if (relatedUser['lastLogin'] != null)
+              relatedUserObject = {
+                  countryRelatedUser: countryNaem,
+                  imageRelatedUser: relatedUser['image'],
+                  totalBottlesThrownRelatedUser: relatedUser['totalBottlesThrown'],
+                  repliesBottlesCountRelatedUser: relatedUser['repliesBottlesCount'],
+                  repliesReceivedCountRelatedUser: relatedUser['repliesReceivedCount'],
+                  foundBottlesCountRelatedUser: relatedUser['foundBottlesCount'],
+                  extraBottlesCountRelatedUser: relatedUser['extraBottlesCount'],
+                  bottlesCountRelatedUser: relatedUser['bottlesCount'],
+                  registrationCompletedRelatedUser: relatedUser['registrationCompleted'],
+                  genderRelatedUser: relatedUser['gender'],
+                  nextRefillRelatedUser: relatedUser['nextRefill'].toString(),
+                  createdAtRelatedUser: relatedUser['createdAt'].toString(),
+                  lastLoginRelatedUser: relatedUser['lastLogin'].toString(),
+                  emailRelatedUser: relatedUser['email'],
+                  statusRelatedUser: relatedUser['status'],
+                  typeLogInRelatedUser: relatedUser['typeLogIn'],
+                  relatedUser: relatedUser['username']
+                }
+              else
+              relatedUserObject = {
+                  countryRelatedUser: countryNaem,
+                  imageRelatedUser: relatedUser['image'],
+                  totalBottlesThrownRelatedUser: relatedUser['totalBottlesThrown'],
+                  repliesBottlesCountRelatedUser: relatedUser['repliesBottlesCount'],
+                  repliesReceivedCountRelatedUser: relatedUser['repliesReceivedCount'],
+                  foundBottlesCountRelatedUser: relatedUser['foundBottlesCount'],
+                  extraBottlesCountRelatedUser: relatedUser['extraBottlesCount'],
+                  bottlesCountRelatedUser: relatedUser['bottlesCount'],
+                  registrationCompletedRelatedUser: relatedUser['registrationCompleted'],
+                  genderRelatedUser: relatedUser['gender'],
+                  nextRefillRelatedUser: relatedUser['nextRefill'].toString(),
+                  createdAtRelatedUser: relatedUser['createdAt'].toString(),
+                  emailRelatedUser: relatedUser['email'],
+                  statusRelatedUser: relatedUser['status'],
+                  typeLogInRelatedUser: relatedUser['typeLogIn'],
+                  relatedUser: relatedUser['username']
+                }
+              console.log("relatedUser");
+              console.log(relatedUser);
+            })
+          }
           object = Object.assign({}, objectItem, productObject);
           secObject = Object.assign({}, object, ownerObject);
-          data.push(secObject);
+          thierdObject = Object.assign({}, secObject, relatedUserObject);
+          data.push(thierdObject);
         }
       }, this);
       var model = mongoXlsx.buildDynamicModel(data);
@@ -804,13 +859,13 @@ module.exports = function (Item) {
       cursor.get(function (err, ownerData) {
         if (err) return callback(err);
 
-        return callback(null,
-          {"count":ownerData.length}
-        );
+        return callback(null, {
+          "count": ownerData.length
+        });
       })
     })
   };
-  
+
   Item.getUserRelated = function (userId, isOwner, callback) {
     var where = {}
     if (isOwner == true) {

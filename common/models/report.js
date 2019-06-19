@@ -43,22 +43,70 @@ module.exports = function (Report) {
       save: true,
       fileName: 'report' + Date.now() + '.xlsx'
     };
-    console.log("filter");
-    console.log(filter);
     var data = [];
     Report.find(filter, function (err, reports) {
       reports.forEach(function (element) {
         var object = {};
-        var secObject={}
+        var secObject = {}
+        var thierdObject = {}
         var typeObject;
         var objectreport;
         var ownerObject;
+        var ownerBottleObject;
+
         var countryNaem = ""
         element.report_Type(function (err, report_Type) {
           typeObject = {
             "report type EN": report_Type['reportName_en'],
             "report type AR": report_Type['reportName_ar']
           }
+        })
+        element.bottle(function (err, bottle) {
+          if (bottle)
+            bottle.owner(function (err, ownerBottle) {
+              ownerBottle.country(function (err, country) {
+                countryNaem = country.name
+              })
+              if (ownerBottle['lastLogin'] != null)
+                ownerBottleObject = {
+                  countryOwnerBottle: countryNaem,
+                  imageOwnerBottle: ownerBottle['image'],
+                  totalBottlesThrownOwnerBottle: ownerBottle['totalBottlesThrown'],
+                  repliesBottlesCountOwnerBottle: ownerBottle['repliesBottlesCount'],
+                  repliesReceivedCountOwnerBottle: ownerBottle['repliesReceivedCount'],
+                  foundBottlesCountOwnerBottle: ownerBottle['foundBottlesCount'],
+                  extraBottlesCountOwnerBottle: ownerBottle['extraBottlesCount'],
+                  bottlesCountOwnerBottle: ownerBottle['bottlesCount'],
+                  registrationCompletedOwnerBottle: ownerBottle['registrationCompleted'],
+                  genderOwnerBottle: ownerBottle['gender'],
+                  nextRefillOwnerBottle: ownerBottle['nextRefill'].toString(),
+                  ceatedAtOwnerBottle: ownerBottle['createdAt'].toString(),
+                  lastLoginOwnerBottle: ownerBottle['lastLogin'].toString(),
+                  emailOwnerBottle: ownerBottle['email'],
+                  statusOwnerBottle: ownerBottle['status'],
+                  typeLogInOwnerBottle: ownerBottle['typeLogIn'],
+                  owner: ownerBottle['username']
+                }
+              else
+                ownerBottleObject = {
+                  countryOwnerBottle: countryNaem,
+                  imageOwnerBottle: ownerBottle['image'],
+                  totalBottlesThrownOwnerBottle: ownerBottle['totalBottlesThrown'],
+                  repliesBottlesCountOwnerBottle: ownerBottle['repliesBottlesCount'],
+                  repliesReceivedCountOwnerBottle: ownerBottle['repliesReceivedCount'],
+                  foundBottlesCountOwnerBottle: ownerBottle['foundBottlesCount'],
+                  extraBottlesCountOwnerBottle: ownerBottle['extraBottlesCount'],
+                  bottlesCountOwnerBottle: ownerBottle['bottlesCount'],
+                  registrationCompletedOwnerBottle: ownerBottle['registrationCompleted'],
+                  genderOwnerBottle: ownerBottle['gender'],
+                  nextRefillOwnerBottle: ownerBottle['nextRefill'].toString(),
+                  createdAtOwnerBottle: ownerBottle['createdAt'].toString(),
+                  emailOwnerBottle: ownerBottle['email'],
+                  statusOwnerBottle: ownerBottle['status'],
+                  typeLogInOwnerBottle: ownerBottle['typeLogIn'],
+                  owner: ownerBottle['username']
+                }
+            })
         })
         element.owner(function (err, owner) {
           owner.country(function (err, country) {
@@ -82,7 +130,7 @@ module.exports = function (Report) {
               email: owner['email'],
               status: owner['status'],
               typeLogIn: owner['typeLogIn'],
-              username: owner['username']
+              reporter: owner['username']
             }
           else
             ownerObject = {
@@ -101,7 +149,7 @@ module.exports = function (Report) {
               email: owner['email'],
               status: owner['status'],
               typeLogIn: owner['typeLogIn'],
-              username: owner['username']
+              reporter: owner['username']
             }
         })
         var objectreport = {
@@ -110,7 +158,8 @@ module.exports = function (Report) {
 
         object = Object.assign({}, objectreport, typeObject);
         secObject = Object.assign({}, object, ownerObject);
-        data.push(secObject);
+        thierdObject = Object.assign({}, secObject, ownerBottleObject);
+        data.push(thierdObject);
       }, this);
       /* Generate automatic model for processing (A static model should be used) */
       var model = mongoXlsx.buildDynamicModel(data);

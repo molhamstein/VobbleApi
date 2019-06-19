@@ -324,8 +324,7 @@ module.exports = function (Bottle) {
                       // oneUser.save();
                       ranking[0].bottleViewCount++;
                       ranking[0].save();
-                      return callback(null, ranking[0
-                      ]);
+                      return callback(null, ranking[0]);
                     }
                   }
                 }
@@ -584,7 +583,7 @@ module.exports = function (Bottle) {
 
 
   rule.minute = 2;
-  cron.scheduleJob('0 */2 * * *', function () {
+  cron.scheduleJob('*/15 * * * *', function () {
     Bottle.updateAll({
       totalWeight: '-99999999999999999999999'
     }, function (err, info) {
@@ -1274,7 +1273,9 @@ module.exports = function (Bottle) {
           status: element['status'],
           thumbnail: element['thumbnail'],
           CreatedAt: element['createdAt'].toString(),
+          viewUserCount: element['bottleViewCount'],
           repliesUserCount: element['repliesUserCount'],
+          completedUserCount: element['bottleCompleteCount']
         }
 
         if (ownerObject != null) {

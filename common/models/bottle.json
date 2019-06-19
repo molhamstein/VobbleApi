@@ -87,6 +87,22 @@
       "options": {
         "nestRemoting": true
       }
+    },
+    "userSeen": {
+      "type": "hasMany",
+      "model": "bottleUserseen",
+      "foreignKey": "bottleId",
+      "options": {
+        "nestRemoting": true
+      }
+    },
+    "userReplaies": {
+      "type": "hasMany",
+      "model": "replies",
+      "foreignKey": "bottleId",
+      "options": {
+        "nestRemoting": true
+      }
     }
   },
   "acls": [{
