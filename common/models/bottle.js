@@ -290,41 +290,41 @@ module.exports = function (Bottle) {
             ranking = sortBottle(bottles, req.accessToken.userId, seenBottle, blockList, secFilter, function (data) {
 
 
-              if (ranking[0]) {
-                for (let index = 0; index < ranking.length; index++) {
-                  const element = ranking[index];
-                  if (cheackLogBootleOwner(oneUser, ranking[index].ownerId)) {
+              if (data[0]) {
+                for (let index = 0; index < data.length; index++) {
+                  const element = data[index];
+                  if (cheackLogBootleOwner(oneUser, data[index].ownerId)) {
                     console.log("log is fine")
                     var bottleUserseenObject = {
                       "userId": req.accessToken.userId,
-                      "bottleId": ranking[index].id
+                      "bottleId": data[index].id
                     }
                     Bottle.app.models.bottleUserseen.create(bottleUserseenObject)
                       .then()
                       .catch(err => console.log(err));
 
-                    addOwnerBootle(oneUser, ranking[index].ownerId)
+                    addOwnerBootle(oneUser, data[index].ownerId)
                     // oneUser.save();
-                    ranking[index].bottleViewCount++;
-                    ranking[index].save();
-                    return callback(null, ranking[index]);
+                    data[index].bottleViewCount++;
+                    data[index].save();
+                    return callback(null, data[index]);
                   } else {
                     console.log("log is not fine")
-                    if (index + 1 == ranking.length) {
+                    if (index + 1 == data.length) {
                       console.log("log is good")
                       var bottleUserseenObject = {
                         "userId": req.accessToken.userId,
-                        "bottleId": ranking[0].id
+                        "bottleId": data[0].id
                       }
                       Bottle.app.models.bottleUserseen.create(bottleUserseenObject)
                         .then()
                         .catch(err => console.log(err));
 
-                      addOwnerBootle(oneUser, ranking[0].ownerId)
+                      addOwnerBootle(oneUser, data[0].ownerId)
                       // oneUser.save();
-                      ranking[0].bottleViewCount++;
-                      ranking[0].save();
-                      return callback(null, ranking[0]);
+                      data[0].bottleViewCount++;
+                      data[0].save();
+                      return callback(null, data[0]);
                     }
                   }
                 }
@@ -583,7 +583,7 @@ module.exports = function (Bottle) {
 
 
   rule.minute = 2;
-  cron.scheduleJob('*/15 * * * *', function () {
+  cron.scheduleJob('*/5 * * * *', function () {
     Bottle.updateAll({
       totalWeight: '-99999999999999999999999'
     }, function (err, info) {
@@ -745,9 +745,9 @@ module.exports = function (Bottle) {
             numofDeleted++
           } else if (numberOfSeenThisBottle > 0) {
             ranking[index - numofDeleted].numberRepeted = numberOfSeenThisBottle;
-            // console.log("numberOfSeenThisBottle");
-            // console.log(ranking[index - numofDeleted].numberRepeted);
-            // console.log(ranking[index - numofDeleted].id);
+            console.log("numberOfSeenThisBottle");
+            console.log(ranking[index - numofDeleted].numberRepeted);
+            console.log(ranking[index - numofDeleted].id);
             newRanking.unshift(ranking[index - numofDeleted]);
             ranking.splice(index - numofDeleted, 1);
             numofDeleted++
@@ -759,8 +759,14 @@ module.exports = function (Bottle) {
     }, function () {
       console.log("Finish loop")
       newRanking.sort(compare);
-      ranking = ranking.concat(newRanking);
-      mainCallback(ranking);
+      var res = ranking.concat(newRanking);
+      console.log("newRanking")
+      console.log(newRanking.length)
+      console.log("ranking")
+      console.log(ranking.length)
+      console.log("res")
+      console.log(res.length)
+      mainCallback(res);
     });
     // while (index >= 0) {
     //   var element = ranking[index];
