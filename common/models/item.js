@@ -8,12 +8,12 @@ const config = require(configPath);
 var ObjectId = require('mongodb').ObjectID;
 
 
-// var appleReceiptVerify = require('node-apple-receipt-verify');
-// appleReceiptVerify.config({
-//   secret: "8622c3ec270a4f3eb4ec599daa8d5720",
-//   environment: ['sandbox', 'production'],
-//   verbose: true
-// });
+var appleReceiptVerify = require('node-apple-receipt-verify');
+appleReceiptVerify.config({
+  secret: "8622c3ec270a4f3eb4ec599daa8d5720",
+  environment: ['sandbox', 'production'],
+  verbose: true
+});
 
 
 module.exports = function (Item) {

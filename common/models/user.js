@@ -812,8 +812,6 @@ module.exports = function (User) {
    */
 
   User.signupByPhone = function (phonenumber, callback) {
-    var code = Math.floor(100000 + Math.random() * 900000)
-    var expiryDate = new Date().addHours(6)
     User.findOne({
       "where": {
         "phonenumber": phonenumber
@@ -822,84 +820,90 @@ module.exports = function (User) {
       if (err)
         return callback(err, null)
       if (user) {
-        User.app.models.Code.create({
-          "userId": user.id,
-          "code": code,
-          "expiryDate": expiryDate
-        }, function (err, codeData) {
-          if (err)
-            return next(err)
-          // sendSMS(phoneNumber, code, function () {
-          return callback(null, codeData)
-          // });
-        })
+        sendVerificationCode(phonenumber, function () {
+          return callback(null, {
+            "success": true
+          })
+        });
+        // })
       } else {
         User.create({
           "phonenumber": phonenumber,
-          "password": "password"
+          "password": "password",
+          "typeLogIn": "phonenumber"
         }, function (err, newUser) {
           if (err)
             return callback(err)
-          User.app.models.Code.create({
-            "userId": newUser.id,
-            "code": code,
-            "expiryDate": expiryDate
-          }, function (err, codeData) {
-            if (err)
-              return next(err)
-            // sendSMS(phoneNumber, code, function () {
-            return callback(null, codeData)
-            // });
-          })
+          sendVerificationCode(phonenumber, function () {
+            return callback(null,  {
+              "success": true
+            })
+          });
         })
       }
     })
   }
 
-  // sendSMS("+963957465876", 5555)
-
-  function sendSMS(from, code, callback) {
-
-    // Your application credentials
-
-    var headers = {
-      "content-type": "application/json; charset=UTF-8",
-      "x-timestamp": "2019-06-24T10:03:03.563Z",
-      "authorization": "Application 4cf160fb-c939-491d-8ba0-de6fa91eb274"
+  User.checkVerificationCode = function (phonenumber, code, callback) {
+    var request = require("request");
+    var options = {
+      method: 'PUT',
+      url: 'https://verificationapi-v1.sinch.com/verification/v1/verifications/number/' + phonenumber,
+      headers: {
+        'cache-control': 'no-cache',
+        'Content-Type': 'application/json',
+        'x-timestamp': new Date(),
+        Authorization: 'Application 4cf160fb-c939-491d-8ba0-de6fa91eb274'
+      },
+      body: {
+        sms: {
+          code: code
+        },
+        method: 'sms'
+      },
+      json: true
     };
 
-    var body = {
-      "identity": {
-        "type": "number",
-        "endpoint": "+963957465876"
-      },
-      "method": "sms"
-    }
-    var url = "http://verificationapi-v1.sinch.com/verification/v1/verifications"
-
-
-
-    var request = require("request");
-
-    var options = { method: 'POST',
-      url: 'http://verificationapi-v1.sinch.com/verification/v1/verifications',
-      headers: 
-       { 'Postman-Token': 'e31b8d29-8a46-4c23-8332-0aad887b9f9a',
-         'cache-control': 'no-cache',
-         'Content-Type': 'application/json',
-         'x-timestamp': '2019-06-24T08:34:41.054Z',
-         Authorization: 'Application 4cf160fb-c939-491d-8ba0-de6fa91eb274' },
-      body: 
-       { identity: { type: 'number', endpoint: '+963957465876' },
-         method: 'sms' },
-      json: true };
-    
     request(options, function (error, response, body) {
       if (error) throw new Error(error);
-    
+      if (body.errorCode == 40003)
+        callback(errors.account.usernameNotValid(), null);
+
+      console.log(body);
+      callback()
+
+    });
+  }
+  // sendVerificationCode("+963957465876", null)
+
+  function sendVerificationCode(mobile, callback) {
+    var request = require("request");
+    var options = {
+      method: 'POST',
+      url: 'https://verificationapi-v1.sinch.com/verification/v1/verifications',
+      headers: {
+        'cache-control': 'no-cache',
+        'Content-Type': 'application/json',
+        'x-timestamp': new Date(),
+        Authorization: 'Application 4cf160fb-c939-491d-8ba0-de6fa91eb274'
+      },
+      body: {
+        identity: {
+          type: 'number',
+          endpoint: mobile
+        },
+        method: 'sms'
+      },
+      json: true
+    };
+
+    request(options, function (error, response, body) {
+      callback()
+      if (error) throw new Error(error);
+
       console.log(body);
     });
-    
+
   }
 
 
@@ -912,29 +916,36 @@ module.exports = function (User) {
     }, function (err, user) {
       if (err)
         return callback(err)
-      User.app.models.Code.findOne({
-        "where": {
-          "code": code,
-          "userId": user.id,
-          "expiryDate": {
-            "gt": new Date()
+      var request = require("request");
+      var options = {
+        method: 'PUT',
+        url: 'https://verificationapi-v1.sinch.com/verification/v1/verifications/number/' + phonenumber,
+        headers: {
+          'cache-control': 'no-cache',
+          'Content-Type': 'application/json',
+          'x-timestamp': new Date(),
+          Authorization: 'Application 4cf160fb-c939-491d-8ba0-de6fa91eb274'
+        },
+        body: {
+          sms: {
+            code: code
           },
-          "status": "active"
-        }
-      }, function (err, codes) {
-        if (err)
-          return callback(err, null);
-        if (codes == null)
+          method: 'sms'
+        },
+        json: true
+      };
+
+      request(options, function (error, response, body) {
+        if (error) throw new Error(error);
+        if (body.errorCode == 40003)
           return callback(errors.account.codeNotFound())
+
         User.loginByPhonenumber({
           phonenumber: phonenumber,
           password: 'password',
         }, ["user"], function (err, data) {
           if (err)
             return callback(err)
-          codes.updateAttributes({
-            "status": "used"
-          });
           if (data.user.gender == null)
             data.isNew = true
           else
