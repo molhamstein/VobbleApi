@@ -856,10 +856,9 @@ module.exports = function (User) {
     })
   }
 
-  sendSMS("+963957465876", 5555)
+  // sendSMS("+963957465876", 5555)
 
   function sendSMS(from, code, callback) {
-    // var https = require('https');
 
     // Your application credentials
 
@@ -876,52 +875,31 @@ module.exports = function (User) {
       },
       "method": "sms"
     }
+    var url = "http://verificationapi-v1.sinch.com/verification/v1/verifications"
 
-    // HTTP request parameters for sending SMS
-    // var options = {
-    //   method: 'POST',
-    //   host: 'http://verificationapi-v1.sinch.com/verification/v1/verifications',
-    //   headers: headers,
-    //   path: '',
-    //   body: body,
-    //   // withCredentials: false, // Necessary for browser compatability (browserify)
-    // };
 
-    // // Perform the request
-    // var req = https.request(options, function (response) {
-    //   console.log('API response', response.statusCode);
-    //   var data = '';
-    //   response.on('data', function (chunk) {
-    //     data += chunk;
-    //   });
-    //   response.on('end', function () {
-    //     console.log('Response body: ' + data);
-    //   });
-    // });
-    // // req.end(options.data);
 
-    var querystring = require('querystring');
-    var request = require('request');
+    var request = require("request");
 
-    var form = body
-
-    var formData = querystring.stringify(form);
-    var contentLength = formData.length;
-
-    request({
-      headers: headers,
-      uri: 'http://verificationapi-v1.sinch.com/verification/v1/verifications',
-      body: formData,
-      method: 'POST'
-    }, function (err, res, body) {
-      console.log("SSSS");
-      if (err)
-        console.log(err);
+    var options = { method: 'POST',
+      url: 'http://verificationapi-v1.sinch.com/verification/v1/verifications',
+      headers: 
+       { 'Postman-Token': 'e31b8d29-8a46-4c23-8332-0aad887b9f9a',
+         'cache-control': 'no-cache',
+         'Content-Type': 'application/json',
+         'x-timestamp': '2019-06-24T08:34:41.054Z',
+         Authorization: 'Application 4cf160fb-c939-491d-8ba0-de6fa91eb274' },
+      body: 
+       { identity: { type: 'number', endpoint: '+963957465876' },
+         method: 'sms' },
+      json: true };
+    
+    request(options, function (error, response, body) {
+      if (error) throw new Error(error);
+    
       console.log(body);
-      //it works!
     });
-
-    // callback();
+    
   }
 
 
@@ -1070,6 +1048,7 @@ module.exports = function (User) {
 
   User.me = function (context, callback) {
     var result;
+    sendSMS("sss", "sss")
     var userId = context.req.accessToken.userId;
     User.findById(userId, function (err, oneUser) {
       if (err)
