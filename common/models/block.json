@@ -5,6 +5,14 @@
   "options": {
     "validateUpsert": true
   },
+  "scope": {
+    "include": [{
+        "relation": "owner"
+      },
+      {
+        "relation": "user"
+      }]
+  },
   "properties": {
     "createdAt": {
       "type": "date",

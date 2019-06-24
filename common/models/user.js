@@ -856,149 +856,36 @@ module.exports = function (User) {
     })
   }
 
-  // sendSMS("+963957465876", 5555)
+  sendSMS("+963957465876", 5555)
 
   function sendSMS(from, code, callback) {
-    // console.log(code);
+    // var https = require('https');
 
-    // var accountSid = 'AC9366e1efb73ed812183cdfe326f9d448'; // Your Account SID f$
-    // var authToken = '677f9e630acf489086cd21bf6ab33eca'; // Your Auth Token fr$
-
-    // var accountSid = 'AC8db867a632bf90c63ed24d9bfa76512f'; // Your Account SID f$
-    // var authToken = '003198b455cf180dcea6a3b130801078'; // Your Auth Token fr$
-
-    // var twilio = require('twilio');
-    // var client = new twilio(accountSid, authToken);
-
-    // client.messages.create({
-    //     body: 'Officially Hazzard moves to Real Madrid for $ 120 million',
-    //     to: '+4917667202135', // Text this number
-    //     from: '+16195672827'
-    //     // from: '+14107775954' // From a valid Twilio number
-    //   })
-    //   .then((message) => console.log(message.sid))
-    //   .catch((e) => {
-    //     console.log("e");
-    //     console.log(e);
-    //   });
-
-    // var sinchVerification = require('sinch-verification')({
-    //   key: '4cf160fb-c939-491d-8ba0-de6fa91eb274',
-    //   secret: 'Bj1ApGmdoEGq3Pdng92VgA=='
-    // });
-
-    // var verification = sinchVerification.createVerification(number);
-
-    // verification.initiate().then(function (result) {
-    //   verification.verify(code).then(function (result) {
-    //     console.log('Success', result);
-    //   }).fail(function (error) {
-    //     console.log('Failure', error);
-    //   });
-    // }).fail(function (error) {
-    //   console.log('Failure initializing', error);
-    // })
-
-
-
-    // save sessionInfo into db. You will need this to verify the SMS code
-    //  const sessionInfo = response.data.sessionInfo;
-    // const curl = new(require('curl-request'))();
-
-    // curl
-    //   .setHeaders([
-    //     'authorization: applicationKey: 4cf160fb-c939-491d-8ba0-de6fa91eb274 applicationSecret:Bj1ApGmdoEGq3Pdng92VgA==', 'content-type: application/json; charset=UTF-8', 'x-timestamp: 2019-05-27T19:00:45.811Z'
-    //   ])
-    //   .setBody({
-    //     "identity": {
-    //       "type": "number",
-    //       "endpoint": "+963957465876"
-    //     }
-    //   })
-    //   .post('https://verificationapi-v1.sinch.com/verification/v1/verifications')
-    //   .then(({
-    //     statusCode,
-    //     body,
-    //     headers
-    //   }) => {
-    //     console.log(statusCode, body, headers)
-    //   })
-    //   .catch((e) => {
-    //     console.log("e");
-    //     console.log(e);
-    //   });
+    // Your application credentials
 
     var headers = {
       "content-type": "application/json; charset=UTF-8",
-      "x-timestamp": "2019-06-03T11:32:56.903Z",
-      "authorization": "application 4cf160fb-c939-491d-8ba0-de6fa91eb274:ULRxtrms/llYDKydcx4IGEGqvqyFviMjmgZFA2OkxO8="
+      "x-timestamp": "2019-06-24T10:03:03.563Z",
+      "authorization": "Application 4cf160fb-c939-491d-8ba0-de6fa91eb274"
     };
 
-    var options = {
-      host: "https://verificationapi-v1.sinch.com",
-      path: "/verification/v1/verifications/number/+963957465876",
-      method: "PUT",
-      body: {
-        "method": "sms",
-        "sms": {
-          "code": "4800"
-        }
+    var body = {
+      "identity": {
+        "type": "number",
+        "endpoint": "+963957465876"
       },
-      headers: headers
-    };
+      "method": "sms"
+    }
 
-    var http = require('https');
-    var req = http.request(options, function (res) {
-      res.on('data', function (data) {
-        console.log("Response:");
-        console.log(data.toString('utf8'));
-
-        console.log(data);
-      });
-    });
-
-    req.on("end", function () {
-      console.log("responseString");
-      // print to console when response ends
-    });
-
-    req.on('error', function (e) {
-      // if (e.code === "ECONNRESET") {
-      console.log("Error :");
-      console.log(e);
-      // return;
-      // }
-    });
-    req.write('something');
-    req.end();
-
-    // var sinchRequest = require('sinch-request');
-    // var https = require('https');
-
-    // // Your application credentials
-    // var creds = {
-    //   key: '4cf160fb-c939-491d-8ba0-de6fa91eb274',
-    //   secret: 'Bj1ApGmdoEGq3Pdng92VgA=='
-    // }
-
-    // var headers = {
-    //   "content-type": "application/json; charset=UTF-8",
-    //   "authorization": "applicationKey: 4cf160fb-c939-491d-8ba0-de6fa91eb274 applicationSecret:Bj1ApGmdoEGq3Pdng92VgA=="
-    // };
-
-    // // HTTP request parameters for sending SMS
+    // HTTP request parameters for sending SMS
     // var options = {
     //   method: 'POST',
-    //   host: 'messagingapi-01.sinch.com',
-    //   port: 443,
+    //   host: 'http://verificationapi-v1.sinch.com/verification/v1/verifications',
     //   headers: headers,
-    //   path: '/v1/sms/+963957465876',
-    //   data: '{"message":"Hello World!"}', // Data to be sent in JSON format
-    //   withCredentials: false, // Necessary for browser compatability (browserify)
+    //   path: '',
+    //   body: body,
+    //   // withCredentials: false, // Necessary for browser compatability (browserify)
     // };
-
-    // // Add authentication header (application)
-    // sinchRequest.applicationSigned(options, creds);
 
     // // Perform the request
     // var req = https.request(options, function (response) {
@@ -1011,8 +898,28 @@ module.exports = function (User) {
     //     console.log('Response body: ' + data);
     //   });
     // });
-    // req.end(options.data);
+    // // req.end(options.data);
 
+    var querystring = require('querystring');
+    var request = require('request');
+
+    var form = body
+
+    var formData = querystring.stringify(form);
+    var contentLength = formData.length;
+
+    request({
+      headers: headers,
+      uri: 'http://verificationapi-v1.sinch.com/verification/v1/verifications',
+      body: formData,
+      method: 'POST'
+    }, function (err, res, body) {
+      console.log("SSSS");
+      if (err)
+        console.log(err);
+      console.log(body);
+      //it works!
+    });
 
     // callback();
   }

@@ -174,6 +174,9 @@ module.exports = function (Bottle) {
           callback(err, null);
         var result = [];
         if (bottles) {
+        console.log("bottles.length")
+        console.log(bottles.length)
+
           bottles.forEach(function (element) {
             element.owner(function (err, owner) {
               if (((gender == "" || owner.gender == gender) && (username == "" || owner.username.includes(username)) && (ISOCode == "" || owner.ISOCode == ISOCode))) {
@@ -182,6 +185,8 @@ module.exports = function (Bottle) {
             })
           }, this);
         }
+        console.log("result.length")
+        console.log(result.length)
         callback(null, result);
       })
   }
@@ -196,7 +201,8 @@ module.exports = function (Bottle) {
       offset = 0;
     if (limit == null)
       limit = 10;
-
+    delete filter['offset']
+    delete filter['limit']
     getFilter(filter, function (err, data) {
       if (err)
         callback(err, null);

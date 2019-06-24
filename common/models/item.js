@@ -176,8 +176,8 @@ module.exports = function (Item) {
 
     if (filter == null || filter['where']['and'][0] == null)
       filter = {}
-    console.log("filter.where.and");
-    console.log(filter.where.and);
+    // console.log("filter.where.and");
+    // console.log(filter.where.and);
     Item.find(
       filter,
       function (err, items) {
@@ -216,7 +216,10 @@ module.exports = function (Item) {
       offset = 0;
     if (limit == null)
       limit = 10;
-    console.log(filter.where.and)
+    // console.log(filter.where.and)
+    delete filter['offset']
+    delete filter['limit']
+
     getFilter(filter, function (err, data) {
       if (err)
         callback(err, null);
