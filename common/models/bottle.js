@@ -174,14 +174,15 @@ module.exports = function (Bottle) {
           callback(err, null);
         var result = [];
         if (bottles) {
-        console.log("bottles.length")
-        console.log(bottles.length)
+          console.log("bottles.length")
+          console.log(bottles.length)
 
           bottles.forEach(function (element) {
             element.owner(function (err, owner) {
-              if (((gender == "" || owner.gender == gender) && (username == "" || owner.username.includes(username)) && (ISOCode == "" || owner.ISOCode == ISOCode))) {
-                result.push(element);
-              }
+              if (owner)
+                if (((gender == "" || owner.gender == gender) && (username == "" || owner.username.includes(username)) && (ISOCode == "" || owner.ISOCode == ISOCode))) {
+                  result.push(element);
+                }
             })
           }, this);
         }
