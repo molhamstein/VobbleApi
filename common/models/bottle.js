@@ -602,6 +602,9 @@ module.exports = function (Bottle) {
       Bottle.find({
         order: 'createdAt DESC',
         limit: 2000,
+        where: {
+          "status": "active"
+        },
         include: {
           relation: 'owner',
         }
@@ -657,7 +660,7 @@ module.exports = function (Bottle) {
   });
   Bottle.recommendationTest = function (mainCallback) {
     var result = []
-    Bottle.updateAll({
+      Bottle.updateAll({
       totalWeight: '-99999999999999999999999'
     }, function (err, info) {
 
@@ -707,6 +710,8 @@ module.exports = function (Bottle) {
                 "totalPaid score": totalPaid * paidWieght,
                 "score": (totalPaid * paidWieght) + ((maxHourse - diffHourse(element.createdAt)) * 10) + (element.repliesUserCount * repliesCountWieght)
               }
+
+              tempProject.score = (totalPaid * paidWieght) + ((maxHourse - diffHourse(element.createdAt)) * 10) + (element.repliesUserCount * repliesCountWieght);
               element.totalWeight = (totalPaid * paidWieght) + ((maxHourse - diffHourse(element.createdAt)) * 10) + (element.repliesUserCount * repliesCountWieght);
               if (gender == "female") {
                 tempProject['score'] = tempProject['score'] * 0.6
