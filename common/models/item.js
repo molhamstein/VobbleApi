@@ -28,36 +28,36 @@ module.exports = function (Item) {
   });
 
   Item.beforeRemote('create', function (context, item, next) {
-    if (context.req.body.receipt == undefined) {
-      Item.app.models.Product.findById(context.req.body.productId, function (err, product) {
-        if (err) {
-          return next(err);
-        }
+    if (context.req.body.receipt == undefined || context.req.body.transactionId == undefined) {
+      // Item.app.models.Product.findById(context.req.body.productId, function (err, product) {
+      //   if (err) {
+      //     return next(err);
+      //   }
 
-        if (product == null) {
-          return next(errors.product.productNotFound());
-        }
-        Item.app.models.User.findById(context.req.accessToken.userId, function (err, user) {
-          if (err)
-            return next(err, null);
-          if (user.status != 'active') {
-            return next(errors.product.unvalidReceipt());
-          }
+      //   if (product == null) {
+      //     return next(errors.product.productNotFound());
+      //   }
+      //   Item.app.models.User.findById(context.req.accessToken.userId, function (err, user) {
+      //     if (err)
+      //       return next(err, null);
+      //     if (user.status != 'active') {
+      return next(errors.product.unvalidReceipt());
+      //     }
 
-          product.productSold++;
-          product.save();
-          if (context.req.body.ownerId == null && context.req.accessToken != null)
-            context.req.body.ownerId = context.req.accessToken.userId;
+      //     product.productSold++;
+      //     product.save();
+      //     if (context.req.body.ownerId == null && context.req.accessToken != null)
+      //       context.req.body.ownerId = context.req.accessToken.userId;
 
 
-          context.req.body.type = product.type;
-          context.req.body.price = product.price;
-          console.log("context.req.body");
-          console.log(context.req.body);
+      //     context.req.body.type = product.type;
+      //     context.req.body.price = product.price;
+      //     console.log("context.req.body");
+      //     console.log(context.req.body);
 
-          next();
-        })
-      })
+      //     next();
+      //   })
+      // })
     } else {
       Item.app.models.User.findById(context.req.accessToken.userId, function (err, user) {
         if (err)
@@ -87,7 +87,7 @@ module.exports = function (Item) {
               return next(errors.product.unvalidReceipt());
             } else {
               var transactionId = context.req.body.transactionId;
-              delete context.req.body.receipt;
+              // delete context.req.body.receipt;
               if (products.length == 0)
                 return next(errors.product.unvalidReceipt());
               var isInProcess = false;
@@ -446,13 +446,13 @@ module.exports = function (Item) {
         if (ownerObject != null || productObject != null) {
           if (element.type == "Chat Extend") {
             element.relatedUser(function (err, relatedUser) {
-              var countryNaem=""
+              var countryNaem = ""
               relatedUser.country(function (err, country) {
                 countryNaem = country.name
               })
 
               if (relatedUser['lastLogin'] != null)
-              relatedUserObject = {
+                relatedUserObject = {
                   countryRelatedUser: countryNaem,
                   imageRelatedUser: relatedUser['image'],
                   totalBottlesThrownRelatedUser: relatedUser['totalBottlesThrown'],
@@ -472,7 +472,7 @@ module.exports = function (Item) {
                   relatedUser: relatedUser['username']
                 }
               else
-              relatedUserObject = {
+                relatedUserObject = {
                   countryRelatedUser: countryNaem,
                   imageRelatedUser: relatedUser['image'],
                   totalBottlesThrownRelatedUser: relatedUser['totalBottlesThrown'],
