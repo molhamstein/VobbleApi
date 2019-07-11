@@ -16,6 +16,8 @@
   "scope": {
     "include": [{
       "relation": "country"
+    }, {
+      "relation": "device"
     }]
   },
   "properties": {
@@ -143,6 +145,11 @@
       "type": "belongsTo",
       "model": "country",
       "foreignKey": "ISOCode"
+    },
+    "device": {
+      "type": "belongsTo",
+      "model": "device",
+      "foreignKey": "deviceId"
     },
     "items": {
       "type": "hasMany",
@@ -416,6 +423,13 @@
         "http": {
           "source": "form"
         }
+      }, {
+        "arg": "deviceName",
+        "type": "string",
+        "required": false,
+        "http": {
+          "source": "form"
+        }
       }],
       "returns": [{
         "arg": "result",
@@ -535,12 +549,18 @@
     },
     "me": {
       "accepts": [{
-        "arg": "context",
-        "type": "object",
-        "http": {
-          "source": "context"
+          "arg": "context",
+          "type": "object",
+          "http": {
+            "source": "context"
+          }
+        },
+        {
+          "arg": "deviceName",
+          "type": "string",
+          "required": false
         }
-      }],
+      ],
       "returns": [{
         "arg": "result",
         "type": "object",

@@ -44,9 +44,10 @@ module.exports = function (Bottle) {
   // Set owner Id
   Bottle.beforeRemote('create', function (context, result, next) {
     // check user is active 
-    if (context.res.locals.user.status !== 'active') {
+    if (context.res.locals.user.status != 'active') {
       return next(errors.account.notActive());
     }
+
 
     if (context.req.body.ownerId == null)
       context.req.body.ownerId = context.req.accessToken.userId;
@@ -63,6 +64,7 @@ module.exports = function (Bottle) {
         if (err) {
           return next(err);
         }
+
         shore.bottleCount++;
         shore.save();
         weight += Date.parse(new Date()) * 3;
@@ -229,6 +231,40 @@ module.exports = function (Bottle) {
     })
 
   };
+
+  Bottle.getBottleById = function (id, req, callback) {
+    var userId = req.accessToken.userId;
+    Bottle.app.models.user.findById(userId, function (err, oneUser) {
+      if (err) {
+        return callback(err);
+      }
+      if (oneUser.status !== 'active') {
+        return callback(errors.account.notActive());
+      }
+      Bottle.findById(id, function (err, bottle) {
+        if (err) {
+          return callback(err);
+        }
+        if (bottle == null) {
+          return callback(errors.bottle.bottleNotFount())
+        }
+        var bottleUserseenObject = {
+          "userId": userId,
+          "bottleId": id
+        }
+        Bottle.app.models.bottleUserseen.create(bottleUserseenObject)
+          .then()
+          .catch(err => console.log(err));
+
+        addOwnerBootle(oneUser, bottle.ownerId)
+        // oneUser.save();
+        bottle.bottleViewCount++;
+        bottle.save();
+        return callback(null, bottle);
+
+      })
+    })
+  }
   Bottle.getOneBottle = function (gender, ISOCode, shoreId, req, callback) {
     var result;
     var secFilter = {};
@@ -244,10 +280,10 @@ module.exports = function (Bottle) {
     var blockList = [];
     Bottle.app.models.user.findById(req.accessToken.userId, function (err, oneUser) {
       if (err) {
-        return next(err);
+        return callback(err);
       }
       if (oneUser.status !== 'active') {
-        return next(errors.account.notActive());
+        return callback(errors.account.notActive());
       }
       // get bottle seen 
       Bottle.app.models.bottleUserseen.find({
@@ -660,7 +696,7 @@ module.exports = function (Bottle) {
   });
   Bottle.recommendationTest = function (mainCallback) {
     var result = []
-      Bottle.updateAll({
+    Bottle.updateAll({
       totalWeight: '-99999999999999999999999'
     }, function (err, info) {
 

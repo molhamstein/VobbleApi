@@ -127,6 +127,12 @@
       "principalType": "ROLE",
       "principalId": "$authenticated",
       "permission": "ALLOW",
+      "property": "getBottleById"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
       "property": "getOneBottleTest"
     },
     {
@@ -197,6 +203,36 @@
       "description": "get one mthode with some logic",
       "http": [{
         "path": "/getOneBottle",
+        "verb": "get"
+      }]
+    },
+    "getBottleById": {
+      "accepts": [{
+          "arg": "id",
+          "type": "string",
+          "required": true,
+          "description": "id of bottle",
+          "http": {
+            "source": "path"
+          }
+        },
+        {
+          "arg": "req",
+          "type": "object",
+          "http": {
+            "source": "req"
+          }
+        }
+      ],
+      "returns": [{
+        "arg": "result",
+        "type": "object",
+        "root": true,
+        "description": ""
+      }],
+      "description": "get bottle by id",
+      "http": [{
+        "path": "/getBottleById/:id",
         "verb": "get"
       }]
     },

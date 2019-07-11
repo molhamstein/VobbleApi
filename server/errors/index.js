@@ -33,6 +33,9 @@ module.exports.account = {
   },
   codeNotFound: function () {
     return new cError('CODE_NOT_FOUND',418, 'code not found', 418);
+  },
+  deviceNotAvailable: function () {
+    return new cError('DEVICE_NOT_AVAILABLE',419, 'device not available', 419);
   }
 
 
@@ -47,6 +50,9 @@ module.exports.bottle = {
   },
   noNewBottle: function () {
     return new cError('NO_NEW_BOTTLE', 406, 'no new bottle', 406);
+  },
+  bottleNotFount: function () {
+    return new cError('BOTTLE_NOT_FOUND', 420, 'bottle not fount', 420);
   }
 };
 

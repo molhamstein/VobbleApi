@@ -35,7 +35,6 @@ module.exports = function (User) {
     callback(null);
   };
 
-
   // file root save 
   var urlFileRoot = config.domain + config.restApiRoot + "/uploadFiles";
 
@@ -48,48 +47,47 @@ module.exports = function (User) {
 
 
   User.beforeRemote('create', function (context, result, next) {
-    var date = new Date();
-    context.req.body.totalBottlesThrown = 0;
-    context.req.body.registrationCompleted = true;
-    var nextRefill = new Date();
-    nextRefill.setHours(24, 0, 0, 0);
-    context.req.body.nextRefill = nextRefill
 
-    if (context.req.body.email) {
-      User.findOne({
-        where: {
-          email: context.req.body.email
-        }
-      }, function (err, user) {
-        if (err)
-          return next(err)
-        if (user)
-          return next(errors.account.emailAlreadyExists());
-        else
-          next();
-      })
-    }
-    // else if (context.req.body.phonenumber) {
-    //   context.req.body.typeLogIn = "phonenumber"
-    //   User.findOne({
-    //     where: {
-    //       phonenumber: context.req.body.phonenumber
-    //     }
-    //   }, function (err, user) {
-    //     if (err)
-    //       return next(err)
-    //     if (user)
-    //       return next(errors.account.phoneAlreadyExists());
-    //     else {
-    //       context.req.body.password = "password"
-    //       next();
-    //     }
-    //   })
-    // }
+    User.app.models.Device.cheackDevice(context.req.body.deviceName, function (err, device) {
+      if (err)
+        return next(err)
+      if (device != null) {
+        context.req.body.deviceId = device.id;
+        delete context.req.body.deviceName
+      }
+      var date = new Date();
+      context.req.body.totalBottlesThrown = 0;
+      context.req.body.registrationCompleted = true;
+      var nextRefill = new Date();
+      nextRefill.setHours(24, 0, 0, 0);
+      context.req.body.nextRefill = nextRefill
+
+      if (context.req.body.email) {
+        User.findOne({
+          where: {
+            email: context.req.body.email
+          }
+        }, function (err, user) {
+          if (err)
+            return next(err)
+          if (user)
+            return next(errors.account.emailAlreadyExists());
+          else
+            next();
+        })
+      }
+    })
+
   });
 
+  User.afterRemote('create', function (context, result, next) {
+    makeChat(result.id);
+    next();
+  })
 
-
+  function makeChat(userId) {
+    User.app.models.Conversation.makeChatWithbot(userId)
+  }
 
   function sendVerificationEmail(user, subject, message, callback) {
     var options = {
@@ -167,494 +165,544 @@ module.exports = function (User) {
    */
 
   User.loginFacebook = function (data, callback) {
-    var socialId = data.socialId;
-    var token = data.token;
-    var gender = data.gender;
-    var image = data.image;
-    // var image = "https://www.idlidu.com/Content/images/default.png";
-    var email = data.email;
-    var name = data.name;
-    // image=image.replace("height=50&width=50", "height=200&width=200");
-    var result;
-    // check if user is new or old in the system 
-    User.findOne({
-      where: {
-        "and": [{
-          "or": [{
-              socialId: socialId
-            },
-            {
-              "and": [{
-                username: {
-                  like: name,
-                  options: "i"
-                }
-              }, {
-                email: email
-              }]
-            }
-          ]
-        }, {
-          typeLogIn: "facebook"
-        }]
-
-      }
-    }, function (err, oneUser) {
+    var deviceId = null
+    User.app.models.Device.cheackDevice(data.deviceName, function (err, device) {
       if (err)
-        callback(err, null);
-      console.log("oneUser");
-      console.log(oneUser);
-      if (oneUser == null) {
-        // cheack if username is userd befor
-        User.findOne({
-          where: {
-            username: name
-          }
-        }, function (err, userByUsername) {
-          if (userByUsername) {
-            var randVal = 100 + (Math.random() * (999 - 100));
-            var x = Math.round(randVal);
-            name = name + "_" + x;
-          }
-
-
-
-          const parts = image.split('.');
-          // extension = parts[parts.length - 1];
-          var extension = "jpg"
-          var newFilename = (new Date()).getTime() + '.' + extension;
-
-          const options = {
-            url: image,
-            dest: 'uploadFiles/profile/' + newFilename // Save to /path/to/dest/image.jpg
-          }
-
-          download.image(options)
-            .then(({
-              filename,
-              imageFile
-            }) => {
-              image = urlFileRootSave + newFilename;
-              var date = new Date();
-              var nextRefillVar = new Date();
-              nextRefillVar.setHours(24, 0, 0, 0);
-              User.create({
-                socialId: socialId,
-                gender: gender,
-                email: email,
-                image: image,
-                username: name,
-                status: "active",
-                nextRefill: nextRefillVar,
-                password: "123",
-                typeLogIn: "facebook"
-              }, function (err, newUser) {
-                if (err) {
-                  if (err.statusCode == 422)
-                    callback(errors.account.emailAlreadyExistsSN(), null);
-                  else
-                    callback(err, null);
-                }
-                // create the token
-                User.app.models.AccessToken.create({
-                  ttl: 31536000000,
-                  userId: newUser.id
-                }, function (err, newToken) {
-                  // get the token with user of new user
-                  // User.app.models.AccessToken.findOne({ include: 'user', userId: newUser.id }, function (err, token) {
-                  // User.app.models.AccessToken.findOne(, function (err, token) {
-                  User.app.models.AccessToken.findOne({
-                    include: {
-                      relation: 'user',
-                      scope: {
-                        include: {
-                          relation: 'country'
-                        }
-                      }
-                    },
-                    where: {
-                      userId: newUser.id
-                    }
-                  }, function (err, token) {
-                    if (err)
-                      callback(err, null);
-                    result = token;
-                    result.isNew = true;
-                    callback(null, result);
-                  });
-                })
-
-              })
-            })
-
-        })
-        // .catch((err) => {
-        //     console.log('err', err)
-
-        //     throw err
-        // })
-
+        return callback(err)
+      if (device != null) {
+        deviceId = device.id;
       }
-      // old user
-      else {
-        oneUser.updateAttributes({
-          "socialId": socialId
-        })
-        // get the token with user
-        User.app.models.AccessToken.findOne({
-          include: {
-            relation: 'user',
-            scope: {
-              include: {
-                relation: 'country'
-              }
-            }
-          },
-          where: {
-            userId: oneUser.id
-          }
-        }, function (err, token) {
-          if (err)
-            callback(err, null);
-          result = token;
-          if (result == null) {
-            User.app.models.AccessToken.create({
-              ttl: 31536000000,
-              userId: oneUser.id
-            }, function (err, newToken) {
-              // get the token with user of new user
-              // User.app.models.AccessToken.findOne({ include: 'user', userId: newUser.id }, function (err, token) {
-              // User.app.models.AccessToken.findOne(, function (err, token) {
-              User.app.models.AccessToken.findOne({
-                include: {
-                  relation: 'user',
-                  scope: {
-                    include: {
-                      relation: 'country'
-                    }
+
+      var socialId = data.socialId;
+      var token = data.token;
+      var gender = data.gender;
+      var image = data.image;
+      // var image = "https://www.idlidu.com/Content/images/default.png";
+      var email = data.email;
+      var name = data.name;
+      // image=image.replace("height=50&width=50", "height=200&width=200");
+      var result;
+      // check if user is new or old in the system 
+      User.findOne({
+        where: {
+          "and": [{
+            "or": [{
+                socialId: socialId
+              },
+              {
+                "and": [{
+                  username: {
+                    like: name,
+                    options: "i"
                   }
-                },
-                where: {
-                  userId: oneUser.id
-                }
-              }, function (err, token) {
-                if (err)
-                  callback(err, null);
-                result = token;
-                result.isNew = false;
-                callback(null, result);
-              });
-            })
-          } else {
-            result.isNew = false;
-            callback(null, result);
+                }, {
+                  email: email
+                }]
+              }
+            ]
+          }, {
+            typeLogIn: "facebook"
+          }]
+
+        }
+      }, function (err, oneUser) {
+        if (err)
+          callback(err, null);
+        console.log("oneUser");
+        console.log(oneUser);
+        if (oneUser == null) {
+          // cheack if username is userd befor
+          User.findOne({
+            where: {
+              username: name
+            }
+          }, function (err, userByUsername) {
+            if (userByUsername) {
+              var randVal = 100 + (Math.random() * (999 - 100));
+              var x = Math.round(randVal);
+              name = name + "_" + x;
+            }
+
+
+
+            const parts = image.split('.');
+            // extension = parts[parts.length - 1];
+            var extension = "jpg"
+            var newFilename = (new Date()).getTime() + '.' + extension;
+
+            const options = {
+              url: image,
+              dest: 'uploadFiles/profile/' + newFilename // Save to /path/to/dest/image.jpg
+            }
+
+            download.image(options)
+              .then(({
+                filename,
+                imageFile
+              }) => {
+                image = urlFileRootSave + newFilename;
+                var date = new Date();
+                var nextRefillVar = new Date();
+                nextRefillVar.setHours(24, 0, 0, 0);
+                User.create({
+                  socialId: socialId,
+                  gender: gender,
+                  email: email,
+                  image: image,
+                  deviceId: deviceId,
+                  username: name,
+                  status: "active",
+                  nextRefill: nextRefillVar,
+                  password: "123",
+                  typeLogIn: "facebook"
+                }, function (err, newUser) {
+                  if (err) {
+                    if (err.statusCode == 422)
+                      callback(errors.account.emailAlreadyExistsSN(), null);
+                    else
+                      callback(err, null);
+                  }
+                  // create the token
+                  User.app.models.AccessToken.create({
+                    ttl: 31536000000,
+                    userId: newUser.id
+                  }, function (err, newToken) {
+                    // get the token with user of new user
+                    // User.app.models.AccessToken.findOne({ include: 'user', userId: newUser.id }, function (err, token) {
+                    // User.app.models.AccessToken.findOne(, function (err, token) {
+                    User.app.models.AccessToken.findOne({
+                      include: {
+                        relation: 'user',
+                        scope: {
+                          include: {
+                            relation: 'country'
+                          }
+                        }
+                      },
+                      where: {
+                        userId: newUser.id
+                      }
+                    }, function (err, token) {
+                      if (err)
+                        callback(err, null);
+                      result = token;
+                      result.isNew = true;
+                      makeChat(newUser.id);
+                      callback(null, result);
+                    });
+                  })
+
+                })
+              })
+
+          })
+          // .catch((err) => {
+          //     console.log('err', err)
+
+          //     throw err
+          // })
+
+        }
+        // old user
+        else {
+          if (oneUser.status != 'active') {
+            return callback(errors.account.notActive());
           }
-        });
-      }
+          oneUser.updateAttributes({
+            "socialId": socialId,
+            "deviceId": deviceId
+          })
+          // get the token with user
+          User.app.models.AccessToken.findOne({
+            include: {
+              relation: 'user',
+              scope: {
+                include: {
+                  relation: 'country'
+                }
+              }
+            },
+            where: {
+              userId: oneUser.id
+            }
+          }, function (err, token) {
+            if (err)
+              callback(err, null);
+            result = token;
+            if (result == null) {
+              User.app.models.AccessToken.create({
+                ttl: 31536000000,
+                userId: oneUser.id
+              }, function (err, newToken) {
+                // get the token with user of new user
+                // User.app.models.AccessToken.findOne({ include: 'user', userId: newUser.id }, function (err, token) {
+                // User.app.models.AccessToken.findOne(, function (err, token) {
+                User.app.models.AccessToken.findOne({
+                  include: {
+                    relation: 'user',
+                    scope: {
+                      include: {
+                        relation: 'country'
+                      }
+                    }
+                  },
+                  where: {
+                    userId: oneUser.id
+                  }
+                }, function (err, token) {
+                  if (err)
+                    callback(err, null);
+                  result = token;
+                  result.isNew = false;
+                  callback(null, result);
+                });
+              })
+            } else {
+              result.isNew = false;
+              callback(null, result);
+            }
+          });
+        }
+      });
     });
   }
 
   User.loginInstegram = function (data, callback) {
-    var result;
-    var socialId = data.socialId;
-    var token = data.token;
-    var gender = data.gender;
-    var image = data.image;
-    var email = data.email;
-    var name = data.name;
-    console.log("data")
-    console.log(data)
-    User.findOne({
-      where: {
-        socialId: socialId,
-        typeLogIn: "instegram"
-      }
-    }, function (err, oneUser) {
+    var deviceId = null
+    User.app.models.Device.cheackDevice(data.deviceName, function (err, device) {
       if (err)
-        callback(err, null);
-      if (oneUser == null) {
-        console.log("new user")
-        User.findOne({
-          where: {
-            username: name
-          }
-        }, function (err, userByUsername) {
-          if (userByUsername) {
-            var randVal = 100 + (Math.random() * (999 - 100));
-            var x = Math.round(randVal);
-            name = name + "_" + x;
-          }
-          const parts = image.split('.');
-          // extension = parts[parts.length - 1];
-          var extension = "jpg"
-          var newFilename = (new Date()).getTime() + '.' + extension;
-
-          const options = {
-            url: image,
-            dest: 'uploadFiles/profile/' + newFilename // Save to /path/to/dest/image.jpg
-          }
-          var nextRefillVar = new Date();
-          nextRefillVar.setHours(24, 0, 0, 0);
-          download.image(options)
-            .then(({
-              filename,
-              imageFile
-            }) => {
-              image = urlFileRootSave + newFilename;
-              var date = new Date();
-              User.create({
-                socialId: socialId,
-                gender: gender,
-                image: image,
-                email: email,
-                username: name,
-                status: "active",
-                nextRefill: nextRefillVar,
-                password: "123",
-                typeLogIn: "instegram"
-              }, function (err, newUser) {
-                if (err)
-                  if (err.statusCode == 422)
-                    callback(errors.account.emailAlreadyExistsSN(), null);
-                  else
-                    callback(err, null);
-                User.app.models.AccessToken.create({
-                  ttl: 31536000000,
-                  userId: newUser.id
-                }, function (err, newToken) {
-                  User.app.models.AccessToken.findOne({
-                    include: {
-                      relation: 'user',
-                      scope: {
-                        include: {
-                          relation: 'country'
-                        }
-                      }
-                    },
-                    where: {
-                      userId: newUser.id
-                    }
-                  }, function (err, token) {
-                    if (err)
-                      callback(err, null);
-                    result = token;
-                    result.isNew = true;
-                    console.log("new user Data")
-                    console.log(result)
-                    callback(null, result);
-                  });
-                })
-              })
-            }).catch((err) => {
-              console.log("err");
-              console.log(err);
-            })
-        })
-      } else {
-        console.log("old user")
-        console.log(oneUser)
-
-        User.app.models.AccessToken.findOne({
-          include: {
-            relation: 'user',
-            scope: {
-              include: {
-                relation: 'country'
-              }
-            }
-          },
-          where: {
-            userId: oneUser.id
-          }
-        }, function (err, token) {
-
-          if (err)
-            callback(err, null);
-          result = token;
-          if (result == null) {
-            User.app.models.AccessToken.create({
-              ttl: 31536000000,
-              userId: oneUser.id
-            }, function (err, newToken) {
-              console.log("new token")
-              console.log(newToken)
-              User.app.models.AccessToken.findOne({
-                include: {
-                  relation: 'user',
-                  scope: {
-                    include: {
-                      relation: 'country'
-                    }
-                  }
-                },
-                where: {
-                  userId: oneUser.id
-                }
-              }, function (err, token) {
-                if (err)
-                  callback(err, null);
-                result = token;
-                result.isNew = false;
-                console.log("result")
-                console.log(result)
-                callback(null, result);
-              });
-            })
-          } else {
-            console.log("old token")
-            console.log(result)
-            result.isNew = false;
-            callback(null, result);
-          }
-        });
+        return callback(err)
+      if (device != null) {
+        deviceId = device.id;
       }
+
+      var result;
+      var socialId = data.socialId;
+      var token = data.token;
+      var gender = data.gender;
+      var image = data.image;
+      var email = data.email;
+      var name = data.name;
+      console.log("data")
+      console.log(data)
+      User.findOne({
+        where: {
+          socialId: socialId,
+          typeLogIn: "instegram"
+        }
+      }, function (err, oneUser) {
+        if (err)
+          callback(err, null);
+        if (oneUser == null) {
+          console.log("new user")
+          User.findOne({
+            where: {
+              username: name
+            }
+          }, function (err, userByUsername) {
+            if (userByUsername) {
+              var randVal = 100 + (Math.random() * (999 - 100));
+              var x = Math.round(randVal);
+              name = name + "_" + x;
+            }
+            const parts = image.split('.');
+            // extension = parts[parts.length - 1];
+            var extension = "jpg"
+            var newFilename = (new Date()).getTime() + '.' + extension;
+
+            const options = {
+              url: image,
+              dest: 'uploadFiles/profile/' + newFilename // Save to /path/to/dest/image.jpg
+            }
+            var nextRefillVar = new Date();
+            nextRefillVar.setHours(24, 0, 0, 0);
+            download.image(options)
+              .then(({
+                filename,
+                imageFile
+              }) => {
+                image = urlFileRootSave + newFilename;
+                var date = new Date();
+                User.create({
+                  socialId: socialId,
+                  gender: gender,
+                  image: image,
+                  email: email,
+                  username: name,
+                  status: "active",
+                  nextRefill: nextRefillVar,
+                  password: "123",
+                  typeLogIn: "instegram"
+                }, function (err, newUser) {
+                  if (err)
+                    if (err.statusCode == 422)
+                      callback(errors.account.emailAlreadyExistsSN(), null);
+                    else
+                      callback(err, null);
+                  User.app.models.AccessToken.create({
+                    ttl: 31536000000,
+                    userId: newUser.id
+                  }, function (err, newToken) {
+                    User.app.models.AccessToken.findOne({
+                      include: {
+                        relation: 'user',
+                        scope: {
+                          include: {
+                            relation: 'country'
+                          }
+                        }
+                      },
+                      where: {
+                        userId: newUser.id
+                      }
+                    }, function (err, token) {
+                      if (err)
+                        callback(err, null);
+                      result = token;
+                      result.isNew = true;
+                      makeChat(newUser.id);
+
+                      console.log("new user Data")
+                      console.log(result)
+                      callback(null, result);
+                    });
+                  })
+                })
+              }).catch((err) => {
+                console.log("err");
+                console.log(err);
+              })
+          })
+        } else {
+          console.log("old user")
+          console.log(oneUser)
+          if (oneUser.status != 'active') {
+            return callback(errors.account.notActive());
+          }
+
+          oneUser.updateAttributes({
+            "deviceId": deviceId
+          })
+          User.app.models.AccessToken.findOne({
+            include: {
+              relation: 'user',
+              scope: {
+                include: {
+                  relation: 'country'
+                }
+              }
+            },
+            where: {
+              userId: oneUser.id
+            }
+          }, function (err, token) {
+
+            if (err)
+              callback(err, null);
+            result = token;
+            if (result == null) {
+              User.app.models.AccessToken.create({
+                ttl: 31536000000,
+                userId: oneUser.id
+              }, function (err, newToken) {
+                console.log("new token")
+                console.log(newToken)
+                User.app.models.AccessToken.findOne({
+                  include: {
+                    relation: 'user',
+                    scope: {
+                      include: {
+                        relation: 'country'
+                      }
+                    }
+                  },
+                  where: {
+                    userId: oneUser.id
+                  }
+                }, function (err, token) {
+                  if (err)
+                    callback(err, null);
+                  result = token;
+                  result.isNew = false;
+                  console.log("result")
+                  console.log(result)
+                  callback(null, result);
+                });
+              })
+            } else {
+              console.log("old token")
+              console.log(result)
+              result.isNew = false;
+              callback(null, result);
+            }
+          });
+        }
+      });
     });
   };
 
   User.loginGoogle = function (data, callback) {
-    var result;
-    var socialId = data.socialId;
-    var token = data.token;
-    var gender = data.gender;
-    var image = data.image;
-    // var image = "https://www.idlidu.com/Content/images/default.png";
-    var email = data.email;
-    var name = data.name;
-    User.findOne({
-      where: {
-        socialId: socialId,
-        typeLogIn: "google"
-      }
-    }, function (err, oneUser) {
+    var deviceId = null
+    User.app.models.Device.cheackDevice(data.deviceName, function (err, device) {
       if (err)
-        callback(err, null);
-      if (oneUser == null) {
-        User.findOne({
-          where: {
-            username: name
-          }
-        }, function (err, userByUsername) {
-          if (userByUsername) {
-            var randVal = 100 + (Math.random() * (999 - 100));
-            var x = Math.round(randVal);
-            name = name + "_" + x;
-          }
-          const parts = image.split('.');
-          // extension = parts[parts.length - 1];
-          var extension = "jpg";
+        return callback(err)
+      if (device != null) {
+        deviceId = device.id;
+      }
 
-          var newFilename = (new Date()).getTime() + '.' + extension;
+      var result;
+      var socialId = data.socialId;
+      var token = data.token;
+      var gender = data.gender;
+      var image = data.image;
+      // var image = "https://www.idlidu.com/Content/images/default.png";
+      var email = data.email;
+      var name = data.name;
+      User.findOne({
+        where: {
+          socialId: socialId,
+          typeLogIn: "google"
+        }
+      }, function (err, oneUser) {
+        if (err)
+          callback(err, null);
+        if (oneUser == null) {
+          User.findOne({
+            where: {
+              username: name
+            }
+          }, function (err, userByUsername) {
+            if (userByUsername) {
+              var randVal = 100 + (Math.random() * (999 - 100));
+              var x = Math.round(randVal);
+              name = name + "_" + x;
+            }
+            const parts = image.split('.');
+            // extension = parts[parts.length - 1];
+            var extension = "jpg";
 
-          const options = {
-            url: image,
-            dest: 'uploadFiles/profile/' + newFilename // Save to /path/to/dest/image.jpg
-          }
-          download.image(options)
-            .then(({
-              filename,
-              imageFile
-            }) => {
-              image = urlFileRootSave + newFilename;
+            var newFilename = (new Date()).getTime() + '.' + extension;
 
-              var date = new Date();
-              var nextRefillVar = new Date();
-              nextRefillVar.setHours(24, 0, 0, 0);
-              User.create({
-                nextRefill: nextRefillVar,
-                socialId: socialId,
-                gender: gender,
-                image: image,
-                username: name,
-                email: email,
-                status: "active",
-                password: "123",
-                typeLogIn: "google"
-              }, function (err, newUser) {
-                if (err)
-                  if (err.statusCode == 422)
-                    callback(errors.account.emailAlreadyExistsSN(), null);
-                  else
-                    callback(err, null);
-                User.app.models.AccessToken.create({
-                  ttl: 31536000000,
-                  userId: newUser.id
-                }, function (err, newToken) {
-                  User.app.models.AccessToken.findOne({
-                    include: {
-                      relation: 'user',
-                      scope: {
-                        include: {
-                          relation: 'country'
-                        }
-                      }
-                    },
-                    where: {
-                      userId: newUser.id
-                    }
-                  }, function (err, token) {
-                    if (err)
+            const options = {
+              url: image,
+              dest: 'uploadFiles/profile/' + newFilename // Save to /path/to/dest/image.jpg
+            }
+            download.image(options)
+              .then(({
+                filename,
+                imageFile
+              }) => {
+                image = urlFileRootSave + newFilename;
+
+                var date = new Date();
+                var nextRefillVar = new Date();
+                nextRefillVar.setHours(24, 0, 0, 0);
+                User.create({
+                  nextRefill: nextRefillVar,
+                  socialId: socialId,
+                  gender: gender,
+                  image: image,
+                  username: name,
+                  email: email,
+                  status: "active",
+                  password: "123",
+                  typeLogIn: "google"
+                }, function (err, newUser) {
+                  if (err)
+                    if (err.statusCode == 422)
+                      callback(errors.account.emailAlreadyExistsSN(), null);
+                    else
                       callback(err, null);
-                    result = token;
-                    result.isNew = true;
-                    callback(null, result);
-                  });
+                  User.app.models.AccessToken.create({
+                    ttl: 31536000000,
+                    userId: newUser.id
+                  }, function (err, newToken) {
+                    User.app.models.AccessToken.findOne({
+                      include: {
+                        relation: 'user',
+                        scope: {
+                          include: {
+                            relation: 'country'
+                          }
+                        }
+                      },
+                      where: {
+                        userId: newUser.id
+                      }
+                    }, function (err, token) {
+                      if (err)
+                        callback(err, null);
+                      result = token;
+                      result.isNew = true;
+                      makeChat(newUser.id);
+                      callback(null, result);
+                    });
+                  })
                 })
               })
-            })
-        })
-      } else {
-        User.app.models.AccessToken.findOne({
-          include: {
-            relation: 'user',
-            scope: {
-              include: {
-                relation: 'country'
-              }
-            }
-          },
-          where: {
-            userId: oneUser.id
+          })
+        } else {
+          if (oneUser.status != 'active') {
+            return callback(errors.account.notActive());
           }
-        }, function (err, token) {
 
-          if (err)
-            callback(err, null);
-          result = token;
-          if (result == null) {
-            User.app.models.AccessToken.create({
-              ttl: 31536000000,
-              userId: oneUser.id
-            }, function (err, newToken) {
-              // get the token with user of new user
-              // User.app.models.AccessToken.findOne({ include: 'user', userId: newUser.id }, function (err, token) {
-              // User.app.models.AccessToken.findOne(, function (err, token) {
-              User.app.models.AccessToken.findOne({
+          oneUser.updateAttributes({
+            "deviceId": deviceId
+          })
+
+          User.app.models.AccessToken.findOne({
+            include: {
+              relation: 'user',
+              scope: {
                 include: {
-                  relation: 'user',
-                  scope: {
-                    include: {
-                      relation: 'country'
-                    }
-                  }
-                },
-                where: {
-                  userId: oneUser.id
+                  relation: 'country'
                 }
-              }, function (err, token) {
-                if (err)
-                  callback(err, null);
-                result = token;
-                result.isNew = false;
-                callback(null, result);
-              });
-            })
-          } else {
-            result.isNew = false;
-            callback(null, result);
-          }
-        });
-      }
-    });
+              }
+            },
+            where: {
+              userId: oneUser.id
+            }
+          }, function (err, token) {
+
+            if (err)
+              callback(err, null);
+            result = token;
+            if (result == null) {
+              User.app.models.AccessToken.create({
+                ttl: 31536000000,
+                userId: oneUser.id
+              }, function (err, newToken) {
+                // get the token with user of new user
+                // User.app.models.AccessToken.findOne({ include: 'user', userId: newUser.id }, function (err, token) {
+                // User.app.models.AccessToken.findOne(, function (err, token) {
+                User.app.models.AccessToken.findOne({
+                  include: {
+                    relation: 'user',
+                    scope: {
+                      include: {
+                        relation: 'country'
+                      }
+                    }
+                  },
+                  where: {
+                    userId: oneUser.id
+                  }
+                }, function (err, token) {
+                  if (err)
+                    callback(err, null);
+                  result = token;
+                  result.isNew = false;
+                  callback(null, result);
+                });
+              })
+            } else {
+              result.isNew = false;
+              callback(null, result);
+            }
+          });
+        }
+      });
+    })
   };
 
 
@@ -811,36 +859,46 @@ module.exports = function (User) {
    * @param {Function(Error, boolean)} callback
    */
 
-  User.signupByPhone = function (phonenumber, callback) {
-    User.findOne({
-      "where": {
-        "phonenumber": phonenumber
-      }
-    }, function (err, user) {
+  User.signupByPhone = function (phonenumber, deviceName, callback) {
+    var deviceId = null
+    User.app.models.Device.cheackDevice(deviceName, function (err, device) {
       if (err)
-        return callback(err, null)
-      if (user) {
-        sendVerificationCode(phonenumber, function () {
-          return callback(null, {
-            "success": true
-          })
-        });
-        // })
-      } else {
-        User.create({
-          "phonenumber": phonenumber,
-          "password": "password",
-          "typeLogIn": "phonenumber"
-        }, function (err, newUser) {
-          if (err)
-            return callback(err)
+        return callback(err)
+      if (device != null) {
+        deviceId = device.id;
+      }
+      User.findOne({
+        "where": {
+          "phonenumber": phonenumber
+        }
+      }, function (err, user) {
+        if (err)
+          return callback(err, null)
+        if (user) {
           sendVerificationCode(phonenumber, function () {
-            return callback(null,  {
+            return callback(null, {
               "success": true
             })
           });
-        })
-      }
+          // })
+        } else {
+          User.create({
+            "phonenumber": phonenumber,
+            "password": "password",
+            "deviceId": deviceId,
+            "typeLogIn": "phonenumber"
+          }, function (err, newUser) {
+            if (err)
+              return callback(err)
+            makeChat(newUser.id)
+            sendVerificationCode(phonenumber, function () {
+              return callback(null, {
+                "success": true
+              })
+            });
+          })
+        }
+      })
     })
   }
 
@@ -874,7 +932,6 @@ module.exports = function (User) {
 
     });
   }
-  // sendVerificationCode("+963957465876", null)
 
   function sendVerificationCode(mobile, callback) {
     var request = require("request");
@@ -946,6 +1003,10 @@ module.exports = function (User) {
         }, ["user"], function (err, data) {
           if (err)
             return callback(err)
+          if (data.user.status != 'active') {
+            return callback(errors.account.notActive());
+          }
+
           if (data.user.gender == null)
             data.isNew = true
           else
@@ -1057,18 +1118,30 @@ module.exports = function (User) {
    * @param {Function(Error, object)} callback
    */
 
-  User.me = function (context, callback) {
+  User.me = function (context, deviceName, callback) {
     var result;
-    sendSMS("sss", "sss")
-    var userId = context.req.accessToken.userId;
-    User.findById(userId, function (err, oneUser) {
-      if (err)
-        callback(err, null);
-      else {
-        oneUser.lastLogin = new Date();
-        oneUser.save();
-        callback(null, oneUser);
+    var deviceId = null
+    console.log(deviceName);
+    User.app.models.Device.cheackDevice(deviceName, function (err, device) {
+      if (err) {
+        return callback(err)
       }
+      if (device != null) {
+        deviceId = device.id;
+      }
+      var userId = context.req.accessToken.userId;
+      User.findById(userId, function (err, oneUser) {
+        if (err)
+          return callback(err, null);
+        if (oneUser.status != 'active') {
+          return callback(errors.account.notActive());
+        } else {
+          oneUser.lastLogin = new Date();
+          oneUser.deviceId = deviceId;
+          oneUser.save();
+          return callback(null, oneUser);
+        }
+      })
     })
     // TODO
   };
@@ -1565,6 +1638,107 @@ module.exports = function (User) {
       }
     })
   })
+  User.login = function (credentials, include, fn) {
+    var deviceId = null
+    User.app.models.Device.cheackDevice(credentials.deviceName, function (err, device) {
+      if (err) {
+        fn(err);
+        return fn.promise;
+      }
+      if (device != null)
+        deviceId = device.id;
+      var self = User;
+      if (typeof include === 'function') {
+        fn = include;
+        include = undefined;
+      }
+
+      fn = fn || utils.createPromiseCallback();
+
+      include = (include || '');
+      if (Array.isArray(include)) {
+        include = include.map(function (val) {
+          return val.toLowerCase();
+        });
+      } else {
+        include = include.toLowerCase();
+      }
+
+
+      var query = {
+        email: credentials.email
+      }
+
+      if (!query.email) {
+        var err2 = new Error(g.f('{{email}} is required'));
+        err2.statusCode = 400;
+        err2.code = 'EMAIL_REQUIRED';
+        fn(err2);
+        return fn.promise;
+      }
+
+      self.findOne({
+        where: query
+      }, function (err, user) {
+        var defaultError = new Error(g.f('login failed'));
+        defaultError.statusCode = 401;
+        defaultError.code = 'LOGIN_FAILED';
+
+        function tokenHandler(err, token) {
+          if (err) return fn(err);
+          if (Array.isArray(include) ? include.indexOf('user') !== -1 : include === 'user') {
+            // NOTE(bajtos) We can't set token.user here:
+            //  1. token.user already exists, it's a function injected by
+            //     "AccessToken belongsTo User" relation
+            //  2. ModelBaseClass.toJSON() ignores own properties, thus
+            //     the value won't be included in the HTTP response
+            // See also loopback#161 and loopback#162
+
+            token.__data.user = user;
+          }
+          afterLogin({}, user, function (err) {
+            if (err)
+              fn(err, null)
+            else
+              fn(err, token);
+          })
+        }
+
+        if (err) {
+          debug('An error is reported from User.findOne: %j', err);
+          fn(defaultError);
+        } else if (user) {
+          if (user.status != 'active') {
+            fn(errors.account.notActive());
+          }
+          user.hasPassword(credentials.password, function (err, isMatch) {
+            if (err) {
+              debug('An error is reported from User.hasPassword: %j', err);
+              fn(defaultError);
+            } else if (isMatch) {
+
+              if (user.createAccessToken.length === 2) {
+                user.createAccessToken(credentials.ttl, tokenHandler);
+              } else {
+                user.createAccessToken(credentials.ttl, credentials, tokenHandler);
+              }
+              user.updateAttributes({
+                "deviceId": deviceId
+              })
+            } else {
+              debug('The password is invalid for user %s', query.email || query.username);
+              fn(defaultError);
+            }
+          });
+        } else {
+          debug('No matching record is found for user %s', query.email || query.username);
+          fn(defaultError);
+        }
+      });
+      return fn.promise;
+    })
+  }
+
 
   function calcDiff(date1, date2) {
     var hours = Math.abs(date1 - date2) / 36e5;

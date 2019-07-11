@@ -1,0 +1,71 @@
+{
+  "name": "conversation",
+  "base": "PersistedModel",
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "key": {
+      "type": "string",
+      "required": true
+    },
+    "bottle": {
+      "type": "object"
+    },
+    "createdAt": {
+      "type": "date"
+    },
+    "expired": {
+      "type": "boolean"
+    },
+    "is_seen": {
+      "type": "boolean"
+    },
+    "messages": {
+      "type": "object"
+    },
+    "startTime": {
+      "type": "date"
+    },
+    "user": {
+      "type": "object"
+    },
+    "user1ID": {
+      "type": "string"
+    },
+    "user2ID": {
+      "type": "string"
+    },
+
+    "user1_unseen": {
+      "type": "boolaen"
+    },
+    "user2_unseen": {
+      "type": "boolaen"
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {
+    "testUser": {
+      "accepts": [{
+        "arg": "userId",
+        "type": "string",
+        "required": false,
+        "description": "user id"
+      }],
+      "returns": [{
+        "arg": "result",
+        "type": "array",
+        "root": true,
+        "description": ""
+      }],
+      "description": "get related user to user",
+      "http": [{
+        "path": "/testUser",
+        "verb": "get"
+      }]
+    }
+  }
+}

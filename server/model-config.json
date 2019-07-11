@@ -90,6 +90,14 @@
     "dataSource": "db",
     "public": true
   },
+  "device": {
+    "dataSource": "db",
+    "public": true
+  },
+  "conversation": {
+    "dataSource": "db",
+    "public": true
+  },
   "code": {
     "dataSource": "db",
     "public": true

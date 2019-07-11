@@ -37,6 +37,13 @@ module.exports = function (Activechat) {
     return this;
   }
 
+
+
+
+
+
+
+
   Activechat.afterRemote('create', function (context, result, next) {
     Activechat.app.Users
     Activechat.app.models.User.findById(result.firstUser, function (err, firstUser) {
