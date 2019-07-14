@@ -19,7 +19,7 @@ module.exports = function (Bottle) {
 
 
   Bottle.validatesInclusionOf('status', {
-    in: ['deactive', 'active']
+    in: ['deactive', 'active', 'pending']
   });
 
   /**

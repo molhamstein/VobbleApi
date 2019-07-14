@@ -21,7 +21,7 @@ module.exports = function (Conversation) {
 
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
-    databaseURL: "https://vobble-1521577974841-859dd.firebaseio.com"
+    databaseURL: "https://vobble-1521577974841.firebaseio.com"
   });
 
   var db = admin.database();
