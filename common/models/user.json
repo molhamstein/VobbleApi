@@ -54,7 +54,7 @@
     },
     "bottlesCount": {
       "type": "number",
-      "default": 3
+      "default": 1
     },
     "email": {
       "type": "string"

@@ -53,7 +53,7 @@ var timer = schedule.scheduleJob('0 0 0 * * *', function () {
   console.log(date);
   date.setHours(date.getHours() + 24);
   console.log(date);
-  app.models.User.updateAll({}, { 'bottlesCount': 3, 'nextRefill': date }, function (err, res) {
+  app.models.User.updateAll({}, { 'bottlesCount': 1, 'nextRefill': date }, function (err, res) {
     if (err)
       console.log(err);
     else
