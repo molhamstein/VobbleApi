@@ -1,10 +1,12 @@
 'use strict';
 
 module.exports = function (Activechat) {
+  var serviceAccount = require("../../server/boot/serviceAccountKey.json");
+
   var sendNewNotification = function (data) {
     var headers = {
       "Content-Type": "application/json; charset=utf-8",
-      "Authorization": "Basic YWE2MTJjOWItYzY4MC00ZWRjLThlZTQtYTNmOGI5MjY2Y2Zm"
+      "Authorization": serviceAccount.AuthorizationOneSignel
     };
 
     var options = {

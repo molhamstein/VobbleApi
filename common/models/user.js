@@ -14,6 +14,7 @@ const download = require('image-downloader')
 const mongoXlsx = require('mongo-xlsx');
 var cron = require('node-schedule');
 
+var serviceAccount = require("../../server/boot/serviceAccountKey.json");
 
 
 
@@ -911,7 +912,7 @@ module.exports = function (User) {
         'cache-control': 'no-cache',
         'Content-Type': 'application/json',
         'x-timestamp': new Date(),
-        Authorization: 'Application 4cf160fb-c939-491d-8ba0-de6fa91eb274'
+        Authorization: serviceAccount.AuthorizationSinch
       },
       body: {
         sms: {
@@ -942,7 +943,7 @@ module.exports = function (User) {
         'cache-control': 'no-cache',
         'Content-Type': 'application/json',
         'x-timestamp': new Date(),
-        Authorization: 'Application 4cf160fb-c939-491d-8ba0-de6fa91eb274'
+        Authorization: serviceAccount.AuthorizationSinch
       },
       body: {
         identity: {
@@ -981,7 +982,7 @@ module.exports = function (User) {
           'cache-control': 'no-cache',
           'Content-Type': 'application/json',
           'x-timestamp': new Date(),
-          Authorization: 'Application 4cf160fb-c939-491d-8ba0-de6fa91eb274'
+          Authorization: serviceAccount.AuthorizationSinch
         },
         body: {
           sms: {
@@ -1747,7 +1748,7 @@ module.exports = function (User) {
   var sendNewNotification = function (data) {
     var headers = {
       "Content-Type": "application/json; charset=utf-8",
-      "Authorization": "Basic YWE2MTJjOWItYzY4MC00ZWRjLThlZTQtYTNmOGI5MjY2Y2Zm"
+      "Authorization": serviceAccount.AuthorizationOneSignel
     };
 
     var options = {

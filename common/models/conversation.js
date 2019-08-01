@@ -2,8 +2,10 @@
 
 module.exports = function (Conversation) {
 
+  var serviceAccount = require("../../server/boot/serviceAccountKey.json");
+
   let config = {
-    apiKey: "AIzaSyAutpehs8hUf1DryBSh3p5sJ1R9DMKfGNg",
+    apiKey: serviceAccount.firebaseApiKey,
     authDomain: "<vobble-1521577974841>.firebaseapp.com",
     projectId: "<vobble-1521577974841>",
     databaseURL: "https://<vobble-1521577974841>.firebaseio.com",
@@ -17,7 +19,6 @@ module.exports = function (Conversation) {
 
   var admin = require("firebase-admin");
 
-  var serviceAccount = require("../../server/boot/serviceAccountKey.json");
 
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
@@ -36,7 +37,7 @@ module.exports = function (Conversation) {
     snapshot.forEach(function (child) {
       var conv = child.val();
       conv['key'] = child.key;
-      if ((new Date(conv['createdAt']).getTime() < lastweak.getTime() && (conv['finishTime']==0 ||  conv['finishTime']==null))|| (conv['finishTime']!=0 &&  conv['finishTime']!=null && new Date(conv['finishTime']).getTime()<now.getTime() )) {
+      if ((new Date(conv['createdAt']).getTime() < lastweak.getTime() && (conv['finishTime'] == 0 || conv['finishTime'] == null)) || (conv['finishTime'] != 0 && conv['finishTime'] != null && new Date(conv['finishTime']).getTime() < now.getTime())) {
         console.log("yes")
         let del_ref = admin.database().ref("conversations/" + conv.key);
         del_ref.remove()
