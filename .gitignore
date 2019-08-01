@@ -16,5 +16,4 @@
 .strong-pm
 coverage
 node_modules
-npm-debug.log
-server/boot/swserviceAccountKey.json
+npm-debug.logserver/boot/serviceAccountKey.json
