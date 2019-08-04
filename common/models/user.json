@@ -56,6 +56,14 @@
       "type": "number",
       "default": 1
     },
+    "replaysCount": {
+      "type": "number",
+      "default": 10
+    },
+    "extraReplaysCount": {
+      "type": "number",
+      "default": 10
+    },
     "email": {
       "type": "string"
     },

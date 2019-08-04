@@ -32,10 +32,10 @@ module.exports.account = {
     return new cError('YOU_ALREADY_LOGIN_TODAY', 414, 'you already login today', 414);
   },
   codeNotFound: function () {
-    return new cError('CODE_NOT_FOUND',418, 'code not found', 418);
+    return new cError('CODE_NOT_FOUND', 418, 'code not found', 418);
   },
   deviceNotAvailable: function () {
-    return new cError('DEVICE_NOT_AVAILABLE',419, 'device not available', 419);
+    return new cError('DEVICE_NOT_AVAILABLE', 419, 'device not available', 419);
   }
 
 
@@ -47,6 +47,9 @@ module.exports.account = {
 module.exports.bottle = {
   noAvailableBottleToday: function () {
     return new cError('NOT_AVAILABLE_BOTTLE_TODAY', 408, 'not available bottle today', 408);
+  },
+  noAvailableReplayToday: function () {
+    return new cError('NOT_AVAILABLE_Replay_TODAY', 421, 'not available replay today', 421);
   },
   noNewBottle: function () {
     return new cError('NO_NEW_BOTTLE', 406, 'no new bottle', 406);

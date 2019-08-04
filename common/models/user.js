@@ -15,6 +15,7 @@ const mongoXlsx = require('mongo-xlsx');
 var cron = require('node-schedule');
 
 var serviceAccount = require("../../server/boot/serviceAccountKey.json");
+var version = require("../../server/boot/version.json");
 
 
 
@@ -1122,7 +1123,9 @@ module.exports = function (User) {
   User.me = function (context, deviceName, callback) {
     var result;
     var deviceId = null
-    console.log(deviceName);
+    console.log("context.req.headers.version");
+    console.log(context.req.headers['ios-version']);
+    let userVersion = context.req.headers['ios-version'] 
     User.app.models.Device.cheackDevice(deviceName, function (err, device) {
       if (err) {
         return callback(err)
@@ -1139,7 +1142,21 @@ module.exports = function (User) {
         } else {
           oneUser.lastLogin = new Date();
           oneUser.deviceId = deviceId;
-          oneUser.save();
+          // oneUser.save();
+          if (userVersion == null)
+            return callback(null, oneUser);
+          else if (userVersion != null) {
+            console.log("version type")
+            var versionStatus = User.compirVersion(userVersion, version)
+            var versionObject = {
+              "status": "uptodate"
+            };
+            if (versionStatus == 'obsolete' || versionStatus == 'update available') {
+              versionObject["status"] = versionStatus;
+              versionObject["link"] = version.iosLink;
+            }
+            oneUser['version'] = versionObject
+          }
           return callback(null, oneUser);
         }
       })
@@ -1147,6 +1164,48 @@ module.exports = function (User) {
     // TODO
   };
 
+  User.compirVersion = function (userVersion, version) {
+
+    var isAfterLoadVersion = false
+    var isBeforLastVersion = false
+    var arrayUserVersion = userVersion.toString().split('.');
+    var arrayLastVersion = version.lastVersion.toString().split('.');
+    var arrayLoadVersion = version.loadVersion.toString().split('.');
+    console.log(arrayUserVersion)
+    console.log(arrayLastVersion)
+    console.log(arrayLoadVersion)
+    if (arrayUserVersion[2] == undefined)
+      arrayUserVersion[2] = 0
+    for (let index = 0; index < arrayUserVersion.length; index++) {
+      const element = parseInt(arrayUserVersion[index]);
+      const elementLoadVersion = parseInt(arrayLoadVersion[index]);
+      console.log(element + "  > " + elementLoadVersion)
+      if (element > elementLoadVersion) {
+        isAfterLoadVersion = true
+        break;
+      }
+    }
+    if (isAfterLoadVersion == false) {
+      return ("obsolete")
+    }
+
+    for (let index = 0; index < arrayUserVersion.length; index++) {
+      const element = parseInt(arrayUserVersion[index]);
+      const elementLastVersion = parseInt(arrayLastVersion[index]);
+      console.log(element + "  < " + elementLastVersion)
+      if (element < elementLastVersion) {
+        isBeforLastVersion = true
+        break;
+      }
+    }
+
+
+    if (isBeforLastVersion == true) {
+      return ("update available")
+    } else {
+      return ("uptodate")
+    }
+  }
 
 
   User.loginByPhonenumber = function (credentials, include, fn) {
@@ -1313,45 +1372,7 @@ module.exports = function (User) {
 
   };
 
-  // User.converToBool = function (context, callback) {
-  //   var result;
-  //   var userId = context.req.accessToken.userId;
-  //   User.find({}, function (err, allUser) {
-  //     if (err)
-  //       callback(err, null);
-  //     else {
-  //       allUser.forEach(function (oneUser) {
-  //         if (oneUser.registrationCompleted == "false") {
-  //           console.log(oneUser.email);
-  //           console.log("registrationCompleted");
-  //           oneUser.registrationCompleted = false
-  //         }
 
-  //         if (oneUser.homeTutShowed == "false") {
-  //           console.log(oneUser.email);
-  //           console.log("homeTutShowed");
-  //           oneUser.homeTutShowed = false
-  //         }
-
-  //         if (oneUser.ChatTutShowed == "false") {
-  //           console.log(oneUser.email);
-  //           console.log("ChatTutShowed");
-  //           oneUser.ChatTutShowed = false
-  //         }
-
-  //         if (oneUser.tut3Showed == "false") {
-  //           console.log(oneUser.email);
-  //           console.log("tut3Showed");
-  //           oneUser.tut3Showed = false
-  //         }
-  //         oneUser.save()
-  //       }, this);
-  //       callback(null, "done");
-
-  //     }
-  //   })
-  //   // TODO
-  // };
 
 
 

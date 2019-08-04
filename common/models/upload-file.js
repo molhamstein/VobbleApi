@@ -5,6 +5,10 @@ const configPath = process.env.NODE_ENV === undefined ?
   '../../server/config.json' :
   `../../server/config.${process.env.NODE_ENV}.json`;
 const config = require(configPath);
+const {
+  getAudioDurationInSeconds
+} = require('get-audio-duration')
+
 
 var ffmpeg = require('fluent-ffmpeg');
 var thumb = require('node-thumbnail').thumb;
@@ -97,6 +101,21 @@ module.exports = function (Uploadfile) {
           'thumbnail': urlThumbRootSave + file.name.substring(0, file.name.lastIndexOf('.')) + "_thumb." + extension
         });
 
+      } else if (folderName == "audios") {
+        var fileDuration = 0;
+        // From a local path...
+        getAudioDurationInSeconds(src + "/" + folderName + "/" + file.name).then((duration) => {
+          fileDuration = duration;
+
+          files.push({
+            'file': urlFileRootSave + file.name,
+            'duration': fileDuration
+          });
+
+          context.res.json(files);
+        })
+
+
       } else {
         files.push({
           'file': urlFileRootSave + file.name
@@ -108,7 +127,8 @@ module.exports = function (Uploadfile) {
       // this for view
       // files.push({ 'file': src + folderName + "/" + file.name, 'thumble': src + "thumb/" + file.name.substring(0, file.name.lastIndexOf('.')) + "_thumb.png" });
     });
-    context.res.json(files);
+    if (folderName != "audios")
+      context.res.json(files);
   });
 
 };

@@ -25,6 +25,7 @@
     "firebase": "^6.2.4",
     "firebase-admin": "^8.2.0",
     "fluent-ffmpeg": "^2.1.2",
+    "get-audio-duration": "^1.0.0",
     "googleapis": "^40.0.0",
     "grpc": "^1.21.1",
     "helmet": "^3.10.0",
