@@ -15,9 +15,9 @@ module.exports = function (Replies) {
       if (err) {
         return next(err);
       }
-      if (oneUser.replaysCount == 0 && oneUser.extraReplaysCount == 0) {
-        return next(errors.bottle.noAvailableReplayToday());
-      }
+      // if (oneUser.replaysCount == 0 && oneUser.extraReplaysCount == 0) {
+      //   return next(errors.bottle.noAvailableReplayToday());
+      // }
       oneUser.repliesBottlesCount++;
       oneUser.save();
       Replies.app.models.bottle.findById(context.req.body.bottleId, function (err, oneBottle) {
