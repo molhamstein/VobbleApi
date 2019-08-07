@@ -128,7 +128,12 @@
     "logBootleOwner": {
       "type": ["string"],
       "default": []
+    },
+    "stackBottleUser": {
+      "type": ["string"],
+      "default": []
     }
+
   },
   "validations": [],
   "relations": {

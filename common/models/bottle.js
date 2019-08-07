@@ -9,6 +9,7 @@ const datesBetween = require('dates-between');
 var cron = require('node-schedule');
 var rule = new cron.RecurrenceRule();
 var async = require("async");
+var ObjectId = require('mongodb').ObjectID;
 
 
 module.exports = function (Bottle) {
@@ -265,6 +266,112 @@ module.exports = function (Bottle) {
       })
     })
   }
+
+  Bottle.getOneBottle = function (gender, ISOCode, shoreId, req, callback) {
+    var userId = req.accessToken.userId;
+    var filter = {}
+    var blockList = []
+    var seenBottle = []
+    if (shoreId) {
+      filter['shoreId'] = ObjectId(shoreId)
+    }
+
+    if (gender) {
+      filter['owner.gender'] = gender
+    }
+
+    if (ISOCode) {
+      filter['owner.ISOCode'] = ISOCode
+    }
+
+    Bottle.app.models.user.findById(userId, function (err, oneUser) {
+      if (err) {
+        return callback(err);
+      }
+      if (oneUser.status !== 'active') {
+        return callback(errors.account.notActive());
+      }
+
+      Bottle.app.models.block.find({
+        where: {
+          or: [{
+              "ownerId": ObjectId(userId)
+            },
+            {
+              "userId": ObjectId(userId)
+            },
+          ]
+        }
+      }, function (err, blocksList) {
+        blockList = blocksList.map(function (block) {
+          if (new String(req.accessToken.userId).valueOf() === new String(block.ownerId).valueOf())
+            return ObjectId(block.userId);
+          else
+            return ObjectId(block.ownerId);
+        });
+
+        blockList.push(ObjectId(userId))
+        console.log("blockList")
+        console.log(blockList)
+        filter['ownerId'] = {
+          $nin: blockList
+        }
+
+
+        Bottle.app.models.bottleUserseen.find({
+          where: {
+            userId: req.accessToken.userId
+          }
+        }, function (err, bottles) {
+          seenBottle = getFrequency(bottles)
+
+
+          console.log(seenBottle)
+
+          Bottle.getDataSource().connector.connect(function (err, db) {
+
+            var collection = db.collection('bottle');
+            var cursor = collection.aggregate([{
+                $match: filter
+              },
+              {
+                $sort: {
+                  totalWeight: -1
+                }
+              },
+              {
+                $limit: 10
+              }
+            ])
+            cursor.get(function (err, data) {
+              if (err) return callback(err);
+              for (let index = 0; index < data.length; index++) {
+                const element = data[index];
+                // if(element)
+              }
+              return callback(null, data);
+            })
+          })
+        })
+      })
+    })
+  }
+
+
+
+  function getFrequency(array) {
+    var freq = {};
+    for (var i = 0; i < array.length; i++) {
+      var element = array[i];
+      if (freq[element.bottleId]) {
+        freq[element.bottleId]++;
+      } else {
+        freq[element.bottleId] = 1;
+      }
+    }
+
+    return freq;
+  };
   Bottle.getOneBottle = function (gender, ISOCode, shoreId, req, callback) {
     var result;
     var secFilter = {};
