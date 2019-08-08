@@ -48,7 +48,7 @@ module.exports = function (Replies) {
     next();
   });
 
-  cron.scheduleJob('0 * * * * *', function () {
+  cron.scheduleJob('0 0 * * * *', function () {
     var dataNotification = []
     Replies.app.models.User.find({
       where: {
