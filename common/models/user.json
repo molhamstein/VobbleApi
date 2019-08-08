@@ -56,11 +56,11 @@
       "type": "number",
       "default": 1
     },
-    "replaysCount": {
+    "replysCount": {
       "type": "number",
       "default": 10
     },
-    "extraReplaysCount": {
+    "extraReplysCount": {
       "type": "number",
       "default": 0
     },

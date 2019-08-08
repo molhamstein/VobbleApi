@@ -48,8 +48,8 @@ module.exports.bottle = {
   noAvailableBottleToday: function () {
     return new cError('NOT_AVAILABLE_BOTTLE_TODAY', 408, 'not available bottle today', 408);
   },
-  noAvailableReplayToday: function () {
-    return new cError('NOT_AVAILABLE_Replay_TODAY', 421, 'not available replay today', 421);
+  noAvailableReplyToday: function () {
+    return new cError('NOT_AVAILABLE_Reply_TODAY', 421, 'not available reply today', 421);
   },
   noNewBottle: function () {
     return new cError('NO_NEW_BOTTLE', 406, 'no new bottle', 406);

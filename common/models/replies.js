@@ -15,8 +15,8 @@ module.exports = function (Replies) {
       if (err) {
         return next(err);
       }
-      if (oneUser.replaysCount == 0 && oneUser.extraReplaysCount == 0) {
-        return next(errors.bottle.noAvailableReplayToday());
+      if (oneUser.replysCount == 0 && oneUser.extraReplysCount == 0) {
+        return next(errors.bottle.noAvailableReplyToday());
       }
       oneUser.repliesBottlesCount++;
       oneUser.save();
@@ -40,10 +40,10 @@ module.exports = function (Replies) {
 
   Replies.afterRemote('create', function (context, result, next) {
     const user = context.res.locals.user;
-    if (user.extraReplaysCount > 0)
-      user.extraReplaysCount--;
+    if (user.extraReplysCount > 0)
+      user.extraReplysCount--;
     else
-      user.replaysCount--;
+      user.replysCount--;
     user.save();
     next();
   });
@@ -52,14 +52,14 @@ module.exports = function (Replies) {
     var dataNotification = []
     Replies.app.models.User.find({
       where: {
-        "replaysCount": 0
+        "replysCount": 0
       }
     }, function (err, data) {
       dataNotification = data;
     })
     Replies.app.models.User.updateAll({}, {
-      'replaysCount': 10,
-      'extraReplaysCount': 0
+      'replysCount': 10,
+      'extraReplysCount': 0
     }, function (err, res) {
       if (err)
         console.log(err);
@@ -71,22 +71,22 @@ module.exports = function (Replies) {
             "app_id": "e8a91e90-a766-4f1b-a47e-e3b3f569dbef",
             "included_segments ": ["Active Users", "Inactive Users"],
             "contents": {
-              "ar": "ادخل وفضفض همك للبحر..",
-              "en": "life is very short.. lets enjoy it together with Vibo!!!"
+              "ar": "صار فيك تعلق عالفيديوهات يلي بتحبها",
+              "en": "Now, you can reply to video "
             },
             "filters": [{
               "field": "tag",
               "key": "user_id",
               "relation": "=",
-              "value": "5c2fbe592946491a550cb6b0"
+              "value": element.id
             }],
             "headings": {
-              "en": "7 days " + element.username + " seems you are busy",
-              "ar": "ايش عندك؟"
+              "en": "Go back and reply",
+              "ar": "رجاع علق عالفيديوهات"
             }
           }
           console.log(message);
-          // sendNewNotification(message)
+          sendNewNotification(message)
         }
       }
 
