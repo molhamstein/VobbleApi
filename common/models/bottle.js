@@ -267,15 +267,15 @@ module.exports = function (Bottle) {
     })
   }
 
-  Bottle.getOneBottle = function (gender, ISOCode, shoreId, req, callback) {
+  Bottle.getBottle = function (gender, ISOCode, shoreId, offsets = 0, limit = 5, seen = [], complete = [], req, callback) {
     var userId = req.accessToken.userId;
-    var filter = {}
-    var blockList = []
-    var seenBottle = []
+    var filter = {
+      "status": "active"
+    }
+
     if (shoreId) {
       filter['shoreId'] = ObjectId(shoreId)
     }
-
     if (gender) {
       filter['owner.gender'] = gender
     }
@@ -283,80 +283,136 @@ module.exports = function (Bottle) {
     if (ISOCode) {
       filter['owner.ISOCode'] = ISOCode
     }
+    Bottle.app.models.bottleUserComplete.seenAndComplete(seen, complete, req, function () {
 
-    Bottle.app.models.user.findById(userId, function (err, oneUser) {
-      if (err) {
-        return callback(err);
-      }
-      if (oneUser.status !== 'active') {
-        return callback(errors.account.notActive());
-      }
-
-      Bottle.app.models.block.find({
-        where: {
-          or: [{
-              "ownerId": ObjectId(userId)
-            },
-            {
-              "userId": ObjectId(userId)
-            },
-          ]
+      Bottle.app.models.user.findById(userId, function (err, oneUser) {
+        if (err) {
+          return callback(err);
         }
-      }, function (err, blocksList) {
-        blockList = blocksList.map(function (block) {
-          if (new String(req.accessToken.userId).valueOf() === new String(block.ownerId).valueOf())
-            return ObjectId(block.userId);
-          else
-            return ObjectId(block.ownerId);
-        });
-
-        blockList.push(ObjectId(userId))
-        console.log("blockList")
-        console.log(blockList)
-        filter['ownerId'] = {
-          $nin: blockList
+        if (oneUser.status !== 'active') {
+          return callback(errors.account.notActive());
         }
 
+        if (offsets == 0) {
 
-        Bottle.app.models.bottleUserseen.find({
-          where: {
-            userId: req.accessToken.userId
-          }
-        }, function (err, bottles) {
-          seenBottle = getFrequency(bottles)
-
-
-          console.log(seenBottle)
-
-          Bottle.getDataSource().connector.connect(function (err, db) {
-
-            var collection = db.collection('bottle');
-            var cursor = collection.aggregate([{
-                $match: filter
-              },
-              {
-                $sort: {
-                  totalWeight: -1
-                }
-              },
-              {
-                $limit: 10
-              }
-            ])
-            cursor.get(function (err, data) {
-              if (err) return callback(err);
-              for (let index = 0; index < data.length; index++) {
-                const element = data[index];
-                // if(element)
-              }
+          createStack(userId, filter, oneUser, function () {
+            getFromStack(userId, offsets, limit, function (err, data) {
               return callback(null, data);
             })
+          })
+        } else
+          getFromStack(userId, offsets, limit, function (err, data) {
+
+            return callback(null, data);
+          })
+      })
+    })
+  }
+
+
+  function createStack(userId, filter, oneUser, callback) {
+    var blockList = []
+    var seenBottle = []
+
+    Bottle.app.models.block.find({
+      where: {
+        or: [{
+            "ownerId": ObjectId(userId)
+          },
+          {
+            "userId": ObjectId(userId)
+          },
+        ]
+      }
+    }, function (err, blocksList) {
+      blockList = blocksList.map(function (block) {
+        if (new String(userId).valueOf() === new String(block.ownerId).valueOf())
+          return ObjectId(block.userId);
+        else
+          return ObjectId(block.ownerId);
+      });
+
+      blockList.push(ObjectId(userId))
+      console.log("blockList")
+      console.log(blockList)
+      filter['ownerId'] = {
+        $nin: blockList
+      }
+
+
+      Bottle.app.models.bottleUserseen.find({
+        where: {
+          userId: userId
+        }
+      }, function (err, bottles) {
+        seenBottle = getFrequency(bottles)
+
+
+        console.log(seenBottle)
+
+        Bottle.getDataSource().connector.connect(function (err, db) {
+
+          var collection = db.collection('bottle');
+          var cursor = collection.aggregate([{
+              $match: filter
+            },
+            {
+              $sort: {
+                totalWeight: -1
+              }
+            },
+            {
+              $limit: 900
+            }
+          ])
+          cursor.get(function (err, data) {
+            if (err) return callback(err);
+            var arrayBottle = seenBottle
+            for (var i = data.length - 1; i >= 0; i--) {
+              var element = data[i]
+              if (seenBottle.indexOf(element._id.toString()) != -1) {
+                console.log("////////////")
+                data.splice(i, 1);
+              } else {
+                arrayBottle.unshift(element._id)
+              }
+              if (i == 0) {
+                console.log(data.length)
+                oneUser.updateAttributes({
+                  "stackBottleUser": arrayBottle
+                }, function (err, data) {
+                  return callback()
+                })
+              }
+            }
           })
         })
       })
     })
   }
 
+  function getFromStack(userId, offsets, limit, callback) {
+    Bottle.app.models.user.findById(userId, function (err, user) {
+      if (err)
+        return callback(err, null)
+      var stack = user.stackBottleUser
+      var bottleIds = stack.slice(offsets, offsets + limit);
+      // callback(null, bottleIds)
+      Bottle.find({
+        "where": {
+          id: {
+            inq: bottleIds
+          }
+        },
+        "order": "totalWeight DESC"
+      }, function (err, data) {
+        if (err)
+          return callback(err, null)
+        console.log(data)
+        return callback(null, data)
+      })
+    })
+  }
 
 
   function getFrequency(array) {
@@ -369,125 +425,128 @@ module.exports = function (Bottle) {
         freq[element.bottleId] = 1;
       }
     }
-
-    return freq;
-  };
-  Bottle.getOneBottle = function (gender, ISOCode, shoreId, req, callback) {
-    var result;
-    var secFilter = {};
-    if (gender) {
-      secFilter.gender = gender;
-    }
-
-    if (ISOCode) {
-      secFilter.ISOCode = ISOCode;
-    }
-
-    var seenBottle = [];
-    var blockList = [];
-    Bottle.app.models.user.findById(req.accessToken.userId, function (err, oneUser) {
-      if (err) {
-        return callback(err);
-      }
-      if (oneUser.status !== 'active') {
-        return callback(errors.account.notActive());
-      }
-      // get bottle seen 
-      Bottle.app.models.bottleUserseen.find({
-        where: {
-          userId: req.accessToken.userId
-        }
-      }, function (err, bottles) {
-        seenBottle = bottles;
-
-        // get id user block list 
-        Bottle.app.models.block.find({
-          where: {
-            or: [{
-                "ownerId": req.accessToken.userId
-              },
-              {
-                "userId": req.accessToken.userId
-              },
-            ]
-          }
-        }, function (err, blocksList) {
-          blockList = blocksList.map(function (block) {
-            if (new String(req.accessToken.userId).valueOf() === new String(block.ownerId).valueOf())
-              return block.userId;
-            else
-              return block.ownerId;
-
-          });
-          var filter = {
-            where: {
-              status: 'active'
-            },
-            order: 'totalWeight DESC'
-
-          }
-          if (shoreId) {
-            filter.where.shoreId = shoreId;
-          }
-
-          Bottle.find(filter, function (err, bottles) {
-            if (err) {
-              callback(err, null);
-            }
-            var ranking = bottles;
-
-            // process bottle sort
-            ranking = sortBottle(bottles, req.accessToken.userId, seenBottle, blockList, secFilter, function (data) {
-
-
-              if (data[0]) {
-                for (let index = 0; index < data.length; index++) {
-                  const element = data[index];
-                  if (cheackLogBootleOwner(oneUser, data[index].ownerId)) {
-                    console.log("log is fine")
-                    var bottleUserseenObject = {
-                      "userId": req.accessToken.userId,
-                      "bottleId": data[index].id
-                    }
-                    Bottle.app.models.bottleUserseen.create(bottleUserseenObject)
-                      .then()
-                      .catch(err => console.log(err));
-
-                    addOwnerBootle(oneUser, data[index].ownerId)
-                    // oneUser.save();
-                    data[index].bottleViewCount++;
-                    data[index].save();
-                    return callback(null, data[index]);
-                  } else {
-                    console.log("log is not fine")
-                    if (index + 1 == data.length) {
-                      console.log("log is good")
-                      var bottleUserseenObject = {
-                        "userId": req.accessToken.userId,
-                        "bottleId": data[0].id
-                      }
-                      Bottle.app.models.bottleUserseen.create(bottleUserseenObject)
-                        .then()
-                        .catch(err => console.log(err));
-
-                      addOwnerBootle(oneUser, data[0].ownerId)
-                      // oneUser.save();
-                      data[0].bottleViewCount++;
-                      data[0].save();
-                      return callback(null, data[0]);
-                    }
-                  }
-                }
-              } else {
-                callback(errors.bottle.noNewBottle(), null);
-              }
-            })
-          })
-        });
-      })
+    console.log(freq)
+    var sortFreq = Object.keys(freq).sort(function (a, b) {
+      return freq[a] - freq[b]
     })
-
+    return sortFreq;
   };
+  // Bottle.getOneBottle = function (gender, ISOCode, shoreId, req, callback) {
+  //   var result;
+  //   var secFilter = {};
+  //   if (gender) {
+  //     secFilter.gender = gender;
+  //   }
+
+  //   if (ISOCode) {
+  //     secFilter.ISOCode = ISOCode;
+  //   }
+
+  //   var seenBottle = [];
+  //   var blockList = [];
+  //   Bottle.app.models.user.findById(req.accessToken.userId, function (err, oneUser) {
+  //     if (err) {
+  //       return callback(err);
+  //     }
+  //     if (oneUser.status !== 'active') {
+  //       return callback(errors.account.notActive());
+  //     }
+  //     // get bottle seen 
+  //     Bottle.app.models.bottleUserseen.find({
+  //       where: {
+  //         userId: req.accessToken.userId
+  //       }
+  //     }, function (err, bottles) {
+  //       seenBottle = bottles;
+
+  //       // get id user block list 
+  //       Bottle.app.models.block.find({
+  //         where: {
+  //           or: [{
+  //               "ownerId": req.accessToken.userId
+  //             },
+  //             {
+  //               "userId": req.accessToken.userId
+  //             },
+  //           ]
+  //         }
+  //       }, function (err, blocksList) {
+  //         blockList = blocksList.map(function (block) {
+  //           if (new String(req.accessToken.userId).valueOf() === new String(block.ownerId).valueOf())
+  //             return block.userId;
+  //           else
+  //             return block.ownerId;
+
+  //         });
+  //         var filter = {
+  //           where: {
+  //             status: 'active'
+  //           },
+  //           order: 'totalWeight DESC'
+
+  //         }
+  //         if (shoreId) {
+  //           filter.where.shoreId = shoreId;
+  //         }
+
+  //         Bottle.find(filter, function (err, bottles) {
+  //           if (err) {
+  //             callback(err, null);
+  //           }
+  //           var ranking = bottles;
+
+  //           // process bottle sort
+  //           ranking = sortBottle(bottles, req.accessToken.userId, seenBottle, blockList, secFilter, function (data) {
+
+
+  //             if (data[0]) {
+  //               for (let index = 0; index < data.length; index++) {
+  //                 const element = data[index];
+  //                 if (cheackLogBootleOwner(oneUser, data[index].ownerId)) {
+  //                   console.log("log is fine")
+  //                   var bottleUserseenObject = {
+  //                     "userId": req.accessToken.userId,
+  //                     "bottleId": data[index].id
+  //                   }
+  //                   Bottle.app.models.bottleUserseen.create(bottleUserseenObject)
+  //                     .then()
+  //                     .catch(err => console.log(err));
+
+  //                   addOwnerBootle(oneUser, data[index].ownerId)
+  //                   // oneUser.save();
+  //                   data[index].bottleViewCount++;
+  //                   data[index].save();
+  //                   return callback(null, data[index]);
+  //                 } else {
+  //                   console.log("log is not fine")
+  //                   if (index + 1 == data.length) {
+  //                     console.log("log is good")
+  //                     var bottleUserseenObject = {
+  //                       "userId": req.accessToken.userId,
+  //                       "bottleId": data[0].id
+  //                     }
+  //                     Bottle.app.models.bottleUserseen.create(bottleUserseenObject)
+  //                       .then()
+  //                       .catch(err => console.log(err));
+
+  //                     addOwnerBootle(oneUser, data[0].ownerId)
+  //                     // oneUser.save();
+  //                     data[0].bottleViewCount++;
+  //                     data[0].save();
+  //                     return callback(null, data[0]);
+  //                   }
+  //                 }
+  //               }
+  //             } else {
+  //               callback(errors.bottle.noNewBottle(), null);
+  //             }
+  //           })
+  //         })
+  //       });
+  //     })
+  //   })
+
+  // };
 
 
   function addOwnerBootle(oneUser, ownerId) {

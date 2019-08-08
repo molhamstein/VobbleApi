@@ -7,9 +7,8 @@
   },
   "scope": {
     "include": [{
-        "relation": "user"
-      }
-    ]
+      "relation": "user"
+    }]
   },
   "properties": {
     "createdAt": {
@@ -38,5 +37,39 @@
     }
   },
   "acls": [],
-  "methods": {}
+  "methods": {
+    "seenAndComplete": {
+      "accepts": [{
+          "arg": "seen",
+          "type": "array",
+          "required": true,
+          "description": "Seen Bottle Array"
+        },
+        {
+          "arg": "complete",
+          "type": "array",
+          "required": true,
+          "description": "Complete Bottle Array"
+        },
+        {
+          "arg": "req",
+          "type": "object",
+          "http": {
+            "source": "req"
+          }
+        }
+      ],
+      "returns": [{
+        "arg": "result",
+        "type": "object",
+        "root": true,
+        "description": ""
+      }],
+      "description": "get one mthode with some logic",
+      "http": [{
+        "path": "/seenAndComplete",
+        "verb": "post"
+      }]
+    }
+  }
 }

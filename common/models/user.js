@@ -1183,8 +1183,6 @@ module.exports = function (User) {
       if (element > elementLoadVersion) {
         isAfterLoadVersion = true
         break;
-      } else if (element < elementLoadVersion) {
-        return ("obsolete")
       }
     }
     if (isAfterLoadVersion == false) {
@@ -1662,6 +1660,8 @@ module.exports = function (User) {
       }
     })
   })
+
+
   User.login = function (credentials, include, fn) {
     var deviceId = null
     User.app.models.Device.cheackDevice(credentials.deviceName, function (err, device) {

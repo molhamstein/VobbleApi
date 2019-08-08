@@ -127,6 +127,12 @@
       "principalType": "ROLE",
       "principalId": "$authenticated",
       "permission": "ALLOW",
+      "property": "getBottle"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
       "property": "getBottleById"
     },
     {
@@ -203,6 +209,69 @@
       "description": "get one mthode with some logic",
       "http": [{
         "path": "/getOneBottle",
+        "verb": "get"
+      }]
+    },
+    "getBottle": {
+      "accepts": [{
+          "arg": "gender",
+          "type": "string",
+          "required": false,
+          "description": "gender of owner bottle"
+        },
+        {
+          "arg": "ISOCode",
+          "type": "string",
+          "required": false,
+          "description": "ISOCode of owner bottle"
+        },
+        {
+          "arg": "shoreId",
+          "type": "string",
+          "required": false,
+          "description": "shore id of  bottle"
+        },
+        {
+          "arg": "offsets",
+          "type": "number",
+          "required": false,
+          "description": "offsets"
+        },
+        {
+          "arg": "limit",
+          "type": "number",
+          "required": false,
+          "description": "limit"
+        },
+        {
+          "arg": "seen",
+          "type": "array",
+          "required": false,
+          "description": "Seen Bottle Array"
+        },
+        {
+          "arg": "complete",
+          "type": "array",
+          "required": false,
+          "description": "Complete Bottle Array"
+        },
+        {
+          "arg": "req",
+          "type": "object",
+          "http": {
+            "source": "req"
+          }
+        }
+      ],
+      "returns": [{
+        "arg": "result",
+        "type": "object",
+        "root": true,
+        "description": ""
+      }],
+      "description": "get page of bottle",
+      "http": [{
+        "path": "/getBottle",
         "verb": "get"
       }]
     },

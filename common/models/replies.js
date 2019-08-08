@@ -57,12 +57,6 @@ module.exports = function (Replies) {
     }, function (err, data) {
       dataNotification = data;
     })
-    // var date = new Date();
-    // date = new Date(date.setTime(date.getTime() + 1 * 86400000));
-    // var date = new Date();
-    // console.log(date);
-    // date.setHours(date.getHours() + 24);
-    // console.log(date);
     Replies.app.models.User.updateAll({}, {
       'replaysCount': 10,
       'extraReplaysCount': 0
