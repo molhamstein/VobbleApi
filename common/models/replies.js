@@ -38,15 +38,15 @@ module.exports = function (Replies) {
     })
   });
 
-  Replies.afterRemote('create', function (context, result, next) {
-    const user = context.res.locals.user;
-    if (user.extraReplaysCount > 0)
-      user.extraReplaysCount--;
-    else
-      user.replaysCount--;
-    user.save();
-    next();
-  });
+  // Replies.afterRemote('create', function (context, result, next) {
+  //   const user = context.res.locals.user;
+  //   if (user.extraReplaysCount > 0)
+  //     user.extraReplaysCount--;
+  //   else
+  //     user.replaysCount--;
+  //   user.save();
+  //   next();
+  // });
 
   cron.scheduleJob('0 * * * * *', function () {
     var dataNotification = []
