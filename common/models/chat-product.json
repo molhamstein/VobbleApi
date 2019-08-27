@@ -1,0 +1,60 @@
+{
+  "name": "chatProduct",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "replaceOnPUT": false,
+  "scope": {
+    "include": [{
+      "relation": "baseProduct"
+    }]
+  },
+  "properties": {
+    "createdAt": {
+      "type": "date",
+      "defaultFn": "now"
+    },
+    "price": {
+      "type": "number",
+      "required": true,
+      "default": 0
+    },
+    "productSold": {
+      "type": "number",
+      "required": true,
+      "default": 0
+    },
+    "status": {
+      "type": "string",
+      "default": "active"
+    },
+    "name_ar": {
+      "type": "string",
+      "required": true
+    },
+    "name_en": {
+      "type": "string",
+      "required": true
+    },
+    "icon": {
+      "type": "string",
+      "required": true
+    },
+    "baseProductId": {
+      "type": "string",
+      "required": true
+    }
+  },
+  "validations": [],
+  "relations": {
+    "baseProduct": {
+      "type": "belongsTo",
+      "model": "baseChatProduct",
+      "foreignKey": "baseProductId"
+    }
+  },
+  "acls": [],
+  "methods": {}
+}

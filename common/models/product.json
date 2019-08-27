@@ -36,6 +36,9 @@
     "bottleCount": {
       "type": "number"
     },
+    "coinsCount": {
+      "type": "number"
+    },
     "validity": {
       "type": "number"
     },

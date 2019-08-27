@@ -82,6 +82,9 @@ module.exports.product = {
   },
   unvalidReceipt: function () {
     return new cError('UNVALID_RECEIPT', 415, 'unvalid receipt', 415);
-
+  },
+  youDonotHaveCoins: function () {
+    return new cError('YOU_DO_NOT_HAVE_COINS', 422, "you don't have coins" , 422);
   }
+
 };

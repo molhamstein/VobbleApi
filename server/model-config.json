@@ -149,5 +149,22 @@
   "bottleUserComplete": {
     "dataSource": "db",
     "public": true
+  },
+  "notificationCenter": {
+    "dataSource": "db",
+    "public": true
+  },
+  "baseChatProduct": {
+    "dataSource": "db",
+    "public": true
+  },
+  "chatProduct": {
+    "dataSource": "db",
+    "public": true
+  },
+  "chatItem": {
+    "dataSource": "db",
+    "public": true
   }
+
 }

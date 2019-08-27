@@ -371,13 +371,13 @@ module.exports = function (Bottle) {
             for (var i = data.length - 1; i >= 0; i--) {
               var element = data[i]
               if (seenBottle.indexOf(element._id.toString()) != -1) {
-                console.log("////////////")
                 data.splice(i, 1);
               } else {
+                console.log(element._id + "////////" + element.totalWeight+"///////////"+element.owner.gender)
+
                 arrayBottle.unshift(element._id)
               }
               if (i == 0) {
-                console.log(data.length)
                 oneUser.updateAttributes({
                   "stackBottleUser": arrayBottle
                 }, function (err, data) {
@@ -408,7 +408,6 @@ module.exports = function (Bottle) {
       }, function (err, data) {
         if (err)
           return callback(err, null)
-        console.log(data)
         return callback(null, data)
       })
     })

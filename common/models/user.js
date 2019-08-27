@@ -88,7 +88,7 @@ module.exports = function (User) {
   })
 
   function makeChat(userId) {
-    User.app.models.Conversation.makeChatWithbot(userId)
+    User.app.models.notificationCenter.initNotificationCenter(userId)
   }
 
   function sendVerificationEmail(user, subject, message, callback) {

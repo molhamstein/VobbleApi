@@ -1,0 +1,235 @@
+{
+  "name": "chatItem",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "replaceOnPUT": false,
+  "scope": {
+    "include": [{
+        "relation": "owner"
+      },
+      {
+        "relation": "chatProduct"
+      },
+      {
+        "relation": "relatedUser"
+      }
+    ]
+  },
+  "properties": {
+    "isConsumed": {
+      "type": "boolean",
+      "required": true
+    },
+    "price": {
+      "type": "number",
+      "required": true
+    }
+  },
+  "validations": [],
+  "relations": {
+    "chatProduct": {
+      "type": "belongsTo",
+      "model": "chatProduct",
+      "foreignKey": "chatProductId"
+    },
+    "owner": {
+      "type": "belongsTo",
+      "model": "user",
+      "foreignKey": "ownerId"
+    },
+    "relatedUser": {
+      "type": "belongsTo",
+      "model": "user",
+      "foreignKey": "relatedUserId"
+    }
+  },
+  "acls": [],
+  "methods": {
+    "countFilter": {
+      "accepts": [{
+        "arg": "filter",
+        "type": "object",
+        "required": true,
+        "description": "filter item"
+      }],
+      "returns": [{
+        "arg": "result",
+        "type": "object",
+        "root": true,
+        "description": ""
+      }],
+      "description": "",
+      "http": [{
+        "path": "/countItem",
+        "verb": "get"
+      }]
+    },
+    "getFilterItem": {
+      "accepts": [{
+        "arg": "filter",
+        "type": "object",
+        "required": false,
+        "description": "filter Item"
+      }],
+      "returns": [{
+        "arg": "result",
+        "type": "object",
+        "root": true,
+        "description": ""
+      }],
+      "description": "filter On the Item",
+      "http": [{
+        "path": "/filterItem",
+        "verb": "get"
+      }]
+    },
+    "itemStateReport": {
+      "accepts": [{
+          "arg": "from",
+          "type": "date",
+          "required": false,
+          "description": ""
+        },
+        {
+          "arg": "to",
+          "type": "date",
+          "required": false,
+          "description": ""
+        }
+      ],
+      "returns": [{
+        "arg": "result",
+        "type": "array",
+        "root": true,
+        "description": ""
+      }],
+      "description": "",
+      "http": [{
+        "path": "/itemStateReport",
+        "verb": "get"
+      }]
+    },
+    "export": {
+      "accepts": [{
+        "arg": "filter",
+        "type": "object",
+        "required": false,
+        "description": "filter Item"
+      }],
+      "returns": [{
+        "arg": "result",
+        "type": "object",
+        "root": true,
+        "description": ""
+      }],
+      "description": "Export To Excel",
+      "http": [{
+        "path": "/export",
+        "verb": "get"
+      }]
+    },
+    "chatExtendReportOwner": {
+      "accepts": [{
+        "arg": "filter",
+        "type": "object",
+        "required": false,
+        "description": "filter Item"
+      }],
+      "returns": [{
+        "arg": "result",
+        "type": "object",
+        "root": true,
+        "description": ""
+      }],
+      "description": "get report about chatExtend",
+      "http": [{
+        "path": "/chatExtendReportOwner",
+        "verb": "get"
+      }]
+    },
+    "chatExtendReportOwnerCount": {
+      "accepts": [{
+        "arg": "filter",
+        "type": "object",
+        "required": false,
+        "description": "filter Item"
+      }],
+      "returns": [{
+        "arg": "result",
+        "type": "object",
+        "root": true,
+        "description": ""
+      }],
+      "description": "get report about chatExtend",
+      "http": [{
+        "path": "/chatExtendReportOwnerCount",
+        "verb": "get"
+      }]
+    },
+    "chatExtendReportRelated": {
+      "accepts": [{
+        "arg": "filter",
+        "type": "object",
+        "required": false,
+        "description": "filter Item"
+      }],
+      "returns": [{
+        "arg": "result",
+        "type": "object",
+        "root": true,
+        "description": ""
+      }],
+      "description": "get report about chatExtend",
+      "http": [{
+        "path": "/chatExtendReportRelated",
+        "verb": "get"
+      }]
+    },
+    "chatExtendReportRelatedCount": {
+      "accepts": [{
+        "arg": "filter",
+        "type": "object",
+        "required": false,
+        "description": "filter Item"
+      }],
+      "returns": [{
+        "arg": "result",
+        "type": "object",
+        "root": true,
+        "description": ""
+      }],
+      "description": "get report about chatExtend",
+      "http": [{
+        "path": "/chatExtendReportRelatedCount",
+        "verb": "get"
+      }]
+    },
+    "getUserRelated": {
+      "accepts": [{
+        "arg": "userId",
+        "type": "string",
+        "required": true,
+        "description": "user id"
+      }, {
+        "arg": "isOwner",
+        "type": "boolean",
+        "required": true,
+        "description": "user type"
+      }],
+      "returns": [{
+        "arg": "result",
+        "type": "array",
+        "root": true,
+        "description": ""
+      }],
+      "description": "get related user to user",
+      "http": [{
+        "path": "/:userId/getUserRelated",
+        "verb": "get"
+      }]
+    }
+  }
+}

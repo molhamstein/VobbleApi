@@ -129,22 +129,30 @@ module.exports = function (Item) {
         return next(err);
       }
       Item.app.models.User.findById(context.req.body.ownerId).then(user => {
-        user.totalPaid += product.price;
-        user.save();
-        if (product.bottleCount > 0) {
-          user.extraBottlesCount += product.bottleCount;
-          user.save();
-          next();
-        } else {
-          var date = new Date().getTime();
-          date += (product.validity * 60 * 60 * 1000);
-          item.endAt = new Date(date);
-          item.save();
-          next();
-        }
-      }).catch(err => next(err));
+        let paid = user.totalPaid + product.price;
+        user.updateAttributes({
+          "totalPaid": paid
+        }, function (err, data) {
+          if (product.coinsCount > 0) {
+            user.pocketCoins += product.coinsCount;
+            user.save();
+            next();
+          } else if (product.bottleCount > 0) {
+            user.extraBottlesCount += product.bottleCount;
+            user.save();
+            next();
+          } else {
+            var date = new Date().getTime();
+            date += (product.validity * 60 * 60 * 1000);
+            item.endAt = new Date(date);
+            item.save();
+            next();
+          }
+        }).catch(err => next(err));
 
+      })
     })
+
 
   });
 
