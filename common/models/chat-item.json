@@ -24,6 +24,11 @@
       "required": true,
       "default": true
     },
+    "createdAt": {
+      "type": "date",
+      "required": true,
+      "defaultFn": "now"
+    },
     "price": {
       "type": "number",
       "required": true

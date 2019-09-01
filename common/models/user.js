@@ -1164,6 +1164,31 @@ module.exports = function (User) {
     // TODO
   };
 
+  User.editUsername = function (context, username, callback) {
+    var result;
+    var deviceId = null
+    var userId = context.req.accessToken.userId;
+    User.findById(userId, function (err, oneUser) {
+      if (err)
+        return callback(err, null);
+      if (oneUser.canEditUsername == false) {
+        return callback(errors.account.youCannotEditUsername());
+      } else {
+        User.checkUsername(username, function (err, data) {
+          if (err)
+            return callback(err, null)
+          oneUser.updateAttributes({
+            "username": username,
+            "canEditUsername": false
+          })
+          return callback(null, true)
+        })
+      }
+    })
+    // TODO
+  };
+
+
   User.compirVersion = function (userVersion, version) {
 
     var isAfterLoadVersion = false

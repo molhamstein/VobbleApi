@@ -36,6 +36,9 @@ module.exports.account = {
   },
   deviceNotAvailable: function () {
     return new cError('DEVICE_NOT_AVAILABLE', 419, 'device not available', 419);
+  },
+  youCannotEditUsername: function () {
+    return new cError('YOU_CAN_NOT_EDIT_USERNAME', 423, 'you can\'t edit username', 423);
   }
 
 
@@ -84,7 +87,7 @@ module.exports.product = {
     return new cError('UNVALID_RECEIPT', 415, 'unvalid receipt', 415);
   },
   youDonotHaveCoins: function () {
-    return new cError('YOU_DO_NOT_HAVE_COINS', 422, "you don't have coins" , 422);
+    return new cError('YOU_DO_NOT_HAVE_COINS', 422, "you don't have coins", 422);
   }
 
 };

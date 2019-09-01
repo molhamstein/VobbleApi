@@ -140,8 +140,11 @@
     "stackBottleUser": {
       "type": ["string"],
       "default": []
+    },
+    "canEditUsername": {
+      "type": "boolean",
+      "default": true
     }
-
   },
   "validations": [],
   "relations": {
@@ -296,6 +299,12 @@
       "principalId": "$authenticated",
       "permission": "ALLOW",
       "property": "me"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "editUsername"
     },
     {
       "principalType": "ROLE",
@@ -594,6 +603,33 @@
         "verb": "get"
       }]
     },
+    "editUsername": {
+      "accepts": [{
+          "arg": "context",
+          "type": "object",
+          "http": {
+            "source": "context"
+          }
+        },
+        {
+          "arg": "username",
+          "type": "string",
+          "required": true
+        }
+      ],
+      "returns": [{
+        "arg": "result",
+        "type": "object",
+        "root": true,
+        "description": ""
+      }],
+      "description": "edit username",
+      "http": [{
+        "path": "/editUsername",
+        "verb": "put"
+      }]
+    },
+
     "deactiveUser": {
       "accepts": [{
         "arg": "id",

@@ -61,88 +61,87 @@ module.exports = function (ChatItem) {
     })
   });
 
-  // function getFilter(filter, callback) {
-  //   var ISOCode = ""
-  //   var goodId = ""
-  //   var index
-  //   var username = ""
-  //   if (filter != null)
-  //     index = filter['where']['and'].length - 1;
-  //   else
-  //     index = -1
+  function getFilter(filter, callback) {
+    var ISOCode = ""
+    var goodId = ""
+    var index
+    var username = ""
+    if (filter != null)
+      index = filter['where']['and'].length - 1;
+    else
+      index = -1
 
-  //   while (index >= 0) {
-  //     if (filter['where']['and'][index]['owner.ISOCode'] != null) {
-  //       ISOCode = filter['where']['and'][index]['owner.ISOCode'];
-  //       filter['where']['and'].splice(index, 1)
-  //     } else if (filter['where']['and'][index]['product.typeGoodsId'] != null) {
-  //       goodId = filter['where']['and'][index]['product.typeGoodsId'];
-  //       filter['where']['and'].splice(index, 1)
-  //     } else if (filter['where']['and'][index]['owner.username'] != null) {
-  //       username = filter['where']['and'][index]['owner.username'];
-  //       filter['where']['and'].splice(index, 1)
-  //     }
+    while (index >= 0) {
+      if (filter['where']['and'][index]['owner.ISOCode'] != null) {
+        ISOCode = filter['where']['and'][index]['owner.ISOCode'];
+        filter['where']['and'].splice(index, 1)
+      } else if (filter['where']['and'][index]['product.typeGoodsId'] != null) {
+        goodId = filter['where']['and'][index]['product.typeGoodsId'];
+        filter['where']['and'].splice(index, 1)
+      } else if (filter['where']['and'][index]['owner.username'] != null) {
+        username = filter['where']['and'][index]['owner.username'];
+        filter['where']['and'].splice(index, 1)
+      }
 
 
-  //     index -= 1;
-  //   }
+      index -= 1;
+    }
 
-  //   if (filter == null || filter['where']['and'][0] == null)
-  //     filter = {}
-  //   // console.log("filter.where.and");
-  //   // console.log(filter.where.and);
-  //   Item.find(
-  //     filter,
-  //     function (err, items) {
-  //       if (err)
-  //         callback(err, null);
-  //       console.log("items")
-  //       console.log(items.length)
-  //       // console.log(items)
-  //       var result = [];
-  //       if (items && items.length != 0) {
-  //         items.forEach(function (element, index) {
-  //           element.owner(function (err, owner) {
-  //             element.product(function (err, product) {
-  //               // console.log(goodId);
-  //               if (((ISOCode == "" || owner.ISOCode == ISOCode) && (goodId == "" || product.typeGoodsId == goodId)) && (username == "" || owner.username.includes(username))) {
-  //                 result.push(element);
-  //               }
+    if (filter == null || filter['where']['and'][0] == null)
+      filter = {}
+    // console.log("filter.where.and");
+    // console.log(filter.where.and);
+    ChatItem.find(
+      filter,
+      function (err, items) {
+        if (err)
+          callback(err, null);
+        console.log("items")
+        console.log(items.length)
+        // console.log(items)
+        var result = [];
+        if (items && items.length != 0) {
+          items.forEach(function (element, index) {
+            element.owner(function (err, owner) {
+              // element.product(function (err, product) {
+              // console.log(goodId);
+              if (((ISOCode == "" || owner.ISOCode == ISOCode)) && (username == "" || owner.username.includes(username))) {
+                result.push(element);
+              }
+              if (index + 1 == items.length) {
+                console.log("resuuuuuuuult");
+                callback(null, result);
+              }
+              // })
+            })
+          }, this);
+        } else {
+          callback(null, [])
+        }
+      })
+  }
 
-  //               if (index + 1 == items.length) {
-  //                 console.log("resuuuuuuuult");
-  //                 callback(null, result);
-  //               }
-  //             })
-  //           })
-  //         }, this);
-  //       } else {
-  //         callback(null, [])
-  //       }
-  //     })
-  // }
+  ChatItem.getFilterItem = function (filter, callback) {
+    var offset = filter['offset'];
+    var limit = filter['limit'];
+    if (offset == null)
+      offset = 0;
+    if (limit == null)
+      limit = 10;
+    // console.log(filter.where.and)
+    delete filter['offset']
+    delete filter['limit']
 
-  // Item.getFilterItem = function (filter, callback) {
-  //   var offset = filter['offset'];
-  //   var limit = filter['limit'];
-  //   if (offset == null)
-  //     offset = 0;
-  //   if (limit == null)
-  //     limit = 10;
-  //   // console.log(filter.where.and)
-  //   delete filter['offset']
-  //   delete filter['limit']
+    getFilter(filter, function (err, data) {
+      if (err)
+        callback(err, null);
+      var newData = data.slice(offset, offset + limit);
+      console.log("newData")
+      console.log(newData)
+      callback(err, newData);
+    })
 
-  //   getFilter(filter, function (err, data) {
-  //     if (err)
-  //       callback(err, null);
-  //     var newData = data.slice(offset, offset + limit);
-  //     console.log("newData")
-  //     console.log(newData)
-  //     callback(err, newData);
-  //   })
-
-  // }
+  }
 
 
 
@@ -152,15 +151,15 @@ module.exports = function (ChatItem) {
   //  * @param {Function(Error, object)} callback
   //  */
 
-  // Item.countFilter = function (filter, callback) {
-  //   getFilter(filter, function (err, data) {
-  //     if (err)
-  //       callback(err, null);
-  //     callback(err, {
-  //       "count": data.length
-  //     });
-  //   })
-  // };
+  ChatItem.countFilter = function (filter, callback) {
+    getFilter(filter, function (err, data) {
+      if (err)
+        callback(err, null);
+      callback(err, {
+        "count": data.length
+      });
+    })
+  };
 
 
 
@@ -435,717 +434,702 @@ module.exports = function (ChatItem) {
   //   // TODO
   // };
 
-  // Item.chatExtendReportOwner = function (filter, callback) {
-  //   var ownerMatch = {
-  //     type: "Chat Extend",
+  ChatItem.chatExtendReportOwner = function (filter, callback) {
+    var ownerMatch = {};
 
-  //   };
+    if (filter && filter.from) {
+      ownerMatch['createdAt'] = {
+        '$gt': new Date(filter.from)
+      }
+    }
 
-  //   if (filter && filter.from) {
-  //     ownerMatch['startAt'] = {
-  //       '$gt': new Date(filter.from)
-  //     }
-  //   }
+    if (filter && filter.to) {
+      if (ownerMatch['createdAt'] == null)
+        ownerMatch['createdAt'] = {}
+      ownerMatch['createdAt']['$lt'] = new Date(filter.to)
+    }
 
-  //   if (filter && filter.to) {
-  //     if (ownerMatch['startAt'] == null)
-  //       ownerMatch['startAt'] = {}
-  //     ownerMatch['startAt']['$lt'] = new Date(filter.to)
-  //   }
+    if (filter && filter.userId) {
+      ownerMatch['ownerId'] = ObjectId(filter.userId)
+    }
 
-  //   if (filter && filter.userId) {
-  //     ownerMatch['ownerId'] = ObjectId(filter.userId)
-  //   }
+    console.log(ownerMatch)
 
-  //   console.log(ownerMatch)
+    ChatItem.getDataSource().connector.connect(function (err, db) {
 
-  //   Item.getDataSource().connector.connect(function (err, db) {
-
-  //     var collection = db.collection('item');
-  //     var cursor = collection.aggregate([{
-  //         $match: ownerMatch
-  //       },
-  //       {
-  //         $group: {
-  //           "_id": {
-  //             "ownerId": "$ownerId",
-  //             "productId": "$productId"
-  //           },
-  //           count: {
-  //             $sum: 1
-  //           },
-  //           cost: {
-  //             $sum: "$price"
-  //           },
-  //         }
-  //       },
-  //       {
-  //         $lookup: {
-  //           from: "user",
-  //           localField: "_id.ownerId",
-  //           foreignField: "_id",
-  //           as: "owner"
-  //         }
-  //       },
-  //       {
-  //         $unwind: "$owner"
-  //       },
-  //       {
-  //         "$addFields": {
-  //           "owner.id": {
-  //             $convert: {
-  //               input: "$owner._id",
-  //               to: "string"
-  //             }
-  //           }
-  //         }
-  //       },
+      var collection = db.collection('chatItem');
+      var cursor = collection.aggregate([{
+          $match: ownerMatch
+        },
+        {
+          $group: {
+            "_id": {
+              "ownerId": "$ownerId",
+              "chatProductId": "$chatProductId"
+            },
+            count: {
+              $sum: 1
+            },
+            cost: {
+              $sum: "$price"
+            },
+          }
+        },
+        {
+          $lookup: {
+            from: "user",
+            localField: "_id.ownerId",
+            foreignField: "_id",
+            as: "owner"
+          }
+        },
+        {
+          $unwind: "$owner"
+        },
+        {
+          "$addFields": {
+            "owner.id": {
+              $convert: {
+                input: "$owner._id",
+                to: "string"
+              }
+            }
+          }
+        },
 
 
-  //       {
-  //         $lookup: {
-  //           from: "product",
-  //           localField: "_id.productId",
-  //           foreignField: "_id",
-  //           as: "product"
-  //         }
-  //       },
-  //       {
-  //         $unwind: "$product"
-  //       },
-  //       {
-  //         "$addFields": {
-  //           "product.id": {
-  //             $convert: {
-  //               input: "$product._id",
-  //               to: "string"
-  //             }
-  //           }
-  //         }
-  //       },
-  //       {
-  //         "$addFields": {
-  //           "product.count": {
-  //             $convert: {
-  //               input: "$count",
-  //               to: "string"
-  //             }
-  //           }
-  //         }
-  //       },
-  //       {
-  //         "$addFields": {
-  //           "product.cost": {
-  //             $convert: {
-  //               input: "$cost",
-  //               to: "string"
-  //             }
-  //           }
-  //         }
-  //       },
+        {
+          $lookup: {
+            from: "chatProduct",
+            localField: "_id.chatProductId",
+            foreignField: "_id",
+            as: "chatProduct"
+          }
+        },
+        {
+          $unwind: "$chatProduct"
+        },
+        {
+          "$addFields": {
+            "chatProduct.id": {
+              $convert: {
+                input: "$chatProduct._id",
+                to: "string"
+              }
+            }
+          }
+        },
+        {
+          "$addFields": {
+            "chatProduct.count": {
+              $convert: {
+                input: "$count",
+                to: "string"
+              }
+            }
+          }
+        },
+        {
+          "$addFields": {
+            "chatProduct.cost": {
+              $convert: {
+                input: "$cost",
+                to: "string"
+              }
+            }
+          }
+        },
 
-  //       {
-  //         $project: {
-  //           count: 1,
-  //           cost: 1,
-  //           product: 1,
-  //           _id: 1
-  //         }
-  //       },
-  //       {
-  //         $group: {
-  //           "_id": {
-  //             "ownerId": "$_id.ownerId",
-  //           },
-  //           products: {
-  //             $addToSet: "$product"
-  //           },
-  //           totalCount: {
-  //             $sum: "$count"
-  //           },
-  //           totalCost: {
-  //             $sum: "$cost"
-  //           }
-  //         }
-  //       },
-  //       {
-  //         $lookup: {
-  //           from: "user",
-  //           localField: "_id.ownerId",
-  //           foreignField: "_id",
-  //           as: "owner"
-  //         }
-  //       },
-  //       {
-  //         $unwind: "$owner"
-  //       },
-  //       {
-  //         "$addFields": {
-  //           "owner.id": {
-  //             $convert: {
-  //               input: "$owner._id",
-  //               to: "string"
-  //             }
-  //           }
-  //         }
-  //       },
-  //       {
-  //         $project: {
-  //           owner: 1,
-  //           products: 1,
-  //           totalCost: 1,
-  //           totalCount: 1,
-  //           _id: 0
-  //         }
-  //       },
-  //     ]);
-  //     cursor.get(function (err, ownerData) {
-  //       if (err) return callback(err);
+        {
+          $project: {
+            count: 1,
+            cost: 1,
+            chatProduct: 1,
+            _id: 1
+          }
+        },
+        {
+          $group: {
+            "_id": {
+              "ownerId": "$_id.ownerId",
+            },
+            chatProducts: {
+              $addToSet: "$chatProduct"
+            },
+            totalCount: {
+              $sum: "$count"
+            },
+            totalCost: {
+              $sum: "$cost"
+            }
+          }
+        },
+        {
+          $lookup: {
+            from: "user",
+            localField: "_id.ownerId",
+            foreignField: "_id",
+            as: "owner"
+          }
+        },
+        {
+          $unwind: "$owner"
+        },
+        {
+          "$addFields": {
+            "owner.id": {
+              $convert: {
+                input: "$owner._id",
+                to: "string"
+              }
+            }
+          }
+        },
+        {
+          $project: {
+            owner: 1,
+            chatProducts: 1,
+            totalCost: 1,
+            totalCount: 1,
+            _id: 0
+          }
+        },
+      ]);
+      cursor.get(function (err, ownerData) {
+        if (err) return callback(err);
 
-  //       return callback(null,
-  //         ownerData
-  //       );
-  //     })
-  //   })
-  // };
-  // Item.chatExtendReportOwnerCount = function (filter, callback) {
-  //   var ownerMatch = {
-  //     type: "Chat Extend",
+        return callback(null,
+          ownerData
+        );
+      })
+    })
+  };
+  ChatItem.chatExtendReportOwnerCount = function (filter, callback) {
+    var ownerMatch = {};
 
-  //   };
+    if (filter && filter.from) {
+      ownerMatch['createdAt'] = {
+        '$gt': new Date(filter.from)
+      }
+    }
 
-  //   if (filter && filter.from) {
-  //     ownerMatch['startAt'] = {
-  //       '$gt': new Date(filter.from)
-  //     }
-  //   }
+    if (filter && filter.to) {
+      if (ownerMatch['createdAt'] == null)
+        ownerMatch['createdAt'] = {}
+      ownerMatch['createdAt']['$lt'] = new Date(filter.to)
+    }
 
-  //   if (filter && filter.to) {
-  //     if (ownerMatch['startAt'] == null)
-  //       ownerMatch['startAt'] = {}
-  //     ownerMatch['startAt']['$lt'] = new Date(filter.to)
-  //   }
+    if (filter && filter.userId) {
+      ownerMatch['ownerId'] = ObjectId(filter.userId)
+    }
 
-  //   if (filter && filter.userId) {
-  //     ownerMatch['ownerId'] = ObjectId(filter.userId)
-  //   }
+    console.log(ownerMatch)
 
-  //   console.log(ownerMatch)
+    ChatItem.getDataSource().connector.connect(function (err, db) {
 
-  //   Item.getDataSource().connector.connect(function (err, db) {
-
-  //     var collection = db.collection('item');
-  //     var cursor = collection.aggregate([{
-  //         $match: ownerMatch
-  //       },
-  //       {
-  //         $group: {
-  //           "_id": {
-  //             "ownerId": "$ownerId",
-  //             "productId": "$productId"
-  //           },
-  //           count: {
-  //             $sum: 1
-  //           },
-  //           cost: {
-  //             $sum: "$price"
-  //           },
-  //         }
-  //       },
-  //       {
-  //         $lookup: {
-  //           from: "user",
-  //           localField: "_id.ownerId",
-  //           foreignField: "_id",
-  //           as: "owner"
-  //         }
-  //       },
-  //       {
-  //         $unwind: "$owner"
-  //       },
-  //       {
-  //         "$addFields": {
-  //           "owner.id": {
-  //             $convert: {
-  //               input: "$owner._id",
-  //               to: "string"
-  //             }
-  //           }
-  //         }
-  //       },
+      var collection = db.collection('chatItem');
+      var cursor = collection.aggregate([{
+          $match: ownerMatch
+        },
+        {
+          $group: {
+            "_id": {
+              "ownerId": "$ownerId",
+              "chatProductId": "$chatProductId"
+            },
+            count: {
+              $sum: 1
+            },
+            cost: {
+              $sum: "$price"
+            },
+          }
+        },
+        {
+          $lookup: {
+            from: "user",
+            localField: "_id.ownerId",
+            foreignField: "_id",
+            as: "owner"
+          }
+        },
+        {
+          $unwind: "$owner"
+        },
+        {
+          "$addFields": {
+            "owner.id": {
+              $convert: {
+                input: "$owner._id",
+                to: "string"
+              }
+            }
+          }
+        },
 
 
-  //       {
-  //         $lookup: {
-  //           from: "product",
-  //           localField: "_id.productId",
-  //           foreignField: "_id",
-  //           as: "product"
-  //         }
-  //       },
-  //       {
-  //         $unwind: "$product"
-  //       },
-  //       {
-  //         "$addFields": {
-  //           "product.id": {
-  //             $convert: {
-  //               input: "$product._id",
-  //               to: "string"
-  //             }
-  //           }
-  //         }
-  //       },
-  //       {
-  //         "$addFields": {
-  //           "product.count": {
-  //             $convert: {
-  //               input: "$count",
-  //               to: "string"
-  //             }
-  //           }
-  //         }
-  //       },
-  //       {
-  //         "$addFields": {
-  //           "product.cost": {
-  //             $convert: {
-  //               input: "$cost",
-  //               to: "string"
-  //             }
-  //           }
-  //         }
-  //       },
+        {
+          $lookup: {
+            from: "chatProduct",
+            localField: "_id.chatProductId",
+            foreignField: "_id",
+            as: "chatProduct"
+          }
+        },
+        {
+          $unwind: "$chatProduct"
+        },
+        {
+          "$addFields": {
+            "chatProduct.id": {
+              $convert: {
+                input: "$chatProduct._id",
+                to: "string"
+              }
+            }
+          }
+        },
+        {
+          "$addFields": {
+            "chatProduct.count": {
+              $convert: {
+                input: "$count",
+                to: "string"
+              }
+            }
+          }
+        },
+        {
+          "$addFields": {
+            "chatProduct.cost": {
+              $convert: {
+                input: "$cost",
+                to: "string"
+              }
+            }
+          }
+        },
 
-  //       {
-  //         $project: {
-  //           count: 1,
-  //           cost: 1,
-  //           product: 1,
-  //           _id: 1
-  //         }
-  //       },
-  //       {
-  //         $group: {
-  //           "_id": {
-  //             "ownerId": "$_id.ownerId",
-  //           },
-  //           products: {
-  //             $addToSet: "$product"
-  //           },
-  //           totalCount: {
-  //             $sum: "$count"
-  //           },
-  //           totalCost: {
-  //             $sum: "$cost"
-  //           }
-  //         }
-  //       },
-  //       {
-  //         $lookup: {
-  //           from: "user",
-  //           localField: "_id.ownerId",
-  //           foreignField: "_id",
-  //           as: "owner"
-  //         }
-  //       },
-  //       {
-  //         $unwind: "$owner"
-  //       },
-  //       {
-  //         "$addFields": {
-  //           "owner.id": {
-  //             $convert: {
-  //               input: "$owner._id",
-  //               to: "string"
-  //             }
-  //           }
-  //         }
-  //       },
-  //       {
-  //         $project: {
-  //           owner: 1,
-  //           products: 1,
-  //           totalCost: 1,
-  //           totalCount: 1,
-  //           _id: 0
-  //         }
-  //       },
-  //     ]);
-  //     cursor.get(function (err, ownerData) {
-  //       if (err) return callback(err);
+        {
+          $project: {
+            count: 1,
+            cost: 1,
+            chatProduct: 1,
+            _id: 1
+          }
+        },
+        {
+          $group: {
+            "_id": {
+              "ownerId": "$_id.ownerId",
+            },
+            chatProducts: {
+              $addToSet: "$chatProduct"
+            },
+            totalCount: {
+              $sum: "$count"
+            },
+            totalCost: {
+              $sum: "$cost"
+            }
+          }
+        },
+        {
+          $lookup: {
+            from: "user",
+            localField: "_id.ownerId",
+            foreignField: "_id",
+            as: "owner"
+          }
+        },
+        {
+          $unwind: "$owner"
+        },
+        {
+          "$addFields": {
+            "owner.id": {
+              $convert: {
+                input: "$owner._id",
+                to: "string"
+              }
+            }
+          }
+        },
+        {
+          $project: {
+            owner: 1,
+            chatProducts: 1,
+            totalCost: 1,
+            totalCount: 1,
+            _id: 0
+          }
+        },
+      ]);
+      cursor.get(function (err, ownerData) {
+        if (err) return callback(err);
 
-  //       return callback(null, {
-  //         "count": ownerData.length
-  //       });
-  //     })
-  //   })
-  // };
+        return callback(null, {
+          "count": ownerData.length
+        });
+      })
+    })
+  };
 
-  // Item.getUserRelated = function (userId, isOwner, callback) {
-  //   var where = {}
-  //   if (isOwner == true) {
-  //     where = {
-  //       "ownerId": userId,
-  //       "type": "Chat Extend"
-  //     }
-  //   } else {
-  //     where = {
-  //       "relatedUserId": userId,
-  //       "type": "Chat Extend"
-  //     }
-  //   }
+  ChatItem.getUserRelated = function (userId, isOwner, callback) {
+    var where = {}
+    if (isOwner == true) {
+      where = {
+        "ownerId": userId
+      }
+    } else {
+      where = {
+        "relatedUserId": userId
+      }
+    }
 
-  //   Item.find({
-  //     "where": where
-  //   }, function (err, items) {
-  //     if (err)
-  //       return callback(err)
-  //     return callback(null, items)
-  //   })
-  // }
-  // Item.chatExtendReportRelated = function (filter, callback) {
-  //   var relatedUserMatch = {
-  //     type: "Chat Extend",
+    ChatItem.find({
+      "where": where
+    }, function (err, items) {
+      if (err)
+        return callback(err)
+      return callback(null, items)
+    })
+  }
+  ChatItem.chatExtendReportRelated = function (filter, callback) {
+    var relatedUserMatch = {};
 
-  //   };
+    if (filter && filter.from) {
+      relatedUserMatch['createdAt'] = {
+        '$gt': new Date(filter.from)
+      }
+    }
 
-  //   if (filter && filter.from) {
-  //     relatedUserMatch['startAt'] = {
-  //       '$gt': new Date(filter.from)
-  //     }
-  //   }
-
-  //   if (filter && filter.to) {
-  //     if (relatedUserMatch['startAt'] == null)
-  //       relatedUserMatch['startAt'] = {}
-  //     relatedUserMatch['startAt']['$lt'] = new Date(filter.to)
-  //   }
+    if (filter && filter.to) {
+      if (relatedUserMatch['createdAt'] == null)
+        relatedUserMatch['createdAt'] = {}
+      relatedUserMatch['createdAt']['$lt'] = new Date(filter.to)
+    }
 
 
-  //   if (filter && filter.userId) {
-  //     relatedUserMatch['relatedUserId'] = ObjectId(filter.userId)
-  //   }
+    if (filter && filter.userId) {
+      relatedUserMatch['relatedUserId'] = ObjectId(filter.userId)
+    }
 
-  //   Item.getDataSource().connector.connect(function (err, db) {
+    ChatItem.getDataSource().connector.connect(function (err, db) {
 
-  //     var collection = db.collection('item');
+      var collection = db.collection('chatItem');
 
-  //     var cursor = collection.aggregate([{
-  //         $match: relatedUserMatch
-  //       },
-  //       {
-  //         $group: {
-  //           "_id": {
-  //             "relatedUserId": "$relatedUserId",
-  //             "productId": "$productId"
-  //           },
-  //           count: {
-  //             $sum: 1
-  //           },
-  //           cost: {
-  //             $sum: "$price"
-  //           },
-  //         }
-  //       },
-  //       {
-  //         $lookup: {
-  //           from: "user",
-  //           localField: "_id.relatedUserId",
-  //           foreignField: "_id",
-  //           as: "relatedUser"
-  //         }
-  //       },
-  //       {
-  //         $unwind: "$relatedUser"
-  //       },
-  //       {
-  //         "$addFields": {
-  //           "relatedUser.id": {
-  //             $convert: {
-  //               input: "$relatedUser._id",
-  //               to: "string"
-  //             }
-  //           }
-  //         }
-  //       },
-  //       {
-  //         $lookup: {
-  //           from: "product",
-  //           localField: "_id.productId",
-  //           foreignField: "_id",
-  //           as: "product"
-  //         }
-  //       },
-  //       {
-  //         $unwind: "$product"
-  //       },
-  //       {
-  //         "$addFields": {
-  //           "product.id": {
-  //             $convert: {
-  //               input: "$product._id",
-  //               to: "string"
-  //             }
-  //           }
-  //         }
-  //       },
-  //       {
-  //         "$addFields": {
-  //           "product.count": {
-  //             $convert: {
-  //               input: "$count",
-  //               to: "string"
-  //             }
-  //           }
-  //         }
-  //       },
-  //       {
-  //         "$addFields": {
-  //           "product.cost": {
-  //             $convert: {
-  //               input: "$cost",
-  //               to: "string"
-  //             }
-  //           }
-  //         }
-  //       },
-  //       {
-  //         $project: {
-  //           count: 1,
-  //           cost: 1,
-  //           product: 1,
-  //           _id: 1
-  //         }
-  //       },
-  //       {
-  //         $group: {
-  //           "_id": {
-  //             "relatedUserId": "$_id.relatedUserId",
-  //           },
-  //           products: {
-  //             $addToSet: "$product"
-  //           },
-  //           totalCount: {
-  //             $sum: "$count"
-  //           },
-  //           totalCost: {
-  //             $sum: "$cost"
-  //           }
-  //         }
-  //       },
-  //       {
-  //         $lookup: {
-  //           from: "user",
-  //           localField: "_id.relatedUserId",
-  //           foreignField: "_id",
-  //           as: "relatedUser"
-  //         }
-  //       },
-  //       {
-  //         $unwind: "$relatedUser"
-  //       },
-  //       {
-  //         "$addFields": {
-  //           "relatedUser.id": {
-  //             $convert: {
-  //               input: "$relatedUser._id",
-  //               to: "string"
-  //             }
-  //           }
-  //         }
-  //       },
-  //       {
-  //         $project: {
-  //           relatedUser: 1,
-  //           products: 1,
-  //           totalCost: 1,
-  //           totalCount: 1,
-  //           _id: 0
-  //         }
-  //       },
-  //     ]);
-
-
-  //     cursor.get(function (err, relatedUserData) {
-  //       if (err) return callback(err);
-  //       return callback(null,
-  //         relatedUserData
-  //       );
-  //     })
-  //   })
-  // };
-
-  // Item.chatExtendReportRelatedCount = function (filter, callback) {
-  //   var relatedUserMatch = {
-  //     type: "Chat Extend",
-
-  //   };
-
-  //   if (filter && filter.from) {
-  //     relatedUserMatch['startAt'] = {
-  //       '$gt': new Date(filter.from)
-  //     }
-  //   }
-
-  //   if (filter && filter.to) {
-  //     if (relatedUserMatch['startAt'] == null)
-  //       relatedUserMatch['startAt'] = {}
-  //     relatedUserMatch['startAt']['$lt'] = new Date(filter.to)
-  //   }
+      var cursor = collection.aggregate([{
+          $match: relatedUserMatch
+        }, {
+          $group: {
+            "_id": {
+              "relatedUserId": "$relatedUserId",
+              "chatProductId": "$chatProductId"
+            },
+            count: {
+              $sum: 1
+            },
+            cost: {
+              $sum: "$price"
+            },
+          }
+        },
+        {
+          $lookup: {
+            from: "user",
+            localField: "_id.relatedUserId",
+            foreignField: "_id",
+            as: "relatedUser"
+          }
+        },
+        {
+          $unwind: "$relatedUser"
+        },
+        {
+          "$addFields": {
+            "relatedUser.id": {
+              $convert: {
+                input: "$relatedUser._id",
+                to: "string"
+              }
+            }
+          }
+        },
+        {
+          $lookup: {
+            from: "chatProduct",
+            localField: "_id.chatProductId",
+            foreignField: "_id",
+            as: "chatProduct"
+          }
+        },
+        {
+          $unwind: "$chatProduct"
+        },
+        {
+          "$addFields": {
+            "chatProduct.id": {
+              $convert: {
+                input: "$chatProduct._id",
+                to: "string"
+              }
+            }
+          }
+        },
+        {
+          "$addFields": {
+            "chatProduct.count": {
+              $convert: {
+                input: "$count",
+                to: "string"
+              }
+            }
+          }
+        },
+        {
+          "$addFields": {
+            "chatProduct.cost": {
+              $convert: {
+                input: "$cost",
+                to: "string"
+              }
+            }
+          }
+        },
+        {
+          $project: {
+            count: 1,
+            cost: 1,
+            chatProduct: 1,
+            _id: 1
+          }
+        },
+        {
+          $group: {
+            "_id": {
+              "relatedUserId": "$_id.relatedUserId",
+            },
+            chatProducts: {
+              $addToSet: "$chatProduct"
+            },
+            totalCount: {
+              $sum: "$count"
+            },
+            totalCost: {
+              $sum: "$cost"
+            }
+          }
+        },
+        {
+          $lookup: {
+            from: "user",
+            localField: "_id.relatedUserId",
+            foreignField: "_id",
+            as: "relatedUser"
+          }
+        },
+        {
+          $unwind: "$relatedUser"
+        },
+        {
+          "$addFields": {
+            "relatedUser.id": {
+              $convert: {
+                input: "$relatedUser._id",
+                to: "string"
+              }
+            }
+          }
+        },
+        {
+          $project: {
+            relatedUser: 1,
+            chatProducts: 1,
+            totalCost: 1,
+            totalCount: 1,
+            _id: 0
+          }
+        }
+      ]);
 
 
-  //   if (filter && filter.userId) {
-  //     relatedUserMatch['relatedUserId'] = ObjectId(filter.userId)
-  //   }
+      cursor.get(function (err, relatedUserData) {
+        if (err) return callback(err);
+        return callback(null,
+          relatedUserData
+        );
+      })
+    })
+  };
 
-  //   Item.getDataSource().connector.connect(function (err, db) {
+  ChatItem.chatExtendReportRelatedCount = function (filter, callback) {
+    var relatedUserMatch = {};
 
-  //     var collection = db.collection('item');
+    if (filter && filter.from) {
+      relatedUserMatch['createdAt'] = {
+        '$gt': new Date(filter.from)
+      }
+    }
 
-  //     var cursor = collection.aggregate([{
-  //         $match: relatedUserMatch
-  //       },
-  //       {
-  //         $group: {
-  //           "_id": {
-  //             "relatedUserId": "$relatedUserId",
-  //             "productId": "$productId"
-  //           },
-  //           count: {
-  //             $sum: 1
-  //           },
-  //           cost: {
-  //             $sum: "$price"
-  //           },
-  //         }
-  //       },
-  //       {
-  //         $lookup: {
-  //           from: "user",
-  //           localField: "_id.relatedUserId",
-  //           foreignField: "_id",
-  //           as: "relatedUser"
-  //         }
-  //       },
-  //       {
-  //         $unwind: "$relatedUser"
-  //       },
-  //       {
-  //         "$addFields": {
-  //           "relatedUser.id": {
-  //             $convert: {
-  //               input: "$relatedUser._id",
-  //               to: "string"
-  //             }
-  //           }
-  //         }
-  //       },
-  //       {
-  //         $lookup: {
-  //           from: "product",
-  //           localField: "_id.productId",
-  //           foreignField: "_id",
-  //           as: "product"
-  //         }
-  //       },
-  //       {
-  //         $unwind: "$product"
-  //       },
-  //       {
-  //         "$addFields": {
-  //           "product.id": {
-  //             $convert: {
-  //               input: "$product._id",
-  //               to: "string"
-  //             }
-  //           }
-  //         }
-  //       },
-  //       {
-  //         "$addFields": {
-  //           "product.count": {
-  //             $convert: {
-  //               input: "$count",
-  //               to: "string"
-  //             }
-  //           }
-  //         }
-  //       },
-  //       {
-  //         "$addFields": {
-  //           "product.cost": {
-  //             $convert: {
-  //               input: "$cost",
-  //               to: "string"
-  //             }
-  //           }
-  //         }
-  //       },
-  //       {
-  //         $project: {
-  //           count: 1,
-  //           cost: 1,
-  //           product: 1,
-  //           _id: 1
-  //         }
-  //       },
-  //       {
-  //         $group: {
-  //           "_id": {
-  //             "relatedUserId": "$_id.relatedUserId",
-  //           },
-  //           products: {
-  //             $addToSet: "$product"
-  //           },
-  //           totalCount: {
-  //             $sum: "$count"
-  //           },
-  //           totalCost: {
-  //             $sum: "$cost"
-  //           }
-  //         }
-  //       },
-  //       {
-  //         $lookup: {
-  //           from: "user",
-  //           localField: "_id.relatedUserId",
-  //           foreignField: "_id",
-  //           as: "relatedUser"
-  //         }
-  //       },
-  //       {
-  //         $unwind: "$relatedUser"
-  //       },
-  //       {
-  //         "$addFields": {
-  //           "relatedUser.id": {
-  //             $convert: {
-  //               input: "$relatedUser._id",
-  //               to: "string"
-  //             }
-  //           }
-  //         }
-  //       },
-  //       {
-  //         $project: {
-  //           relatedUser: 1,
-  //           products: 1,
-  //           totalCost: 1,
-  //           totalCount: 1,
-  //           _id: 0
-  //         }
-  //       },
-  //     ]);
+    if (filter && filter.to) {
+      if (relatedUserMatch['createdAt'] == null)
+        relatedUserMatch['createdAt'] = {}
+      relatedUserMatch['createdAt']['$lt'] = new Date(filter.to)
+    }
 
 
-  //     cursor.get(function (err, relatedUserData) {
-  //       if (err) return callback(err);
-  //       return callback(null, {
-  //         "count": relatedUserData.length
-  //       });
-  //     })
-  //   })
-  // };
+    if (filter && filter.userId) {
+      relatedUserMatch['relatedUserId'] = ObjectId(filter.userId)
+    }
+
+    ChatItem.getDataSource().connector.connect(function (err, db) {
+
+      var collection = db.collection('chatItem');
+
+      var cursor = collection.aggregate([{
+          $match: relatedUserMatch
+        },
+        {
+          $group: {
+            "_id": {
+              "relatedUserId": "$relatedUserId",
+              "chatProductId": "$chatProductId"
+            },
+            count: {
+              $sum: 1
+            },
+            cost: {
+              $sum: "$price"
+            },
+          }
+        },
+        {
+          $lookup: {
+            from: "user",
+            localField: "_id.relatedUserId",
+            foreignField: "_id",
+            as: "relatedUser"
+          }
+        },
+        {
+          $unwind: "$relatedUser"
+        },
+        {
+          "$addFields": {
+            "relatedUser.id": {
+              $convert: {
+                input: "$relatedUser._id",
+                to: "string"
+              }
+            }
+          }
+        },
+        {
+          $lookup: {
+            from: "chatProduct",
+            localField: "_id.chatProductId",
+            foreignField: "_id",
+            as: "chatProduct"
+          }
+        },
+        {
+          $unwind: "$chatProduct"
+        },
+        {
+          "$addFields": {
+            "chatProduct.id": {
+              $convert: {
+                input: "$chatProduct._id",
+                to: "string"
+              }
+            }
+          }
+        },
+        {
+          "$addFields": {
+            "chatProduct.count": {
+              $convert: {
+                input: "$count",
+                to: "string"
+              }
+            }
+          }
+        },
+        {
+          "$addFields": {
+            "chatProduct.cost": {
+              $convert: {
+                input: "$cost",
+                to: "string"
+              }
+            }
+          }
+        },
+        {
+          $project: {
+            count: 1,
+            cost: 1,
+            chatProduct: 1,
+            _id: 1
+          }
+        },
+        {
+          $group: {
+            "_id": {
+              "relatedUserId": "$_id.relatedUserId",
+            },
+            chatProducts: {
+              $addToSet: "$chatProduct"
+            },
+            totalCount: {
+              $sum: "$count"
+            },
+            totalCost: {
+              $sum: "$cost"
+            }
+          }
+        },
+        {
+          $lookup: {
+            from: "user",
+            localField: "_id.relatedUserId",
+            foreignField: "_id",
+            as: "relatedUser"
+          }
+        },
+        {
+          $unwind: "$relatedUser"
+        },
+        {
+          "$addFields": {
+            "relatedUser.id": {
+              $convert: {
+                input: "$relatedUser._id",
+                to: "string"
+              }
+            }
+          }
+        },
+        {
+          $project: {
+            relatedUser: 1,
+            chatProducts: 1,
+            totalCost: 1,
+            totalCount: 1,
+            _id: 0
+          }
+        },
+      ]);
+
+
+      cursor.get(function (err, relatedUserData) {
+        if (err) return callback(err);
+        return callback(null, {
+          "count": relatedUserData.length
+        });
+      })
+    })
+  };
 
 };
