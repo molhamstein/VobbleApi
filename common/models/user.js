@@ -1179,7 +1179,7 @@ module.exports = function (User) {
             return callback(err, null)
           oneUser.updateAttributes({
             "username": username,
-            "canEditUsername": false
+            "canEditUsername": true
           })
           return callback(null, true)
         })
