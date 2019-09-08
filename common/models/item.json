@@ -20,20 +20,16 @@
   },
   "properties": {
     "storeType": {
-      "type": "string",
-      "required": true
+      "type": "string"
     },
     "storeToken": {
-      "type": "string",
-      "required": true
+      "type": "string"
     },
     "isConsumed": {
-      "type": "boolean",
-      "required": true
+      "type": "boolean"
     },
     "valid": {
-      "type": "boolean",
-      "required": true
+      "type": "boolean"
     },
     "startAt": {
       "type": "date",
@@ -50,6 +46,10 @@
     "type": {
       "type": "string",
       "default": "normal"
+    },
+    "typePurchasing": {
+      "type": "string",
+      "default": "creditcard"
     },
     "transactionId": {
       "type": "string"
@@ -77,7 +77,19 @@
       "foreignKey": "relatedUserId"
     }
   },
-  "acls": [],
+  "acls": [{
+      "principalType": "ROLE",
+      "principalId": "$unauthenticated",
+      "permission": "DENY",
+      "property": "buyProductByCoins"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "buyProductByCoins"
+    }
+  ],
   "methods": {
     "countFilter": {
       "accepts": [{
@@ -117,6 +129,34 @@
         "verb": "get"
       }]
     },
+    "buyProductByCoins": {
+      "accepts": [{
+        "arg": "productId",
+        "type": "string",
+        "required": true
+      }, {
+        "arg": "relatedUserId",
+        "type": "string"
+      }, {
+        "arg": "context",
+        "type": "object",
+        "http": {
+          "source": "context"
+        }
+      }],
+      "returns": [{
+        "arg": "result",
+        "type": "object",
+        "root": true,
+        "description": ""
+      }],
+      "description": "buy product by coins",
+      "http": [{
+        "path": "/buyProductByCoins",
+        "verb": "post"
+      }]
+    },
+
     "itemStateReport": {
       "accepts": [{
           "arg": "from",

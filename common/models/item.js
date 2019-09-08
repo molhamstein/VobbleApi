@@ -23,9 +23,9 @@ module.exports = function (Item) {
   var urlFileRootexcel = urlFileRoot + '/excelFiles/download/';
 
 
-  Item.validatesInclusionOf('storeType', {
-    in: ['playStore', 'iTunes']
-  });
+  // Item.validatesInclusionOf('storeType', {
+  //   in: ['playStore', 'iTunes',]
+  // });
 
   Item.beforeRemote('create', function (context, item, next) {
     if (context.req.body.receipt == undefined || context.req.body.transactionId == undefined) {
@@ -257,7 +257,58 @@ module.exports = function (Item) {
     })
   };
 
+  Item.buyProductByCoins = function (productId, relatedUserId, context, callback) {
+    var body = {
+      "productId": productId,
+      "ownerId": context.req.accessToken.userId,
+      "typePurchasing": "coins"
+    }
+    if (relatedUserId) {
+      body['relatedUserId'] = relatedUserId
+    }
+    Item.app.models.User.findById(context.req.accessToken.userId, function (err, user) {
+      if (err)
+        return callback(err, null);
+      if (user.status != 'active') {
+        return callback(errors.account.notActive());
+      }
+      Item.app.models.product.findById(productId, function (err, product) {
+        if (err) {
+          return callback(err);
+        }
+        if (product == null) {
+          return callback(errors.product.productNotFound());
+        }
+        if (user.pocketCoins - product.price_coins < 0) {
+          return callback(errors.product.youDonotHaveCoins());
+        }
+        product.productSold++;
+        body['type'] = product.type;
+        body['price'] = product.price_coins
+        Item.create(body, function (err, item) {
+          if (err)
+            return callback(err, null)
+          product.save();
+          if (product.bottleCount > 0) {
+            user.extraBottlesCount += product.bottleCount;
+            user.pocketCoins -= product.price_coins;
+            user.save();
+            callback(null, item)
+          } else {
+            var date = new Date().getTime();
+            date += (product.validity * 60 * 60 * 1000);
+            item.endAt = new Date(date);
+            item.save();
+            user.pocketCoins -= product.price_coins;
+            user.save();
+            callback(null, item)
 
+          }
+
+        })
+      })
+    })
+  }
 
   /**
    *

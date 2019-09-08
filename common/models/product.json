@@ -6,11 +6,9 @@
     "validateUpsert": true
   },
   "scope": {
-    "include": [
-      {
-        "relation": "typeGoods"
-      }
-    ]
+    "include": [{
+      "relation": "typeGoods"
+    }]
   },
   "properties": {
     "name_ar": {
@@ -24,6 +22,11 @@
     "price": {
       "type": "number",
       "required": true
+    },
+    "price_coins": {
+      "type": "number",
+      "required": true,
+      "default": 0
     },
     "description_ar": {
       "type": "string",

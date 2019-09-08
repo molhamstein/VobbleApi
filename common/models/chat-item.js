@@ -21,7 +21,7 @@ module.exports = function (ChatItem) {
       if (err)
         return next(err, null);
       if (user.status != 'active') {
-        return next(errors.product.unvalidReceipt());
+        return next(errors.account.notActive());
       }
       ChatItem.app.models.chatProduct.findById(context.req.body.chatProductId, function (err, chatProduct) {
         if (err) {
