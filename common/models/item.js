@@ -141,6 +141,11 @@ module.exports = function (Item) {
             user.extraBottlesCount += product.bottleCount;
             user.save();
             next();
+
+          } else if (product.replyCount > 0) {
+            user.extraReplysCount += product.replyCount;
+            user.save();
+            next();
           } else {
             var date = new Date().getTime();
             date += (product.validity * 60 * 60 * 1000);
@@ -294,6 +299,11 @@ module.exports = function (Item) {
             user.pocketCoins -= product.price_coins;
             user.save();
             callback(null, item)
+          } else if (product.replyCount > 0) {
+            user.extraReplysCount += product.replyCount;
+            user.pocketCoins -= product.price_coins;
+            user.save();
+            callback(null, item);
           } else {
             var date = new Date().getTime();
             date += (product.validity * 60 * 60 * 1000);

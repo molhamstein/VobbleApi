@@ -39,6 +39,9 @@
     "bottleCount": {
       "type": "number"
     },
+    "replyCount": {
+      "type": "number"
+    },
     "coinsCount": {
       "type": "number"
     },

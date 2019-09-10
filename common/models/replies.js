@@ -59,7 +59,6 @@ module.exports = function (Replies) {
     })
     Replies.app.models.User.updateAll({}, {
       'replysCount': 10,
-      'extraReplysCount': 0
     }, function (err, res) {
       if (err)
         console.log(err);
