@@ -11,4 +11,17 @@ module.exports = function (Notificationcenter) {
 
     })
   }
+
+  Notificationcenter.getMyCenterNotification = function (context, callback) {
+    var userId = context.req.accessToken.userId;
+    Notificationcenter.find({
+      "where": {
+        ownerId: userId
+      }
+    }, function (err, data) {
+      if (err)
+        return callback(err)
+      callback(null, data)
+    })
+  }
 };

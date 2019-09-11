@@ -30,9 +30,12 @@ module.exports = function (Replies) {
           if (err) {
             return next(err);
           }
-          ownerUser.repliesReceivedCount++;
-          ownerUser.save();
-          next();
+          var repliesReceivedCount = ownerUser.repliesReceivedCount + 1;
+          ownerUser.updateAttributes({
+            "repliesReceivedCount": repliesReceivedCount
+          }, function () {
+            next();
+          })
         })
       })
     })
