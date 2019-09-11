@@ -24,4 +24,33 @@ module.exports = function (Notificationcenter) {
       callback(null, data)
     })
   }
+
+  Notificationcenter.makeNotificationSeen = function (notificationIds, context, callback) {
+    var userId = context.req.accessToken.userId;
+    console.log(userId)
+    console.log(notificationIds)
+    Notificationcenter.updateAll({
+      id: {
+        inq: notificationIds
+      }
+    }, {
+      "isSeen": true
+    }, function (err, data) {
+      if (err)
+        return callback(err)
+      callback(null, 200)
+    })
+
+    // Notificationcenter.find({
+    //   "where": {
+    //     ownerId: userId
+    //   }
+    // }, function (err, data) {
+    //   if (err)
+    //     return callback(err)
+    //   callback(null, data)
+    // })
+  }
+
+
 };

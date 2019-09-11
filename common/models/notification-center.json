@@ -17,6 +17,7 @@
     },
     "isSeen": {
       "type": "boolean",
+      "required": true,
       "defaultFn": false
     },
     "title": {
@@ -43,13 +44,12 @@
   "methods": {
     "getMyCenterNotification": {
       "accepts": [{
-          "arg": "context",
-          "type": "object",
-          "http": {
-            "source": "context"
-          }
+        "arg": "context",
+        "type": "object",
+        "http": {
+          "source": "context"
         }
-      ],
+      }],
       "returns": [{
         "arg": "result",
         "type": "object",
@@ -60,6 +60,30 @@
       "http": [{
         "path": "/getMyCenterNotification",
         "verb": "get"
+      }]
+    },
+    "makeNotificationSeen": {
+      "accepts": [{
+        "arg": "notificationIds",
+        "type": "array",
+        "required": true
+      }, {
+        "arg": "context",
+        "type": "object",
+        "http": {
+          "source": "context"
+        }
+      }],
+      "returns": [{
+        "arg": "result",
+        "type": "number",
+        "root": true,
+        "description": ""
+      }],
+      "description": "get my info",
+      "http": [{
+        "path": "/makeNotificationSeen",
+        "verb": "put"
       }]
     }
   }
