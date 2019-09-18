@@ -287,6 +287,25 @@
         "verb": "get"
       }]
     },
+    "getReportOfAllItems": {
+      "accepts": [{
+        "arg": "filter",
+        "type": "object",
+        "required": false,
+        "description": "filter Item"
+      }],
+      "returns": [{
+        "arg": "result",
+        "type": "object",
+        "root": true,
+        "description": ""
+      }],
+      "description": "get Report Of All Items",
+      "http": [{
+        "path": "/getReportOfAllItems",
+        "verb": "get"
+      }]
+    },
     "getUserRelated": {
       "accepts": [{
         "arg": "userId",

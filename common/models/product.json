@@ -84,5 +84,20 @@
     }
   },
   "acls": [],
-  "methods": {}
+  "methods": {
+    "getAllProducts": {
+      "accepts": [],
+      "returns": [{
+        "arg": "result",
+        "type": "object",
+        "root": true,
+        "description": ""
+      }],
+      "description": "get All Products",
+      "http": [{
+        "path": "/getAllProducts",
+        "verb": "get"
+      }]
+    }
+  }
 }

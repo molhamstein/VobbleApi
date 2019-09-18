@@ -8,12 +8,12 @@ const config = require(configPath);
 var ObjectId = require('mongodb').ObjectID;
 
 
-var appleReceiptVerify = require('node-apple-receipt-verify');
-appleReceiptVerify.config({
-  secret: "8622c3ec270a4f3eb4ec599daa8d5720",
-  environment: ['sandbox', 'production'],
-  verbose: true
-});
+// var appleReceiptVerify = require('node-apple-receipt-verify');
+// appleReceiptVerify.config({
+//   secret: "8622c3ec270a4f3eb4ec599daa8d5720",
+//   environment: ['sandbox', 'production'],
+//   verbose: true
+// });
 
 
 module.exports = function (Item) {
@@ -1348,5 +1348,289 @@ module.exports = function (Item) {
       }
 
     })
+  }
+
+  Item.getReportOfItem = function (match, callback) {
+    Item.getDataSource().connector.connect(function (err, db) {
+
+      var collection = db.collection('item');
+
+      var cursor = collection.aggregate([{
+          $match: match
+        },
+        {
+          $group: {
+            "_id": {
+              month: {
+                $month: "$startAt"
+              },
+              day: {
+                $dayOfMonth: "$startAt"
+              },
+              year: {
+                $year: "$startAt"
+              },
+              "productId": "$productId"
+            },
+            count: {
+              $sum: 1
+            },
+            cost: {
+              $sum: "$price"
+            },
+          }
+        },
+        {
+          $lookup: {
+            from: "product",
+            localField: "_id.productId",
+            foreignField: "_id",
+            as: "product"
+          }
+        },
+        {
+          $unwind: "$product"
+        },
+        {
+          "$addFields": {
+            "product.id": {
+              $convert: {
+                input: "$product._id",
+                to: "string"
+              }
+            }
+          }
+        },
+        {
+          $project: {
+            count: 1,
+            cost: 1,
+            product: 1,
+            groupe: "$_id",
+            _id: 0
+          }
+        },
+      ]);
+
+
+      cursor.get(function (err, normalCoins) {
+        if (err) return callback(err);
+        return callback(null, normalCoins);
+      })
+    })
+  }
+
+  Item.getReportOfChatItem = function (match, callback) {
+    Item.getDataSource().connector.connect(function (err, db) {
+
+      var collection = db.collection('chatItem');
+
+      var cursor = collection.aggregate([{
+          $match: match
+        },
+        {
+          $group: {
+            "_id": {
+              month: {
+                $month: "$createdAt"
+              },
+              day: {
+                $dayOfMonth: "$createdAt"
+              },
+              year: {
+                $year: "$createdAt"
+              },
+              "chatProductId": "$chatProductId"
+            },
+            count: {
+              $sum: 1
+            },
+            cost: {
+              $sum: "$price"
+            },
+          }
+        },
+        {
+          $lookup: {
+            from: "chatProduct",
+            localField: "_id.chatProductId",
+            foreignField: "_id",
+            as: "product"
+          }
+        },
+        {
+          $unwind: "$product"
+        },
+        {
+          "$addFields": {
+            "product.id": {
+              $convert: {
+                input: "$product._id",
+                to: "string"
+              }
+            }
+          }
+        },
+        {
+          $project: {
+            count: 1,
+            cost: 1,
+            product: 1,
+            groupe: "$_id",
+            _id: 0
+          }
+        },
+      ]);
+
+
+      cursor.get(function (err, normalCoins) {
+        if (err) return callback(err);
+        return callback(null, normalCoins);
+      })
+    })
+  }
+
+  Item.getReportOfAllItems = function (filter, callback) {
+    let itemNormalMatch = {}
+    let itemCoinslMatch = {}
+    let itemChatlMatch = {}
+    if (filter && filter.from) {
+      itemNormalMatch['startAt'] = {
+        '$gt': new Date(filter.from)
+      }
+      itemCoinslMatch['startAt'] = {
+        '$gt': new Date(filter.from)
+      }
+      itemChatlMatch['createdAt'] = {
+        '$gt': new Date(filter.from)
+      }
+    }
+    if (filter && filter.to) {
+      if (itemNormalMatch['startAt'] == null) {
+        itemNormalMatch['startAt'] = {}
+        itemCoinslMatch['startAt'] = {}
+        itemChatlMatch['createdAt'] = {}
+      }
+      itemNormalMatch['startAt']['$lt'] = new Date(filter.to)
+      itemCoinslMatch['startAt']['$lt'] = new Date(filter.to)
+      itemChatlMatch['createdAt']['$lt'] = new Date(filter.to)
+    }
+
+    if (filter && filter.ownerId) {
+      itemNormalMatch['ownerId'] = ObjectId(filter.ownerId)
+      itemCoinslMatch['ownerId'] = ObjectId(filter.ownerId)
+      itemChatlMatch['ownerId'] = ObjectId(filter.ownerId)
+    }
+
+    if (filter && filter.productsId && filter.productsId.length > 0) {
+      let tempproductsId = []
+      filter.productsId.forEach(element => {
+        tempproductsId.push(ObjectId(element))
+      });
+      itemNormalMatch['productId'] = {
+        "$in": tempproductsId
+      }
+      itemCoinslMatch['productId'] = {
+        "$in": tempproductsId
+      }
+      itemChatlMatch['chatProductId'] = {
+        "$in": tempproductsId
+      }
+    }
+    itemNormalMatch['type'] = {
+      $ne: "coins",
+    }
+    itemCoinslMatch['type'] = "coins";
+
+
+    console.log("itemNormalMatch")
+    console.log(itemNormalMatch)
+    console.log("itemCoinslMatch")
+    console.log(itemCoinslMatch)
+    console.log("itemChatlMatch")
+    console.log(itemChatlMatch)
+
+    Item.getReportOfItem(itemNormalMatch, function (err, itemNormalData) {
+      if (err)
+        return callback(err)
+      Item.getReportOfItem(itemCoinslMatch, function (err, itemCoinslData) {
+        if (err)
+          return callback(err)
+        Item.getReportOfChatItem(itemChatlMatch, function (err, itemChatData) {
+          if (err)
+            return callback(err)
+          // return callback(err, {
+          //   "itemChatData": itemChatData,
+          //   "itemCoinslData": itemCoinslData,
+          //   "itemNormalData": itemNormalData
+          // })
+          margeTowarray(itemNormalData, itemChatData, function (coinsData) {
+            margeTowarray(itemCoinslData, [], function (priceData) {
+
+              return callback(err, {
+                "coins": coinsData,
+                "dollar": priceData
+              })
+            })
+          })
+        })
+      })
+    })
+  }
+
+  function margeTowarray(firArray, secArray, callback) {
+    let result = {}
+    firArray.forEach(element => {
+      if (result[element.groupe.day + "-" + element.groupe.month + "-" + element.groupe.year] == null)
+        result[element.groupe.day + "-" + element.groupe.month + "-" + element.groupe.year] = {
+          // "count": 0,
+          // "cost": 0,
+          "product": {}
+        }
+
+      result[element.groupe.day + "-" + element.groupe.month + "-" + element.groupe.year]['product'][element.product["id"]] = element
+      // result[element.groupe.day + "-" + element.groupe.month + "-" + element.groupe.year]['cost'] += element.cost;
+      // result[element.groupe.day + "-" + element.groupe.month + "-" + element.groupe.year]['count'] += element.count;
+    });
+    secArray.forEach(element => {
+      if (result[element.groupe.day + "-" + element.groupe.month + "-" + element.groupe.year] == null)
+        result[element.groupe.day + "-" + element.groupe.month + "-" + element.groupe.year] = {
+          "count": 0,
+          "cost": 0,
+          "product": {}
+        }
+      result[element.groupe.day + "-" + element.groupe.month + "-" + element.groupe.year]['product'][element.product["id"]] = element
+      result[element.groupe.day + "-" + element.groupe.month + "-" + element.groupe.year]['cost'] += element.cost;
+      result[element.groupe.day + "-" + element.groupe.month + "-" + element.groupe.year]['count'] += element.count;
+    });
+    if (result != {})
+      sortObject(result, function (data) {
+        return callback(data);
+      })
+    else {
+      return callback({});
+    }
+  }
+
+  function sortObject(result, callback) {
+    var keys = [];
+
+    for (const k in result) {
+      if (result.hasOwnProperty(k)) {
+        keys.push(k);
+      }
+    }
+
+    console.log(keys)
+    keys.sort();
+    console.log(keys)
+    var len = keys.length;
+    var newResult = {}
+    for (let i = 0; i < len; i++) {
+      var k = keys[i];
+      newResult[k] = result[k]
+      if (i + 1 == len)
+        callback(newResult)
+    }
   }
 };
