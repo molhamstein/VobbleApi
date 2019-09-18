@@ -45,11 +45,11 @@ module.exports = function (Replies) {
 
   Replies.afterRemote('create', function (context, result, next) {
     Replies.app.models.user.findById(context.req.body.userId, function (err, oneUser) {
-      if (user.extraReplysCount > 0)
+      if (oneUser.extraReplysCount > 0)
         oneUser.extraReplysCount--;
       else
         oneUser.replysCount--;
-      user.save();
+      oneUser.save();
       next();
     })
   });
