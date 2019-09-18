@@ -11,6 +11,8 @@ module.exports = function (Replies) {
     // if(storeTypeEnum.findIndex(storeType)==-1){
     //     return next(errors.global.notActive());
     // }
+    context.req.body.userId = context.req.accessToken.userId;
+
     Replies.app.models.user.findById(context.req.body.userId, function (err, oneUser) {
       if (err) {
         return next(err);
@@ -42,13 +44,14 @@ module.exports = function (Replies) {
   });
 
   Replies.afterRemote('create', function (context, result, next) {
-    const user = context.res.locals.user;
-    if (user.extraReplysCount > 0)
-      user.extraReplysCount--;
-    else
-      user.replysCount--;
-    user.save();
-    next();
+    Replies.app.models.user.findById(context.req.body.userId, function (err, oneUser) {
+      if (user.extraReplysCount > 0)
+        oneUser.extraReplysCount--;
+      else
+        oneUser.replysCount--;
+      user.save();
+      next();
+    })
   });
 
   cron.scheduleJob('0 0 * * * *', function () {
