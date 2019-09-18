@@ -8,12 +8,12 @@ const config = require(configPath);
 var ObjectId = require('mongodb').ObjectID;
 
 
-var appleReceiptVerify = require('node-apple-receipt-verify');
-appleReceiptVerify.config({
-  secret: "8622c3ec270a4f3eb4ec599daa8d5720",
-  environment: ['sandbox', 'production'],
-  verbose: true
-});
+// var appleReceiptVerify = require('node-apple-receipt-verify');
+// appleReceiptVerify.config({
+//   secret: "8622c3ec270a4f3eb4ec599daa8d5720",
+//   environment: ['sandbox', 'production'],
+//   verbose: true
+// });
 
 
 module.exports = function (Item) {
@@ -648,12 +648,7 @@ module.exports = function (Item) {
         },
         {
           "$addFields": {
-            "owner.id": {
-              $convert: {
-                input: "$owner._id",
-                to: "string"
-              }
-            }
+           "owner.id": "$owner._id"
           }
         },
 
@@ -671,32 +666,17 @@ module.exports = function (Item) {
         },
         {
           "$addFields": {
-            "product.id": {
-              $convert: {
-                input: "$product._id",
-                to: "string"
-              }
-            }
+            "product.id":"$product._id"
           }
         },
         {
           "$addFields": {
-            "product.count": {
-              $convert: {
-                input: "$count",
-                to: "string"
-              }
-            }
+            "product.count":"$count"
           }
         },
         {
           "$addFields": {
-            "product.cost": {
-              $convert: {
-                input: "$cost",
-                to: "string"
-              }
-            }
+           "product.cost":"$cost"
           }
         },
 
@@ -737,12 +717,7 @@ module.exports = function (Item) {
         },
         {
           "$addFields": {
-            "owner.id": {
-              $convert: {
-                input: "$owner._id",
-                to: "string"
-              }
-            }
+           "owner.id": "$owner._id"
           }
         },
         {
@@ -821,12 +796,7 @@ module.exports = function (Item) {
         },
         {
           "$addFields": {
-            "owner.id": {
-              $convert: {
-                input: "$owner._id",
-                to: "string"
-              }
-            }
+           "owner.id": "$owner._id"
           }
         },
 
@@ -844,32 +814,17 @@ module.exports = function (Item) {
         },
         {
           "$addFields": {
-            "product.id": {
-              $convert: {
-                input: "$product._id",
-                to: "string"
-              }
-            }
+            "product.id":"$product._id"
           }
         },
         {
           "$addFields": {
-            "product.count": {
-              $convert: {
-                input: "$count",
-                to: "string"
-              }
-            }
+            "product.count":"$count"
           }
         },
         {
           "$addFields": {
-            "product.cost": {
-              $convert: {
-                input: "$cost",
-                to: "string"
-              }
-            }
+           "product.cost":"$cost"
           }
         },
 
@@ -910,12 +865,7 @@ module.exports = function (Item) {
         },
         {
           "$addFields": {
-            "owner.id": {
-              $convert: {
-                input: "$owner._id",
-                to: "string"
-              }
-            }
+           "owner.id": "$owner._id"
           }
         },
         {
@@ -1017,12 +967,7 @@ module.exports = function (Item) {
         },
         {
           "$addFields": {
-            "relatedUser.id": {
-              $convert: {
-                input: "$relatedUser._id",
-                to: "string"
-              }
-            }
+            "relatedUser.id":"$relatedUser._id"
           }
         },
         {
@@ -1038,32 +983,17 @@ module.exports = function (Item) {
         },
         {
           "$addFields": {
-            "product.id": {
-              $convert: {
-                input: "$product._id",
-                to: "string"
-              }
-            }
+            "product.id":"$product._id"
           }
         },
         {
           "$addFields": {
-            "product.count": {
-              $convert: {
-                input: "$count",
-                to: "string"
-              }
-            }
+            "product.count":"$count"
           }
         },
         {
           "$addFields": {
-            "product.cost": {
-              $convert: {
-                input: "$cost",
-                to: "string"
-              }
-            }
+           "product.cost":"$cost"
           }
         },
         {
@@ -1103,12 +1033,7 @@ module.exports = function (Item) {
         },
         {
           "$addFields": {
-            "relatedUser.id": {
-              $convert: {
-                input: "$relatedUser._id",
-                to: "string"
-              }
-            }
+            "relatedUser.id":"$relatedUser._id"
           }
         },
         {
@@ -1189,12 +1114,7 @@ module.exports = function (Item) {
         },
         {
           "$addFields": {
-            "relatedUser.id": {
-              $convert: {
-                input: "$relatedUser._id",
-                to: "string"
-              }
-            }
+            "relatedUser.id":"$relatedUser._id"
           }
         },
         {
@@ -1210,32 +1130,17 @@ module.exports = function (Item) {
         },
         {
           "$addFields": {
-            "product.id": {
-              $convert: {
-                input: "$product._id",
-                to: "string"
-              }
-            }
+            "product.id":"$product._id"
           }
         },
         {
           "$addFields": {
-            "product.count": {
-              $convert: {
-                input: "$count",
-                to: "string"
-              }
-            }
+            "product.count":"$count"
           }
         },
         {
           "$addFields": {
-            "product.cost": {
-              $convert: {
-                input: "$cost",
-                to: "string"
-              }
-            }
+           "product.cost":"$cost"
           }
         },
         {
@@ -1275,12 +1180,7 @@ module.exports = function (Item) {
         },
         {
           "$addFields": {
-            "relatedUser.id": {
-              $convert: {
-                input: "$relatedUser._id",
-                to: "string"
-              }
-            }
+            "relatedUser.id":"$relatedUser._id"
           }
         },
         {
@@ -1393,13 +1293,10 @@ module.exports = function (Item) {
         },
         {
           "$addFields": {
-            "product.id": {
-              $convert: {
-                input: "$product._id",
-                to: "string"
-              }
-            }
+            "product.id": "$product._id"
           }
+
+
         },
         {
           $project: {
@@ -1463,12 +1360,7 @@ module.exports = function (Item) {
         },
         {
           "$addFields": {
-            "product.id": {
-              $convert: {
-                input: "$product._id",
-                to: "string"
-              }
-            }
+            "product.id": "$product._id"
           }
         },
         {
@@ -1603,13 +1495,9 @@ module.exports = function (Item) {
       result[element.groupe.day + "-" + element.groupe.month + "-" + element.groupe.year]['cost'] += element.cost;
       result[element.groupe.day + "-" + element.groupe.month + "-" + element.groupe.year]['count'] += element.count;
     });
-    if (result != {})
-      sortObject(result, function (data) {
-        return callback(data);
-      })
-    else {
-      return callback({});
-    }
+    sortObject(result, function (data) {
+      return callback(data);
+    })
   }
 
   function sortObject(result, callback) {
@@ -1626,6 +1514,9 @@ module.exports = function (Item) {
     console.log(keys)
     var len = keys.length;
     var newResult = {}
+    if (keys.length == 0)
+      return callback(newResult)
+
     for (let i = 0; i < len; i++) {
       var k = keys[i];
       newResult[k] = result[k]
