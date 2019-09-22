@@ -1473,27 +1473,27 @@ module.exports = function (Item) {
   function margeTowarray(firArray, secArray, callback) {
     let result = {}
     firArray.forEach(element => {
-      if (result[element.groupe.day + "-" + element.groupe.month + "-" + element.groupe.year] == null)
-        result[element.groupe.day + "-" + element.groupe.month + "-" + element.groupe.year] = {
+      if (result[element.groupe.month + "-" + element.groupe.day + "-" + element.groupe.year] == null)
+        result[element.groupe.month + "-" + element.groupe.day + "-" + element.groupe.year] = {
           // "count": 0,
           // "cost": 0,
           "product": {}
         }
 
-      result[element.groupe.day + "-" + element.groupe.month + "-" + element.groupe.year]['product'][element.product["id"]] = element
+      result[element.groupe.month + "-" + element.groupe.day + "-" + element.groupe.year]['product'][element.product["id"]] = element
       // result[element.groupe.day + "-" + element.groupe.month + "-" + element.groupe.year]['cost'] += element.cost;
       // result[element.groupe.day + "-" + element.groupe.month + "-" + element.groupe.year]['count'] += element.count;
     });
     secArray.forEach(element => {
-      if (result[element.groupe.day + "-" + element.groupe.month + "-" + element.groupe.year] == null)
-        result[element.groupe.day + "-" + element.groupe.month + "-" + element.groupe.year] = {
+      if (result[element.groupe.month + "-" + element.groupe.day + "-" + element.groupe.year] == null)
+        result[element.groupe.month + "-" + element.groupe.day + "-" + element.groupe.year] = {
           "count": 0,
           "cost": 0,
           "product": {}
         }
-      result[element.groupe.day + "-" + element.groupe.month + "-" + element.groupe.year]['product'][element.product["id"]] = element
-      result[element.groupe.day + "-" + element.groupe.month + "-" + element.groupe.year]['cost'] += element.cost;
-      result[element.groupe.day + "-" + element.groupe.month + "-" + element.groupe.year]['count'] += element.count;
+      result[element.groupe.month + "-" + element.groupe.day + "-" + element.groupe.year]['product'][element.product["id"]] = element
+      result[element.groupe.month + "-" + element.groupe.day + "-" + element.groupe.year]['cost'] += element.cost;
+      result[element.groupe.month + "-" + element.groupe.day + "-" + element.groupe.year]['count'] += element.count;
     });
     sortObject(result, function (data) {
       return callback(data);
