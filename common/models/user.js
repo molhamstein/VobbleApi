@@ -1581,6 +1581,20 @@ module.exports = function (User) {
     })
   };
 
+  cron.scheduleJob('00 00 * * * *', function () {
+    console.log("cron job is working")
+    User.updateAll({
+      "unlimitedReplysOpenDate": {
+        "lt": new Date()
+      }
+    }, {
+      "unlimitedReplysOpenDate": null,
+      "extraReplysCount": 0
+    }, function (err, data) {
+
+    })
+  })
+
   cron.scheduleJob('* */2 * * *', function () {
     var todayDate = new Date(),
       weekDate = new Date(),

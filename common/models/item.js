@@ -300,7 +300,8 @@ module.exports = function (Item) {
             user.save();
             callback(null, item)
           } else if (product.replyCount > 0) {
-            user.extraReplysCount += product.replyCount;
+            user.extraReplysCount += 99999999999;
+            user.unlimitedReplysOpenDate = addHours(new Date(), 12)
             user.pocketCoins -= product.price_coins;
             user.save();
             callback(null, item);
@@ -648,7 +649,7 @@ module.exports = function (Item) {
         },
         {
           "$addFields": {
-           "owner.id": "$owner._id"
+            "owner.id": "$owner._id"
           }
         },
 
@@ -666,17 +667,17 @@ module.exports = function (Item) {
         },
         {
           "$addFields": {
-            "product.id":"$product._id"
+            "product.id": "$product._id"
           }
         },
         {
           "$addFields": {
-            "product.count":"$count"
+            "product.count": "$count"
           }
         },
         {
           "$addFields": {
-           "product.cost":"$cost"
+            "product.cost": "$cost"
           }
         },
 
@@ -717,7 +718,7 @@ module.exports = function (Item) {
         },
         {
           "$addFields": {
-           "owner.id": "$owner._id"
+            "owner.id": "$owner._id"
           }
         },
         {
@@ -796,7 +797,7 @@ module.exports = function (Item) {
         },
         {
           "$addFields": {
-           "owner.id": "$owner._id"
+            "owner.id": "$owner._id"
           }
         },
 
@@ -814,17 +815,17 @@ module.exports = function (Item) {
         },
         {
           "$addFields": {
-            "product.id":"$product._id"
+            "product.id": "$product._id"
           }
         },
         {
           "$addFields": {
-            "product.count":"$count"
+            "product.count": "$count"
           }
         },
         {
           "$addFields": {
-           "product.cost":"$cost"
+            "product.cost": "$cost"
           }
         },
 
@@ -865,7 +866,7 @@ module.exports = function (Item) {
         },
         {
           "$addFields": {
-           "owner.id": "$owner._id"
+            "owner.id": "$owner._id"
           }
         },
         {
@@ -967,7 +968,7 @@ module.exports = function (Item) {
         },
         {
           "$addFields": {
-            "relatedUser.id":"$relatedUser._id"
+            "relatedUser.id": "$relatedUser._id"
           }
         },
         {
@@ -983,17 +984,17 @@ module.exports = function (Item) {
         },
         {
           "$addFields": {
-            "product.id":"$product._id"
+            "product.id": "$product._id"
           }
         },
         {
           "$addFields": {
-            "product.count":"$count"
+            "product.count": "$count"
           }
         },
         {
           "$addFields": {
-           "product.cost":"$cost"
+            "product.cost": "$cost"
           }
         },
         {
@@ -1033,7 +1034,7 @@ module.exports = function (Item) {
         },
         {
           "$addFields": {
-            "relatedUser.id":"$relatedUser._id"
+            "relatedUser.id": "$relatedUser._id"
           }
         },
         {
@@ -1114,7 +1115,7 @@ module.exports = function (Item) {
         },
         {
           "$addFields": {
-            "relatedUser.id":"$relatedUser._id"
+            "relatedUser.id": "$relatedUser._id"
           }
         },
         {
@@ -1130,17 +1131,17 @@ module.exports = function (Item) {
         },
         {
           "$addFields": {
-            "product.id":"$product._id"
+            "product.id": "$product._id"
           }
         },
         {
           "$addFields": {
-            "product.count":"$count"
+            "product.count": "$count"
           }
         },
         {
           "$addFields": {
-           "product.cost":"$cost"
+            "product.cost": "$cost"
           }
         },
         {
@@ -1180,7 +1181,7 @@ module.exports = function (Item) {
         },
         {
           "$addFields": {
-            "relatedUser.id":"$relatedUser._id"
+            "relatedUser.id": "$relatedUser._id"
           }
         },
         {
@@ -1523,5 +1524,10 @@ module.exports = function (Item) {
       if (i + 1 == len)
         callback(newResult)
     }
+  }
+
+  function addHours(date, h) {
+    date.setTime(date.getTime() + (h * 60 * 60 * 1000));
+    return date;
   }
 };

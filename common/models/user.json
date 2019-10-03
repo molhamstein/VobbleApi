@@ -72,6 +72,9 @@
       "type": "number",
       "default": 0
     },
+    "unlimitedReplysOpenDate": {
+      "type": "date"
+    },
     "email": {
       "type": "string"
     },
