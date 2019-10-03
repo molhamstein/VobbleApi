@@ -17,7 +17,7 @@ module.exports = function (Replies) {
       if (err) {
         return next(err);
       }
-      if (oneUser.replysCount == 0 && (oneUser.unlimitedReplysOpenDate < new Date() || oneUser.unlimitedReplysOpenDate == null)) {
+      if (oneUser.replysCount == 0 && (new Date(oneUser.unlimitedReplysOpenDate).getTime() < new Date().getTime() || oneUser.unlimitedReplysOpenDate == null)) {
         return next(errors.bottle.noAvailableReplyToday());
       }
       oneUser.repliesBottlesCount++;
