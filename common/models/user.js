@@ -430,6 +430,7 @@ module.exports = function (User) {
                   gender: gender,
                   image: image,
                   email: email,
+                  deviceId: deviceId,
                   username: name,
                   status: "active",
                   nextRefill: nextRefillVar,
@@ -604,6 +605,7 @@ module.exports = function (User) {
                   socialId: socialId,
                   gender: gender,
                   image: image,
+                  deviceId: deviceId,
                   username: name,
                   email: email,
                   status: "active",
@@ -1142,7 +1144,7 @@ module.exports = function (User) {
         } else {
           oneUser.lastLogin = new Date();
           oneUser.deviceId = deviceId;
-          // oneUser.save();
+          oneUser.save();
           if (userVersion == null)
             return callback(null, oneUser);
           else if (userVersion != null) {
