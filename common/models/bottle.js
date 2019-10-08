@@ -367,13 +367,20 @@ module.exports = function (Bottle) {
           ])
           cursor.get(function (err, data) {
             if (err) return callback(err);
-            var arrayBottle = seenBottle
+            var arrayBottle = []
+            if (data.length == 0) {
+              oneUser.updateAttributes({
+                "stackBottleUser": arrayBottle
+              }, function (err, data) {
+                return callback()
+              })
+            }
             for (var i = data.length - 1; i >= 0; i--) {
               var element = data[i]
               if (seenBottle.indexOf(element._id.toString()) != -1) {
                 data.splice(i, 1);
               } else {
-                console.log(element._id + "////////" + element.totalWeight+"///////////"+element.owner.gender)
+                console.log(element._id + "////////" + element.totalWeight + "///////////" + element.owner.gender)
 
                 arrayBottle.unshift(element._id)
               }
