@@ -402,22 +402,35 @@ module.exports = function (Bottle) {
     Bottle.app.models.user.findById(userId, function (err, user) {
       if (err)
         return callback(err, null)
-      var stack = user.stackBottleUser
-      var bottleIds = stack.slice(offsets, offsets + limit);
-      // callback(null, bottleIds)
-      Bottle.find({
-        "where": {
-          id: {
-            inq: bottleIds
+      Bottle.getDataSource().connector.connect(function (err, db) {
+
+        var collection = db.collection('user');
+        var cursor = collection.aggregate([{
+          $match: {
+            _id: ObjectId(userId)
           }
-        },
-        "order": "totalWeight DESC"
-      }, function (err, data) {
-        if (err)
-          return callback(err, null)
-        return callback(null, data)
+        }])
+        cursor.get(function (err, users) {
+          if (err) return callback(err);
+          var stack = users[0].stackBottleUser
+          var bottleIds = stack.slice(offsets, offsets + limit);
+          // callback(null, bottleIds)
+          Bottle.find({
+            "where": {
+              id: {
+                inq: bottleIds
+              }
+            },
+            "order": "totalWeight DESC"
+          }, function (err, data) {
+            if (err)
+              return callback(err, null)
+            return callback(null, data)
+          })
+        })
       })
     })
+
   }
 
 

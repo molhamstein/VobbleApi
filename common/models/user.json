@@ -11,7 +11,8 @@
     "password",
     "verificationToken",
     "emailVerified",
-    "realm"
+    "realm",
+    "stackBottleUser"
   ],
   "scope": {
     "include": [{
