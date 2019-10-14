@@ -1,13 +1,10 @@
 'use strict';
 const path = require('path');
-const ejs = require('ejs');
 const configPath = process.env.NODE_ENV === undefined ?
   '../../server/config.json' :
   `../../server/config.${process.env.NODE_ENV}.json`;
 const config = require(configPath);
-const {
-  getAudioDurationInSeconds
-} = require('get-audio-duration')
+const mm = require('music-metadata');
 
 
 var ffmpeg = require('fluent-ffmpeg');
@@ -22,7 +19,7 @@ module.exports = function (Uploadfile) {
     var folderName = context.req.params.container;
 
     let src = path.join(__dirname, '../../uploadFiles/');
-    // file root save 
+    // file root save
     var urlFileRoot = config.domain + config.restApiRoot + Uploadfile.http.path;
 
     // ulr save depend of folder name
@@ -87,7 +84,7 @@ module.exports = function (Uploadfile) {
         });
 
       }
-      // cheack type of file from folder name request            
+      // cheack type of file from folder name request
       else if (folderName == "images") {
         thumb({
           source: src + "/" + folderName + "/" + file.name, // could be a filename: dest/path/image.jpg
@@ -104,12 +101,12 @@ module.exports = function (Uploadfile) {
       } else if (folderName == "audios") {
         var fileDuration = 0;
         // From a local path...
-        getAudioDurationInSeconds(src + "/" + folderName + "/" + file.name).then((duration) => {
+        mm.parseFile(path.join(src, folderName, file.name), {duration: true, skipCovers: true}).then(metadata => {
           fileDuration = duration;
 
           files.push({
             'file': urlFileRootSave + file.name,
-            'duration': fileDuration
+            'duration': metadata.format.duration
           });
 
           context.res.json(files);
