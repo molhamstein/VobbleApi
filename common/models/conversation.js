@@ -19,37 +19,41 @@ module.exports = function (Conversation) {
 
   var admin = require("firebase-admin");
 
+  var cron = require('node-schedule');
 
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-    databaseURL: "https://vobble-1521577974841.firebaseio.com"
-  });
+  cron.scheduleJob('00 00 * * * *', function () {
 
-  var db = admin.database();
-  var ref = db.ref("conversations");
-
-  ref.orderByChild("expired").equalTo(0).once("value", function (snapshot) {
-    var now = new Date()
-    var lastweak = new Date(now.getTime() - (5 * 24 * 60 * 60 * 1000));
-    console.log("lastweak")
-    console.log(lastweak)
-    console.log(snapshot.length);
-    snapshot.forEach(function (child) {
-      var conv = child.val();
-      conv['key'] = child.key;
-      if ((new Date(conv['createdAt']).getTime() < lastweak.getTime() && (conv['finishTime'] == 0 || conv['finishTime'] == null)) || (conv['finishTime'] != 0 && conv['finishTime'] != null && new Date(conv['finishTime']).getTime() < now.getTime())) {
-        console.log("yes")
-        let del_ref = admin.database().ref("conversations/" + conv.key);
-        del_ref.remove()
-          .then(function () {})
-          .catch(function (error) {});
-        Conversation.getDataSource().connector.connect(function (err, maindb) {
-          var collection = maindb.collection('conversation');
-          collection.insert(conv)
-        })
-      }
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount),
+      databaseURL: "https://vobble-1521577974841.firebaseio.com"
     });
-  });
+
+    var db = admin.database();
+    var ref = db.ref("conversations");
+
+    ref.orderByChild("expired").equalTo(0).once("value", function (snapshot) {
+      var now = new Date()
+      var lastweak = new Date(now.getTime() - (5 * 24 * 60 * 60 * 1000));
+      console.log("lastweak")
+      console.log(lastweak)
+      console.log(snapshot.length);
+      snapshot.forEach(function (child) {
+        var conv = child.val();
+        conv['key'] = child.key;
+        if ((new Date(conv['createdAt']).getTime() < lastweak.getTime() && (conv['finishTime'] == 0 || conv['finishTime'] == null)) || (conv['finishTime'] != 0 && conv['finishTime'] != null && new Date(conv['finishTime']).getTime() < now.getTime())) {
+          console.log("yes")
+          let del_ref = admin.database().ref("conversations/" + conv.key);
+          del_ref.remove()
+            .then(function () {})
+            .catch(function (error) {});
+          Conversation.getDataSource().connector.connect(function (err, maindb) {
+            var collection = maindb.collection('conversation');
+            collection.insert(conv)
+          })
+        }
+      });
+    });
+  })
 
   Conversation.makeChatWithbot = function (userId) {
     Conversation.app.models.User.findOne({
