@@ -413,7 +413,9 @@ module.exports = function (Bottle) {
         cursor.get(function (err, users) {
           if (err) return callback(err);
           var stack = users[0].stackBottleUser
-          var bottleIds = stack.slice(offsets, offsets + limit);
+          var length = stack.length;
+          var newOffset = offsets % length
+          var bottleIds = stack.slice(newOffset, newOffset + limit);
           // callback(null, bottleIds)
           Bottle.find({
             "where": {
@@ -425,6 +427,8 @@ module.exports = function (Bottle) {
           }, function (err, data) {
             if (err)
               return callback(err, null)
+            console.log("newOffset");
+            console.log(newOffset);
             return callback(null, data)
           })
         })
