@@ -1117,6 +1117,21 @@ module.exports = function (User) {
   };
 
 
+  User.getStackBottleUser = function (userId, context, callback) {
+    User.getDataSource().connector.connect(function (err, db) {
+
+      var collection = db.collection('user');
+      var cursor = collection.aggregate([{
+        $match: {
+          _id: ObjectId(userId)
+        }
+      }])
+      cursor.get(function (err, users) {
+        callback(err, users)
+      })
+    })
+  }
+
   /**
    * get my info
    * @param {Function(Error, object)} callback

@@ -607,6 +607,33 @@
         "verb": "get"
       }]
     },
+    "getStackBottleUser": {
+      "accepts": [{
+          "arg": "userId",
+          "type": "string",
+          "http": {
+            "source": "path"
+          }
+        }, {
+          "arg": "context",
+          "type": "object",
+          "http": {
+            "source": "context"
+          }
+        }
+      ],
+      "returns": [{
+        "arg": "result",
+        "type": "object",
+        "root": true,
+        "description": ""
+      }],
+      "description": "get my Stack Bottle User",
+      "http": [{
+        "path": "/:userId/getStackBottleUser",
+        "verb": "get"
+      }]
+    },
     "editUsername": {
       "accepts": [{
           "arg": "context",
