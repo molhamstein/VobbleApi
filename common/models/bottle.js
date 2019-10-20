@@ -448,12 +448,12 @@ module.exports = function (Bottle) {
       } else {
         // console.log("element.bottles.owner.gender")
         var bottle = element.bottles()
-        var owner = bottle.owner();
-        console.log(owner.gender)
-        console.log(filter.gender == owner.gender)
-        console.log(owner.ISOCode)
-        if (bottle && bottle.status == 'active' && owner && owner.status == 'active' && (filter['owner.gender'] == null || filter['owner.gender'] == owner.gender) && (filter['owner.ISOCode'] == null || filter['owner.ISOCode'] == owner.ISOCode) && (filter.shoreId == null || ObjectId(filter.shoreId) == ObjectId(bottle.shoreId)))
-          freq[element.bottleId] = 1;
+        if (bottle && bottle.status == 'active') {
+          var owner = bottle.owner();
+          if (owner && owner.status == 'active' && (filter['owner.gender'] == null || filter['owner.gender'] == owner.gender) && (filter['owner.ISOCode'] == null || filter['owner.ISOCode'] == owner.ISOCode) && (filter.shoreId == null || ObjectId(filter.shoreId) == ObjectId(bottle.shoreId)))
+            freq[element.bottleId] = 1;
+
+        }
       }
     }
     var sortFreq = Object.keys(freq).sort(function (a, b) {
