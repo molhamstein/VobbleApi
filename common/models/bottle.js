@@ -345,9 +345,10 @@ module.exports = function (Bottle) {
           userId: userId
         }
       }, function (err, bottles) {
-        seenBottle = getFrequency(bottles)
+        seenBottle = getFrequency(bottles, filter)
 
 
+        console.log("seenBottle.length")
         console.log(seenBottle)
 
         Bottle.getDataSource().connector.connect(function (err, db) {
@@ -374,22 +375,22 @@ module.exports = function (Bottle) {
               }, function (err, data) {
                 return callback()
               })
-            }
-            for (var i = data.length - 1; i >= 0; i--) {
-              var element = data[i]
-              if (seenBottle.indexOf(element._id.toString()) != -1) {
-                data.splice(i, 1);
-              } else {
-                console.log(element._id + "////////" + element.totalWeight + "///////////" + element.owner.gender)
-
-                arrayBottle.unshift(element._id)
-              }
-              if (i == 0) {
-                oneUser.updateAttributes({
-                  "stackBottleUser": arrayBottle
-                }, function (err, data) {
-                  return callback()
-                })
+            } else {
+              for (var i = data.length - 1; i >= 0; i--) {
+                var element = data[i]
+                if (seenBottle.indexOf(element._id.toString()) != -1) {
+                  data.splice(i, 1);
+                } else {
+                  arrayBottle.unshift(element._id)
+                }
+                if (i == 0) {
+                  arrayBottle = arrayBottle.concat(seenBottle)
+                  oneUser.updateAttributes({
+                    "stackBottleUser": arrayBottle
+                  }, function (err, data) {
+                    return callback()
+                  })
+                }
               }
             }
           })
@@ -438,22 +439,29 @@ module.exports = function (Bottle) {
   }
 
 
-  function getFrequency(array) {
+  function getFrequency(array, filter) {
     var freq = {};
     for (var i = 0; i < array.length; i++) {
       var element = array[i];
       if (freq[element.bottleId]) {
         freq[element.bottleId]++;
       } else {
-        freq[element.bottleId] = 1;
+        // console.log("element.bottles.owner.gender")
+        var bottle = element.bottles()
+        var owner = bottle.owner();
+        console.log(owner.gender)
+        console.log(filter.gender == owner.gender)
+        console.log(owner.ISOCode)
+        if (bottle && bottle.status == 'active' && owner && owner.status == 'active' && (filter['owner.gender'] == null || filter['owner.gender'] == owner.gender) && (filter['owner.ISOCode'] == null || filter['owner.ISOCode'] == owner.ISOCode) && (filter.shoreId == null || ObjectId(filter.shoreId) == ObjectId(bottle.shoreId)))
+          freq[element.bottleId] = 1;
       }
     }
-    console.log(freq)
     var sortFreq = Object.keys(freq).sort(function (a, b) {
       return freq[a] - freq[b]
     })
     return sortFreq;
   };
+
   Bottle.getOneBottle = function (gender, ISOCode, shoreId, req, callback) {
     var result;
     var secFilter = {};

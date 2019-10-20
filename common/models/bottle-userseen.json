@@ -7,8 +7,12 @@
   },
   "scope": {
     "include": [{
-      "relation": "users"
-    }]
+        "relation": "users"
+      },
+      {
+        "relation": "bottles"
+      }
+    ]
   },
   "properties": {
     "createdAt": {
@@ -20,7 +24,7 @@
   "validations": [],
   "relations": {
     "bottles": {
-      "type": "hasMany",
+      "type": "belongsTo",
       "model": "bottle",
       "foreignKey": "bottleId"
     },
