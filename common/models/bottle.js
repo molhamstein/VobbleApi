@@ -272,6 +272,7 @@ module.exports = function (Bottle) {
     var filter = {
       "status": "active"
     }
+    filter['owner.status'] = "active"
 
     if (shoreId) {
       filter['shoreId'] = ObjectId(shoreId)
