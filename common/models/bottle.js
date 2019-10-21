@@ -384,7 +384,7 @@ module.exports = function (Bottle) {
                   arrayBottle.unshift(element._id)
                 }
                 if (i == 0) {
-                  arrayBottle = arrayBottle.concat(seenBottle)
+                  // arrayBottle = arrayBottle.concat(seenBottle)
                   oneUser.updateAttributes({
                     "stackBottleUser": arrayBottle
                   }, function (err, data) {
