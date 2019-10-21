@@ -450,7 +450,9 @@ module.exports = function (Bottle) {
         var bottle = element.bottles()
         if (bottle && bottle.status == 'active') {
           var owner = bottle.owner();
-          if (owner && owner.status == 'active' && (filter['owner.gender'] == null || filter['owner.gender'] == owner.gender) && (filter['owner.ISOCode'] == null || filter['owner.ISOCode'] == owner.ISOCode) && (filter.shoreId == null || new String(filter.shoreId) == new String(bottle.shoreId)))
+          // console.log("filter.shoreId.toString() == bottle.shoreId.toString()")
+          // console.log(filter.shoreId.toString() + "//" + bottle.shoreId.toString())
+          if (owner && owner.status == 'active' && (filter['owner.gender'] == null || filter['owner.gender'] == owner.gender) && (filter['owner.ISOCode'] == null || filter['owner.ISOCode'] == owner.ISOCode) && (filter.shoreId == null || new String(filter.shoreId).valueOf() === new String(bottle.shoreId).valueOf()))
             freq[element.bottleId] = 1;
 
         }
