@@ -1589,13 +1589,36 @@ module.exports = function (User) {
   User.accesstoken = function (callback) {
     var result;
     // TODO
-    User.app.models.AccessToken.find({}, function (err, data) {
-      if (err)
-        callback(err, null);
-
-      callback(null, data);
-
+    User.app.models.Item.updateAll({
+      "or": [{
+          "productId": ObjectId("5d91f0e9b2cf5c43578eab6f")
+        },
+        {
+          "productId": ObjectId("5d91f078b2cf5c43578eab6e")
+        },
+        {
+          "productId": ObjectId("5d91eff6b2cf5c43578eab6d")
+        },
+        {
+          "productId": ObjectId("5d90b33bb2cf5c43578ea2d4")
+        },
+        {
+          "productId": ObjectId("5d90acc2b2cf5c43578ea2d3")
+        }
+      ]
+    }, {
+      "type": "coins"
+    }, function (err, data) {
+      console.log("TRRRR")
+      callback(err, data);
     })
+    // User.app.models.AccessToken.find({}, function (err, data) {
+    //   if (err)
+    //     callback(err, null);
+
+    //   callback(null, data);
+
+    // })
   };
 
   cron.scheduleJob('00 00 * * * *', function () {

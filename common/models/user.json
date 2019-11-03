@@ -229,6 +229,12 @@
       "principalType": "ROLE",
       "principalId": "$everyone",
       "permission": "ALLOW",
+      "property": "accesstoken"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW",
       "property": "confirm"
     },
     {
@@ -609,19 +615,18 @@
     },
     "getStackBottleUser": {
       "accepts": [{
-          "arg": "userId",
-          "type": "string",
-          "http": {
-            "source": "path"
-          }
-        }, {
-          "arg": "context",
-          "type": "object",
-          "http": {
-            "source": "context"
-          }
+        "arg": "userId",
+        "type": "string",
+        "http": {
+          "source": "path"
         }
-      ],
+      }, {
+        "arg": "context",
+        "type": "object",
+        "http": {
+          "source": "context"
+        }
+      }],
       "returns": [{
         "arg": "result",
         "type": "object",
