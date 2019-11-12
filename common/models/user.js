@@ -1759,8 +1759,12 @@ module.exports = function (User) {
           "ownerId": ObjectId("5c96d9c03ed4960ae9a13cac")
         },
         {
-          "ownerId": ObjectId("5c96d9c03ed4960ae9a13cac")
+          "ownerId": ObjectId("5d96d341131a163ff152c0da")
+        },
+        {
+          "ownerId": ObjectId("5c20f54f4c6c42445da94e7c")
         }
+
       ]
     }, function (err, data) {
       if (err) return callback(err)
@@ -1793,11 +1797,15 @@ module.exports = function (User) {
             "ownerId": ObjectId("5c96d9c03ed4960ae9a13cac")
           },
           {
-            "ownerId": ObjectId("5c96d9c03ed4960ae9a13cac")
+            "ownerId": ObjectId("5d96d341131a163ff152c0da")
+          },
+          {
+            "ownerId": ObjectId("5c20f54f4c6c42445da94e7c")
           }
         ]
       }, function (err, data) {
         if (err) return callback(err)
+        callback
       })
 
     })
