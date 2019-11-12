@@ -1762,8 +1762,9 @@ module.exports = function (User) {
           "ownerId": ObjectId("5c96d9c03ed4960ae9a13cac")
         }
       ]
-    }, function () {
-
+    }, function (err, data) {
+      if (err) return callback(err)
+      callback(err, data)
     })
 
 
