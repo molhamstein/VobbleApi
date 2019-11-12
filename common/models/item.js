@@ -434,49 +434,51 @@ module.exports = function (Item) {
         var productObject;
         element.owner(function (err, owner) {
           var countryNaem
-          owner.country(function (err, country) {
-            countryNaem = country.name
-          })
-          if ((ISOCode == "" || owner.ISOCode == ISOCode) && (username == "" || owner.username.includes(username))) {
-            if (owner['lastLogin'] != null)
-              ownerObject = {
-                country: countryNaem,
-                image: owner['image'],
-                totalBottlesThrown: owner['totalBottlesThrown'],
-                repliesBottlesCount: owner['repliesBottlesCount'],
-                repliesReceivedCount: owner['repliesReceivedCount'],
-                foundBottlesCount: owner['foundBottlesCount'],
-                extraBottlesCount: owner['extraBottlesCount'],
-                bottlesCount: owner['bottlesCount'],
-                registrationCompleted: owner['registrationCompleted'],
-                gender: owner['gender'],
-                nextRefill: owner['nextRefill'].toString(),
-                createdAt: owner['createdAt'].toString(),
-                lastLogin: owner['lastLogin'].toString(),
-                email: owner['email'],
-                status: owner['status'],
-                typeLogIn: owner['typeLogIn'],
-                username: owner['username']
-              }
-            else
-              ownerObject = {
-                country: countryNaem,
-                image: owner['image'],
-                totalBottlesThrown: owner['totalBottlesThrown'],
-                repliesBottlesCount: owner['repliesBottlesCount'],
-                repliesReceivedCount: owner['repliesReceivedCount'],
-                foundBottlesCount: owner['foundBottlesCount'],
-                extraBottlesCount: owner['extraBottlesCount'],
-                bottlesCount: owner['bottlesCount'],
-                registrationCompleted: owner['registrationCompleted'],
-                gender: owner['gender'],
-                nextRefill: owner['nextRefill'].toString(),
-                createdAt: owner['createdAt'].toString(),
-                email: owner['email'],
-                status: owner['status'],
-                typeLogIn: owner['typeLogIn'],
-                username: owner['username']
-              }
+          if (owner) {
+            owner.country(function (err, country) {
+              countryNaem = country.name
+            })
+            if ((ISOCode == "" || owner.ISOCode == ISOCode) && (username == "" || owner.username.includes(username))) {
+              if (owner['lastLogin'] != null)
+                ownerObject = {
+                  country: countryNaem,
+                  image: owner['image'],
+                  totalBottlesThrown: owner['totalBottlesThrown'],
+                  repliesBottlesCount: owner['repliesBottlesCount'],
+                  repliesReceivedCount: owner['repliesReceivedCount'],
+                  foundBottlesCount: owner['foundBottlesCount'],
+                  extraBottlesCount: owner['extraBottlesCount'],
+                  bottlesCount: owner['bottlesCount'],
+                  registrationCompleted: owner['registrationCompleted'],
+                  gender: owner['gender'],
+                  nextRefill: owner['nextRefill'].toString(),
+                  createdAt: owner['createdAt'].toString(),
+                  lastLogin: owner['lastLogin'].toString(),
+                  email: owner['email'],
+                  status: owner['status'],
+                  typeLogIn: owner['typeLogIn'],
+                  username: owner['username']
+                }
+              else
+                ownerObject = {
+                  country: countryNaem,
+                  image: owner['image'],
+                  totalBottlesThrown: owner['totalBottlesThrown'],
+                  repliesBottlesCount: owner['repliesBottlesCount'],
+                  repliesReceivedCount: owner['repliesReceivedCount'],
+                  foundBottlesCount: owner['foundBottlesCount'],
+                  extraBottlesCount: owner['extraBottlesCount'],
+                  bottlesCount: owner['bottlesCount'],
+                  registrationCompleted: owner['registrationCompleted'],
+                  gender: owner['gender'],
+                  nextRefill: owner['nextRefill'].toString(),
+                  createdAt: owner['createdAt'].toString(),
+                  email: owner['email'],
+                  status: owner['status'],
+                  typeLogIn: owner['typeLogIn'],
+                  username: owner['username']
+                }
+            }
           }
         })
         element.product(function (err, product) {
@@ -513,55 +515,60 @@ module.exports = function (Item) {
           }
         }
 
-        if (ownerObject != null || productObject != null) {
+        console.log("productObject")
+        console.log(productObject)
+
+        if (ownerObject != undefined && productObject != undefined) {
           if (element.type == "Chat Extend") {
             element.relatedUser(function (err, relatedUser) {
               var countryNaem = ""
-              relatedUser.country(function (err, country) {
-                countryNaem = country.name
-              })
+              if (relatedUser) {
+                relatedUser.country(function (err, country) {
+                  countryNaem = country.name
+                })
 
-              if (relatedUser['lastLogin'] != null)
-                relatedUserObject = {
-                  countryRelatedUser: countryNaem,
-                  imageRelatedUser: relatedUser['image'],
-                  totalBottlesThrownRelatedUser: relatedUser['totalBottlesThrown'],
-                  repliesBottlesCountRelatedUser: relatedUser['repliesBottlesCount'],
-                  repliesReceivedCountRelatedUser: relatedUser['repliesReceivedCount'],
-                  foundBottlesCountRelatedUser: relatedUser['foundBottlesCount'],
-                  extraBottlesCountRelatedUser: relatedUser['extraBottlesCount'],
-                  bottlesCountRelatedUser: relatedUser['bottlesCount'],
-                  registrationCompletedRelatedUser: relatedUser['registrationCompleted'],
-                  genderRelatedUser: relatedUser['gender'],
-                  nextRefillRelatedUser: relatedUser['nextRefill'].toString(),
-                  createdAtRelatedUser: relatedUser['createdAt'].toString(),
-                  lastLoginRelatedUser: relatedUser['lastLogin'].toString(),
-                  emailRelatedUser: relatedUser['email'],
-                  statusRelatedUser: relatedUser['status'],
-                  typeLogInRelatedUser: relatedUser['typeLogIn'],
-                  relatedUser: relatedUser['username']
-                }
-              else
-                relatedUserObject = {
-                  countryRelatedUser: countryNaem,
-                  imageRelatedUser: relatedUser['image'],
-                  totalBottlesThrownRelatedUser: relatedUser['totalBottlesThrown'],
-                  repliesBottlesCountRelatedUser: relatedUser['repliesBottlesCount'],
-                  repliesReceivedCountRelatedUser: relatedUser['repliesReceivedCount'],
-                  foundBottlesCountRelatedUser: relatedUser['foundBottlesCount'],
-                  extraBottlesCountRelatedUser: relatedUser['extraBottlesCount'],
-                  bottlesCountRelatedUser: relatedUser['bottlesCount'],
-                  registrationCompletedRelatedUser: relatedUser['registrationCompleted'],
-                  genderRelatedUser: relatedUser['gender'],
-                  nextRefillRelatedUser: relatedUser['nextRefill'].toString(),
-                  createdAtRelatedUser: relatedUser['createdAt'].toString(),
-                  emailRelatedUser: relatedUser['email'],
-                  statusRelatedUser: relatedUser['status'],
-                  typeLogInRelatedUser: relatedUser['typeLogIn'],
-                  relatedUser: relatedUser['username']
-                }
-              console.log("relatedUser");
-              console.log(relatedUser);
+                if (relatedUser['lastLogin'] != null)
+                  relatedUserObject = {
+                    countryRelatedUser: countryNaem,
+                    imageRelatedUser: relatedUser['image'],
+                    totalBottlesThrownRelatedUser: relatedUser['totalBottlesThrown'],
+                    repliesBottlesCountRelatedUser: relatedUser['repliesBottlesCount'],
+                    repliesReceivedCountRelatedUser: relatedUser['repliesReceivedCount'],
+                    foundBottlesCountRelatedUser: relatedUser['foundBottlesCount'],
+                    extraBottlesCountRelatedUser: relatedUser['extraBottlesCount'],
+                    bottlesCountRelatedUser: relatedUser['bottlesCount'],
+                    registrationCompletedRelatedUser: relatedUser['registrationCompleted'],
+                    genderRelatedUser: relatedUser['gender'],
+                    nextRefillRelatedUser: relatedUser['nextRefill'].toString(),
+                    createdAtRelatedUser: relatedUser['createdAt'].toString(),
+                    lastLoginRelatedUser: relatedUser['lastLogin'].toString(),
+                    emailRelatedUser: relatedUser['email'],
+                    statusRelatedUser: relatedUser['status'],
+                    typeLogInRelatedUser: relatedUser['typeLogIn'],
+                    relatedUser: relatedUser['username']
+                  }
+                else
+                  relatedUserObject = {
+                    countryRelatedUser: countryNaem,
+                    imageRelatedUser: relatedUser['image'],
+                    totalBottlesThrownRelatedUser: relatedUser['totalBottlesThrown'],
+                    repliesBottlesCountRelatedUser: relatedUser['repliesBottlesCount'],
+                    repliesReceivedCountRelatedUser: relatedUser['repliesReceivedCount'],
+                    foundBottlesCountRelatedUser: relatedUser['foundBottlesCount'],
+                    extraBottlesCountRelatedUser: relatedUser['extraBottlesCount'],
+                    bottlesCountRelatedUser: relatedUser['bottlesCount'],
+                    registrationCompletedRelatedUser: relatedUser['registrationCompleted'],
+                    genderRelatedUser: relatedUser['gender'],
+                    nextRefillRelatedUser: relatedUser['nextRefill'].toString(),
+                    createdAtRelatedUser: relatedUser['createdAt'].toString(),
+                    emailRelatedUser: relatedUser['email'],
+                    statusRelatedUser: relatedUser['status'],
+                    typeLogInRelatedUser: relatedUser['typeLogIn'],
+                    relatedUser: relatedUser['username']
+                  }
+                console.log("relatedUser");
+                console.log(relatedUser);
+              }
             })
           }
           object = Object.assign({}, objectItem, productObject);
@@ -1383,6 +1390,117 @@ module.exports = function (Item) {
     })
   }
 
+
+  Item.exportReportOfAllItems = function (filter, callback) {
+    var config = {
+      path: 'uploadFiles/excelFiles',
+      save: true,
+      fileName: 'item' + Date.now() + '.xlsx'
+    };
+
+    Item.getReportOfAllItems(filter, function (err, data) {
+      if (err)
+        return (err);
+
+      var itemsCount = []
+      for (const key in data['coins']) {
+        if (data['coins'].hasOwnProperty(key)) {
+          const element = data['coins'][key];
+          var object = {
+            "date": key
+          }
+          if (element.product.length != {}) {
+            for (const childKey in element['product']) {
+              if (element['product'].hasOwnProperty(childKey)) {
+                const childElement = element['product'][childKey];
+                object[childElement.product.name_en] = childElement['count']
+              }
+            }
+            itemsCount.push(object)
+          }
+
+        }
+      }
+      var modelItemsCount = mongoXlsx.buildDynamicModel(itemsCount);
+      var dataItemsCount = mongoXlsx.mongoData2XlsxData(itemsCount, modelItemsCount)
+
+      var coinsCount = []
+      for (const key in data['dollar']) {
+        if (data['dollar'].hasOwnProperty(key)) {
+          const element = data['dollar'][key];
+          var object = {
+            "date": key
+          }
+          if (element.product.length != {}) {
+            for (const childKey in element['product']) {
+              if (element['product'].hasOwnProperty(childKey)) {
+                const childElement = element['product'][childKey];
+                object[childElement.product.name_en] = childElement['count']
+              }
+            }
+            coinsCount.push(object)
+          }
+
+        }
+      }
+      var modelCoinsCount = mongoXlsx.buildDynamicModel(coinsCount);
+      var dataCoinsCount = mongoXlsx.mongoData2XlsxData(coinsCount, modelCoinsCount)
+
+
+      var itemsCost = []
+      for (const key in data['coins']) {
+        if (data['coins'].hasOwnProperty(key)) {
+          const element = data['coins'][key];
+          var object = {
+            "date": key
+          }
+          if (element.product.length != {}) {
+            for (const childKey in element['product']) {
+              if (element['product'].hasOwnProperty(childKey)) {
+                const childElement = element['product'][childKey];
+                object[childElement.product.name_en] = childElement['cost']
+              }
+            }
+            itemsCost.push(object)
+          }
+
+        }
+      }
+      var modelItemsCost = mongoXlsx.buildDynamicModel(itemsCost);
+      var dataItemsCost = mongoXlsx.mongoData2XlsxData(itemsCost, modelItemsCost)
+
+      var coinsCost = []
+      for (const key in data['dollar']) {
+        if (data['dollar'].hasOwnProperty(key)) {
+          const element = data['dollar'][key];
+          var object = {
+            "date": key
+          }
+          if (element.product.length != {}) {
+            for (const childKey in element['product']) {
+              if (element['product'].hasOwnProperty(childKey)) {
+                const childElement = element['product'][childKey];
+                object[childElement.product.name_en] = childElement['cost']
+              }
+            }
+            coinsCost.push(object)
+          }
+        }
+      }
+      var modelCoinsCost = mongoXlsx.buildDynamicModel(coinsCost);
+      var dataCoinsCost = mongoXlsx.mongoData2XlsxData(coinsCost, modelCoinsCost)
+
+      // callback(err, itemsCount)
+
+      mongoXlsx.mongoData2XlsxMultiPage([dataItemsCount, dataCoinsCount, dataItemsCost, dataCoinsCost], ["Items Count", "Coins Count", "Items Cost", "Coins Cost"], config, function (err, data) {
+        callback(null, {
+          'path': urlFileRootexcel + config['fileName']
+        });
+      })
+
+    })
+
+  }
   Item.getReportOfAllItems = function (filter, callback) {
     let itemNormalMatch = {}
     let itemCoinslMatch = {}
@@ -1511,7 +1629,10 @@ module.exports = function (Item) {
     }
 
     console.log(keys)
-    keys.sort();
+    keys.sort((function (a, b) {
+      return new Date(a) - new Date(b);
+    }));
+    console.log("keysssssssssss")
     console.log(keys)
     var len = keys.length;
     var newResult = {}

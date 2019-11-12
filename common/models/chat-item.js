@@ -11,6 +11,7 @@ var ObjectId = require('mongodb').ObjectID;
 module.exports = function (ChatItem) {
 
   var urlFileRoot = config.domain + config.restApiRoot + "/uploadFiles";
+  urlFileRoot = "http://localhost:3000" + config.restApiRoot + "/uploadFiles";
 
   var urlFileRootexcel = urlFileRoot + '/excelFiles/download/';
 
@@ -228,211 +229,201 @@ module.exports = function (ChatItem) {
   // };
 
 
-  // Item.export = function (filter, callback) {
+  ChatItem.export = function (filter = {}, callback) {
 
-  //   var ISOCode = ""
-  //   var goodId = ""
-  //   var username = ""
-  //   var index
-  //   if (filter != null)
-  //     index = filter['where']['and'].length - 1;
-  //   else
-  //     index = -1
+    var temFilter = {
+      "where": {}
+    }
 
-  //   while (index >= 0) {
-  //     if (filter['where']['and'][index]['owner.ISOCode'] != null) {
-  //       ISOCode = filter['where']['and'][index]['owner.ISOCode'];
-  //       filter['where']['and'].splice(index, 1)
-  //     } else if (filter['where']['and'][index]['product.typeGoodsId'] != null) {
-  //       goodId = filter['where']['and'][index]['product.typeGoodsId'];
-  //       filter['where']['and'].splice(index, 1)
-  //     } else if (filter['where']['and'][index]['owner.username'] != null) {
-  //       username = filter['where']['and'][index]['owner.username'];
-  //       filter['where']['and'].splice(index, 1)
-  //     }
+    var andInFilter = []
 
+    if (filter.relatedUserId != null)
+      andInFilter.push({
+        "relatedUserId": ObjectId(filter.relatedUserId)
+      })
 
-  //     index -= 1;
-  //   }
+    if (filter.userId != null)
+      andInFilter.push({
+        "ownerId": ObjectId(filter.userId)
+      })
 
+    if (filter.from != null && filter.from != "")
+      andInFilter.push({
+        "createdAt": {
+          "gt": new Date(filter.from)
+        }
+      })
 
-
-  //   if (filter == null || filter['where']['and'][0] == null)
-  //     filter = {}
-  //   var config = {
-  //     path: 'uploadFiles/excelFiles',
-  //     save: true,
-  //     fileName: 'item' + Date.now() + '.xlsx'
-  //   };
-
-  //   var data = [];
-  //   Item.find(filter, function (err, items) {
-  //     items.forEach(function (element) {
-  //       var object = {};
-  //       var secObject = {};
-  //       var thierdObject = {};
-  //       var ownerObject
-  //       var relatedUserObject
-  //       var productObject;
-  //       element.owner(function (err, owner) {
-  //         var countryNaem
-  //         owner.country(function (err, country) {
-  //           countryNaem = country.name
-  //         })
-  //         if ((ISOCode == "" || owner.ISOCode == ISOCode) && (username == "" || owner.username.includes(username))) {
-  //           if (owner['lastLogin'] != null)
-  //             ownerObject = {
-  //               country: countryNaem,
-  //               image: owner['image'],
-  //               totalBottlesThrown: owner['totalBottlesThrown'],
-  //               repliesBottlesCount: owner['repliesBottlesCount'],
-  //               repliesReceivedCount: owner['repliesReceivedCount'],
-  //               foundBottlesCount: owner['foundBottlesCount'],
-  //               extraBottlesCount: owner['extraBottlesCount'],
-  //               bottlesCount: owner['bottlesCount'],
-  //               registrationCompleted: owner['registrationCompleted'],
-  //               gender: owner['gender'],
-  //               nextRefill: owner['nextRefill'].toString(),
-  //               createdAt: owner['createdAt'].toString(),
-  //               lastLogin: owner['lastLogin'].toString(),
-  //               email: owner['email'],
-  //               status: owner['status'],
-  //               typeLogIn: owner['typeLogIn'],
-  //               username: owner['username']
-  //             }
-  //           else
-  //             ownerObject = {
-  //               country: countryNaem,
-  //               image: owner['image'],
-  //               totalBottlesThrown: owner['totalBottlesThrown'],
-  //               repliesBottlesCount: owner['repliesBottlesCount'],
-  //               repliesReceivedCount: owner['repliesReceivedCount'],
-  //               foundBottlesCount: owner['foundBottlesCount'],
-  //               extraBottlesCount: owner['extraBottlesCount'],
-  //               bottlesCount: owner['bottlesCount'],
-  //               registrationCompleted: owner['registrationCompleted'],
-  //               gender: owner['gender'],
-  //               nextRefill: owner['nextRefill'].toString(),
-  //               createdAt: owner['createdAt'].toString(),
-  //               email: owner['email'],
-  //               status: owner['status'],
-  //               typeLogIn: owner['typeLogIn'],
-  //               username: owner['username']
-  //             }
-  //         }
-  //       })
-  //       element.product(function (err, product) {
-  //         if (goodId == "" || product.typeGoodsId == goodId)
-  //           productObject = {
-  //             name_ar: product['name_ar'],
-  //             name_en: product['name_en'],
-  //             price: product['price'],
-  //             description: product['description'],
-  //             icon: product['icon'],
-  //             androidProduct: product['androidProduct'],
-  //             appleProduct: product['appleProduct'],
-  //           }
-  //       })
-
-  //       if (element['endAt'] != null)
-  //         var objectItem = {
-  //           storeType: element['storeType'],
-  //           storeToken: element['storeToken'],
-  //           isConsumed: element['isConsumed'],
-  //           valid: element['valid'],
-  //           startAt: element['startAt'].toString(),
-  //           endAt: element['endAt'].toString(),
-  //           mainPrice: element['price'],
-  //         }
-  //       else {
-  //         var objectItem = {
-  //           storeType: element['storeType'],
-  //           storeToken: element['storeToken'],
-  //           isConsumed: element['isConsumed'],
-  //           valid: element['valid'],
-  //           startAt: element['startAt'].toString(),
-  //           mainPrice: element['price'],
-  //         }
-  //       }
-
-  //       if (ownerObject != null || productObject != null) {
-  //         if (element.type == "Chat Extend") {
-  //           element.relatedUser(function (err, relatedUser) {
-  //             var countryNaem = ""
-  //             relatedUser.country(function (err, country) {
-  //               countryNaem = country.name
-  //             })
-
-  //             if (relatedUser['lastLogin'] != null)
-  //               relatedUserObject = {
-  //                 countryRelatedUser: countryNaem,
-  //                 imageRelatedUser: relatedUser['image'],
-  //                 totalBottlesThrownRelatedUser: relatedUser['totalBottlesThrown'],
-  //                 repliesBottlesCountRelatedUser: relatedUser['repliesBottlesCount'],
-  //                 repliesReceivedCountRelatedUser: relatedUser['repliesReceivedCount'],
-  //                 foundBottlesCountRelatedUser: relatedUser['foundBottlesCount'],
-  //                 extraBottlesCountRelatedUser: relatedUser['extraBottlesCount'],
-  //                 bottlesCountRelatedUser: relatedUser['bottlesCount'],
-  //                 registrationCompletedRelatedUser: relatedUser['registrationCompleted'],
-  //                 genderRelatedUser: relatedUser['gender'],
-  //                 nextRefillRelatedUser: relatedUser['nextRefill'].toString(),
-  //                 createdAtRelatedUser: relatedUser['createdAt'].toString(),
-  //                 lastLoginRelatedUser: relatedUser['lastLogin'].toString(),
-  //                 emailRelatedUser: relatedUser['email'],
-  //                 statusRelatedUser: relatedUser['status'],
-  //                 typeLogInRelatedUser: relatedUser['typeLogIn'],
-  //                 relatedUser: relatedUser['username']
-  //               }
-  //             else
-  //               relatedUserObject = {
-  //                 countryRelatedUser: countryNaem,
-  //                 imageRelatedUser: relatedUser['image'],
-  //                 totalBottlesThrownRelatedUser: relatedUser['totalBottlesThrown'],
-  //                 repliesBottlesCountRelatedUser: relatedUser['repliesBottlesCount'],
-  //                 repliesReceivedCountRelatedUser: relatedUser['repliesReceivedCount'],
-  //                 foundBottlesCountRelatedUser: relatedUser['foundBottlesCount'],
-  //                 extraBottlesCountRelatedUser: relatedUser['extraBottlesCount'],
-  //                 bottlesCountRelatedUser: relatedUser['bottlesCount'],
-  //                 registrationCompletedRelatedUser: relatedUser['registrationCompleted'],
-  //                 genderRelatedUser: relatedUser['gender'],
-  //                 nextRefillRelatedUser: relatedUser['nextRefill'].toString(),
-  //                 createdAtRelatedUser: relatedUser['createdAt'].toString(),
-  //                 emailRelatedUser: relatedUser['email'],
-  //                 statusRelatedUser: relatedUser['status'],
-  //                 typeLogInRelatedUser: relatedUser['typeLogIn'],
-  //                 relatedUser: relatedUser['username']
-  //               }
-  //             console.log("relatedUser");
-  //             console.log(relatedUser);
-  //           })
-  //         }
-  //         object = Object.assign({}, objectItem, productObject);
-  //         secObject = Object.assign({}, object, ownerObject);
-  //         thierdObject = Object.assign({}, secObject, relatedUserObject);
-  //         data.push(thierdObject);
-  //       }
-  //     }, this);
-  //     var model = mongoXlsx.buildDynamicModel(data);
+    if (filter.to != null && filter.to != "")
+      andInFilter.push({
+        "createdAt": {
+          "lt": new Date(filter.from)
+        }
+      })
 
 
-  //     /* Generate Excel */
-  //     mongoXlsx.mongoData2Xlsx(data, model, config, function (err, data) {
-  //       console.log('File saved at:', data.fullPath);
-  //       callback(null, {
-  //         'path': urlFileRootexcel + config['fileName']
-  //       });
+    if (andInFilter.length > 0)
+      temFilter['where']['and'] = andInFilter
 
-  //     });
-  //   });
 
-  //   // model[0].access = 'id';
-  //   // mongoXlsx.mongoData2Xlsx(data, model, config, function (err, data) {
-  //   //   console.log('File saved at:', path.join(__dirname, '../../', data.fullPath), data.fullPath);
-  //   //   return res.sendFile(path.join(__dirname, '../../', data.fullPath))
-  //   // });
+    var config = {
+      path: 'uploadFiles/excelFiles',
+      save: true,
+      fileName: 'item' + Date.now() + '.xlsx'
+    };
 
-  //   // TODO
-  // };
+    var data = [];
+    console.log(JSON.stringify(temFilter))
+    ChatItem.find(temFilter, function (err, items) {
+      items.forEach(function (element) {
+        var object = {};
+        var secObject = {};
+        var thierdObject = {};
+        var ownerObject
+        var relatedUserObject
+        var productObject;
+        element.owner(function (err, owner) {
+          var countryNaem
+          owner.country(function (err, country) {
+            countryNaem = country.name
+          })
+          if (owner['lastLogin'] != null)
+            ownerObject = {
+              country: countryNaem,
+              image: owner['image'],
+              totalBottlesThrown: owner['totalBottlesThrown'],
+              repliesBottlesCount: owner['repliesBottlesCount'],
+              repliesReceivedCount: owner['repliesReceivedCount'],
+              foundBottlesCount: owner['foundBottlesCount'],
+              extraBottlesCount: owner['extraBottlesCount'],
+              bottlesCount: owner['bottlesCount'],
+              registrationCompleted: owner['registrationCompleted'],
+              gender: owner['gender'],
+              nextRefill: owner['nextRefill'].toString(),
+              createdAt: owner['createdAt'].toString(),
+              lastLogin: owner['lastLogin'].toString(),
+              email: owner['email'],
+              status: owner['status'],
+              typeLogIn: owner['typeLogIn'],
+              username: owner['username']
+            }
+          else
+            ownerObject = {
+              country: countryNaem,
+              image: owner['image'],
+              totalBottlesThrown: owner['totalBottlesThrown'],
+              repliesBottlesCount: owner['repliesBottlesCount'],
+              repliesReceivedCount: owner['repliesReceivedCount'],
+              foundBottlesCount: owner['foundBottlesCount'],
+              extraBottlesCount: owner['extraBottlesCount'],
+              bottlesCount: owner['bottlesCount'],
+              registrationCompleted: owner['registrationCompleted'],
+              gender: owner['gender'],
+              nextRefill: owner['nextRefill'].toString(),
+              createdAt: owner['createdAt'].toString(),
+              email: owner['email'],
+              status: owner['status'],
+              typeLogIn: owner['typeLogIn'],
+              username: owner['username']
+            }
+
+        })
+        element.chatProduct(function (err, product) {
+          productObject = {
+            name_ar: product['name_ar'],
+            name_en: product['name_en'],
+            price: product['price'],
+            description: product['description'],
+            icon: product['icon'],
+            androidProduct: product['androidProduct'],
+            appleProduct: product['appleProduct'],
+          }
+        })
+        var objectItem = {
+          isConsumed: element['isConsumed'],
+          createdAt: element['createdAt'].toString(),
+          mainPrice: element['price'],
+        }
+        // }
+
+        element.relatedUser(function (err, relatedUser) {
+          var countryNaem = ""
+          if (relatedUser) {
+            relatedUser.country(function (err, country) {
+              countryNaem = country.name
+            })
+
+            if (relatedUser['lastLogin'] != null)
+              relatedUserObject = {
+                countryRelatedUser: countryNaem,
+                imageRelatedUser: relatedUser['image'],
+                totalBottlesThrownRelatedUser: relatedUser['totalBottlesThrown'],
+                repliesBottlesCountRelatedUser: relatedUser['repliesBottlesCount'],
+                repliesReceivedCountRelatedUser: relatedUser['repliesReceivedCount'],
+                foundBottlesCountRelatedUser: relatedUser['foundBottlesCount'],
+                extraBottlesCountRelatedUser: relatedUser['extraBottlesCount'],
+                bottlesCountRelatedUser: relatedUser['bottlesCount'],
+                registrationCompletedRelatedUser: relatedUser['registrationCompleted'],
+                genderRelatedUser: relatedUser['gender'],
+                nextRefillRelatedUser: relatedUser['nextRefill'].toString(),
+                createdAtRelatedUser: relatedUser['createdAt'].toString(),
+                lastLoginRelatedUser: relatedUser['lastLogin'].toString(),
+                emailRelatedUser: relatedUser['email'],
+                statusRelatedUser: relatedUser['status'],
+                typeLogInRelatedUser: relatedUser['typeLogIn'],
+                relatedUser: relatedUser['username']
+              }
+            else
+              relatedUserObject = {
+                countryRelatedUser: countryNaem,
+                imageRelatedUser: relatedUser['image'],
+                totalBottlesThrownRelatedUser: relatedUser['totalBottlesThrown'],
+                repliesBottlesCountRelatedUser: relatedUser['repliesBottlesCount'],
+                repliesReceivedCountRelatedUser: relatedUser['repliesReceivedCount'],
+                foundBottlesCountRelatedUser: relatedUser['foundBottlesCount'],
+                extraBottlesCountRelatedUser: relatedUser['extraBottlesCount'],
+                bottlesCountRelatedUser: relatedUser['bottlesCount'],
+                registrationCompletedRelatedUser: relatedUser['registrationCompleted'],
+                genderRelatedUser: relatedUser['gender'],
+                nextRefillRelatedUser: relatedUser['nextRefill'].toString(),
+                createdAtRelatedUser: relatedUser['createdAt'].toString(),
+                emailRelatedUser: relatedUser['email'],
+                statusRelatedUser: relatedUser['status'],
+                typeLogInRelatedUser: relatedUser['typeLogIn'],
+                relatedUser: relatedUser['username']
+              }
+          }
+          console.log("relatedUser");
+          console.log(relatedUser);
+        })
+
+        object = Object.assign({}, objectItem, productObject);
+        secObject = Object.assign({}, object, ownerObject);
+        thierdObject = Object.assign({}, secObject, relatedUserObject);
+        data.push(thierdObject);
+
+      }, this);
+      var model = mongoXlsx.buildDynamicModel(data);
+
+
+      /* Generate Excel */
+      mongoXlsx.mongoData2Xlsx(data, model, config, function (err, data) {
+        console.log('File saved at:', data.fullPath);
+        callback(null, {
+          'path': urlFileRootexcel + config['fileName']
+        });
+
+      });
+    });
+
+    // model[0].access = 'id';
+    // mongoXlsx.mongoData2Xlsx(data, model, config, function (err, data) {
+    //   console.log('File saved at:', path.join(__dirname, '../../', data.fullPath), data.fullPath);
+    //   return res.sendFile(path.join(__dirname, '../../', data.fullPath))
+    // });
+
+    // TODO
+  };
 
   ChatItem.chatExtendReportOwner = function (filter, callback) {
     var ownerMatch = {};
@@ -815,6 +806,7 @@ module.exports = function (ChatItem) {
       relatedUserMatch['relatedUserId'] = ObjectId(filter.userId)
     }
 
+    // return callback(null, relatedUserMatch)
     ChatItem.getDataSource().connector.connect(function (err, db) {
 
       var collection = db.collection('chatItem');

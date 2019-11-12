@@ -1580,6 +1580,139 @@ module.exports = function (User) {
   };
 
 
+  User.getTransaction = async function (userId, callback) {
+    try {
+      var item = await User.app.models.Item.find({
+        "where": {
+          "ownerId": ObjectId(userId),
+          "type": {
+            "neq": "coins"
+          }
+        },
+        "order": "startAt DESC"
+      })
+
+      var coins = await User.app.models.Item.find({
+        "where": {
+          "ownerId": ObjectId(userId),
+          "type": "coins"
+        },
+        "order": "startAt DESC"
+      })
+      var chatItem = await User.app.models.chatItem.find({
+        "where": {
+          "ownerId": ObjectId(userId),
+        },
+        "order": "startAt DESC"
+      })
+
+      item.concat(chatItem)
+      item.sort(function (a, b) {
+        a = new Date(a.startAt);
+        b = new Date(b.startAt);
+        return a > b ? -1 : a < b ? 1 : 0;
+      });
+
+      var data = await getAggregate(userId)
+      callback(null, {
+        "item": item,
+        "groupe": data,
+        "coins": coins,
+      })
+    } catch (error) {
+      return callback(error)
+    }
+  }
+
+  function getAggregate(userId) {
+    return new Promise(function (resolve, reject) {
+      User.getDataSource().connector.connect(function (err, db) {
+
+        var collection = db.collection('item');
+        var cursor = collection.aggregate([{
+            $match: {
+              "ownerId": ObjectId(userId)
+            }
+          },
+          {
+            $group: {
+              _id: '$productId',
+              count: {
+                $sum: 1
+              },
+              totalRevenue: {
+                $sum: "$price"
+              }
+            }
+          },
+          {
+            $lookup: {
+              from: "product",
+              localField: "_id",
+              foreignField: "_id",
+              as: "product"
+            }
+          },
+          {
+            $unwind: "$product"
+          },
+          {
+            $project: {
+              _id: 0,
+              product: 1,
+              count: 1,
+              totalRevenue: 1,
+            }
+          }
+        ]);
+        cursor.get(function (err, data) {
+          if (err) reject(err)
+
+          var collectionChatItem = db.collection('chatItem');
+          var cursorChatItem = collectionChatItem.aggregate([{
+              $match: {
+                "ownerId": ObjectId(userId)
+              }
+            },
+            {
+              $group: {
+                _id: '$chatProductId',
+                count: {
+                  $sum: 1
+                },
+                totalRevenue: {
+                  $sum: "$price"
+                }
+              }
+            },
+            {
+              $lookup: {
+                from: "chatProduct",
+                localField: "_id",
+                foreignField: "_id",
+                as: "product"
+              }
+            },
+            {
+              $unwind: "$product"
+            },
+            {
+              $project: {
+                _id: 0,
+                product: 1,
+                count: 1,
+                totalRevenue: 1,
+              }
+            }
+          ]);
+          cursorChatItem.get(function (err, dataChatItem) {
+            if (err) reject(err)
+            resolve(data.concat(dataChatItem));
+          })
+        })
+      })
+    })
+  }
 
   /**
    *
@@ -1589,36 +1722,51 @@ module.exports = function (User) {
   User.accesstoken = function (callback) {
     var result;
     // TODO
-    User.app.models.Item.updateAll({
-      "or": [{
-          "productId": ObjectId("5d91f0e9b2cf5c43578eab6f")
-        },
-        {
-          "productId": ObjectId("5d91f078b2cf5c43578eab6e")
-        },
-        {
-          "productId": ObjectId("5d91eff6b2cf5c43578eab6d")
-        },
-        {
-          "productId": ObjectId("5d90b33bb2cf5c43578ea2d4")
-        },
-        {
-          "productId": ObjectId("5d90acc2b2cf5c43578ea2d3")
-        }
-      ]
-    }, {
-      "type": "coins"
-    }, function (err, data) {
-      console.log("TRRRR")
-      callback(err, data);
-    })
+
     // User.app.models.AccessToken.find({}, function (err, data) {
     //   if (err)
     //     callback(err, null);
 
     //   callback(null, data);
-
     // })
+
+    User.app.models.Item.destroyAll({
+      "or": [{
+          "ownerId": ObjectId("5c2640f52946491a550cb132")
+        },
+        {
+          "ownerId": ObjectId("5d9dbba8a49e014bfc032f0d")
+        },
+        {
+          "ownerId": ObjectId("5c2fbe592946491a550cb6b0")
+        },
+        {
+          "ownerId": ObjectId("5d96dbbe131a163ff152c10c")
+        },
+        {
+          "ownerId": ObjectId("5d99c3fc03d2f91006f0b55a")
+        },
+        {
+          "ownerId": ObjectId("5d917892b2cf5c43578ea99d")
+        },
+        {
+          "ownerId": ObjectId("5d94a28cb404c7363af46ead")
+        },
+        {
+          "ownerId": ObjectId("5d772a3193056a3deaef465c")
+        },
+        {
+          "ownerId": ObjectId("5c96d9c03ed4960ae9a13cac")
+        },
+        {
+          "ownerId": ObjectId("5c96d9c03ed4960ae9a13cac")
+        }
+      ]
+    }, function () {
+
+    })
+
+
   };
 
   cron.scheduleJob('00 00 * * * *', function () {
