@@ -1599,7 +1599,7 @@ module.exports = function (User) {
         },
         "order": "startAt DESC"
       })
-      var chatItem = await User.app.models.chatItem.find({
+      var chatItem = await User.app.models.ChatItem.find({
         "where": {
           "ownerId": ObjectId(userId),
         },
