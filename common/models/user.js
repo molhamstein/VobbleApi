@@ -1606,11 +1606,20 @@ module.exports = function (User) {
         "order": "startAt DESC"
       })
 
-      item.concat(chatItem)
+      item = item.concat(chatItem)
       item.sort(function (a, b) {
-        a = new Date(a.startAt);
-        b = new Date(b.startAt);
-        return a > b ? -1 : a < b ? 1 : 0;
+        var dateA;
+        var dateB;
+        if (a.startAt)
+          dateA = new Date(a.startAt);
+        else
+          dateA = new Date(a.createdAt);
+        if (b.startAt)
+          dateB = new Date(b.startAt);
+        else
+          dateB = new Date(b.createdAt);
+
+        return dateA > dateB ? -1 : dateA < dateB ? 1 : 0;
       });
 
       var data = await getAggregate(userId)
