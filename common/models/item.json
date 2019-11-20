@@ -348,6 +348,32 @@
         "path": "/:userId/getUserRelated",
         "verb": "get"
       }]
+    },
+    "getUsersCoinsByDay": {
+      "accepts": [{
+        "arg": "from",
+        "type": "date",
+        "required": true
+      }, {
+        "arg": "to",
+        "type": "date",
+        "required": true
+      }, {
+        "arg": "ownerId",
+        "type": "string",
+        "required": false
+      }],
+      "returns": [{
+        "arg": "result",
+        "type": "array",
+        "root": true,
+        "description": ""
+      }],
+      "description": "Get Users Coins By Day",
+      "http": [{
+        "path": "/getUsersCoinsByDay",
+        "verb": "get"
+      }]
     }
   }
 }

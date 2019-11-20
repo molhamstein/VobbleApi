@@ -324,6 +324,12 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "getItemsByUser"
+    },
+    {
+      "principalType": "ROLE",
       "principalId": "$unauthenticated",
       "permission": "ALLOW",
       "property": "loginByPhone"
@@ -743,6 +749,31 @@
       "description": "",
       "http": [{
         "path": "/:userId/getTransaction",
+        "verb": "get"
+      }]
+    },
+    "getItemsByUser": {
+      "accepts": [{
+          "arg": "userId",
+          "type": "string",
+          "http": {
+            "source": "path"
+          }
+        },
+        {
+          "arg": "date",
+          "type": "string"
+        }
+      ],
+      "returns": [{
+        "arg": "result",
+        "type": "array",
+        "root": true,
+        "description": ""
+      }],
+      "description": "",
+      "http": [{
+        "path": "/:userId/getItemsByUser",
         "verb": "get"
       }]
     },

@@ -2043,6 +2043,79 @@ module.exports = function (User) {
     })
   }
 
+  User.getItemsByUser = async function (userId, date, callback) {
+    try {
+      var startDate = new Date(date)
+      var endDate = new Date(date)
+      startDate.setHours(0);
+      startDate.setMinutes(0);
+      endDate.setHours(23);
+      endDate.setMinutes(59);
+      var item = await User.app.models.Item.find({
+        "where": {
+          "and": [{
+              "ownerId": ObjectId(userId),
+            },
+            {
+              "type": {
+                "neq": "coins"
+              }
+            },
+            {
+              "startAt": {
+                "gt": startDate
+              }
+            },
+            {
+              "startAt": {
+                "lt": endDate
+              }
+            }
+          ]
+
+        },
+        "order": "startAt DESC"
+      })
+      var chatItem = await User.app.models.ChatItem.find({
+        "where": {
+          "and": [{
+              "ownerId": ObjectId(userId),
+            },
+            {
+              "createdAt": {
+                "gt": startDate
+              }
+            },
+            {
+              "createdAt": {
+                "lt": endDate
+              }
+            }
+          ]
+        },
+        "order": "createdAt DESC"
+      })
+
+      item = item.concat(chatItem)
+      item.sort(function (a, b) {
+        var dateA;
+        var dateB;
+        if (a.startAt)
+          dateA = new Date(a.startAt);
+        else
+          dateA = new Date(a.createdAt);
+        if (b.startAt)
+          dateB = new Date(b.startAt);
+        else
+          dateB = new Date(b.createdAt);
+
+        return dateA > dateB ? -1 : dateA < dateB ? 1 : 0;
+      });
+      callback(null, item)
+    } catch (error) {
+      return callback(error)
+    }
+  }
 
   function calcDiff(date1, date2) {
     var hours = Math.abs(date1 - date2) / 36e5;

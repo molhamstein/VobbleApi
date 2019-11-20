@@ -123,6 +123,7 @@ module.exports = function (Item) {
     }
   });
 
+
   Item.afterRemote('create', function (context, item, next) {
     Item.app.models.Product.findById(context.req.body.productId, function (err, product) {
       if (err) {
@@ -160,6 +161,7 @@ module.exports = function (Item) {
 
 
   });
+
 
   function getFilter(filter, callback) {
     var ISOCode = ""
@@ -222,6 +224,7 @@ module.exports = function (Item) {
       })
   }
 
+
   Item.getFilterItem = function (filter, callback) {
     var offset = filter['offset'];
     var limit = filter['limit'];
@@ -262,6 +265,7 @@ module.exports = function (Item) {
     })
   };
 
+
   Item.buyProductByCoins = function (productId, relatedUserId, context, callback) {
     var body = {
       "productId": productId,
@@ -297,12 +301,14 @@ module.exports = function (Item) {
           if (product.bottleCount > 0) {
             user.extraBottlesCount += product.bottleCount;
             user.pocketCoins -= product.price_coins;
+            user.totalPaidCoins += product.price_coins;
             user.save();
             callback(null, item)
           } else if (product.replyCount > 0) {
             user.extraReplysCount += 99999999999;
             user.unlimitedReplysOpenDate = addHours(new Date(), 12)
             user.pocketCoins -= product.price_coins;
+            user.totalPaidCoins += product.price_coins;
             user.save();
             callback(null, item);
           } else {
@@ -311,11 +317,10 @@ module.exports = function (Item) {
             item.endAt = new Date(date);
             item.save();
             user.pocketCoins -= product.price_coins;
+            user.totalPaidCoins += product.price_coins;
             user.save();
             callback(null, item)
-
           }
-
         })
       })
     })
@@ -599,6 +604,7 @@ module.exports = function (Item) {
     // TODO
   };
 
+
   Item.chatExtendReportOwner = function (filter, callback) {
     var ownerMatch = {
       type: "Chat Extend",
@@ -747,6 +753,8 @@ module.exports = function (Item) {
       })
     })
   };
+
+
   Item.chatExtendReportOwnerCount = function (filter, callback) {
     var ownerMatch = {
       type: "Chat Extend",
@@ -896,6 +904,7 @@ module.exports = function (Item) {
     })
   };
 
+
   Item.getUserRelated = function (userId, isOwner, callback) {
     var where = {}
     if (isOwner == true) {
@@ -918,6 +927,8 @@ module.exports = function (Item) {
       return callback(null, items)
     })
   }
+
+
   Item.chatExtendReportRelated = function (filter, callback) {
     var relatedUserMatch = {
       type: "Chat Extend",
@@ -1064,6 +1075,7 @@ module.exports = function (Item) {
       })
     })
   };
+
 
   Item.chatExtendReportRelatedCount = function (filter, callback) {
     var relatedUserMatch = {
@@ -1232,6 +1244,7 @@ module.exports = function (Item) {
     })
   };
 
+
   function calcToUser(user) {
     var totalPrice = 0;
     Item.find({
@@ -1257,6 +1270,7 @@ module.exports = function (Item) {
 
     })
   }
+
 
   Item.getReportOfItem = function (match, callback) {
     Item.getDataSource().connector.connect(function (err, db) {
@@ -1324,6 +1338,7 @@ module.exports = function (Item) {
       })
     })
   }
+
 
   Item.getReportOfChatItem = function (match, callback) {
     Item.getDataSource().connector.connect(function (err, db) {
@@ -1501,6 +1516,8 @@ module.exports = function (Item) {
     })
 
   }
+
+
   Item.getReportOfAllItems = function (filter, callback) {
     let itemNormalMatch = {}
     let itemCoinslMatch = {}
@@ -1589,6 +1606,104 @@ module.exports = function (Item) {
     })
   }
 
+
+  Item.getUsersCoinsByDay = function (from, to, ownerId, callback) {
+    var filter = {};
+    filter['startAt'] = {
+      '$gt': new Date(from)
+    }
+    filter['startAt']['$lt'] = new Date(to)
+    filter['type'] = "coins"
+    if (ownerId)
+      filter['ownerId'] = ObjectId(ownerId)
+
+    Item.getDataSource().connector.connect(function (err, db) {
+      var collection = db.collection('item');
+      var users = collection.aggregate([{
+          $match: filter
+        },
+        {
+          $lookup: {
+            from: "product",
+            localField: "productId",
+            foreignField: "_id",
+            as: "product"
+          }
+        },
+        {
+          $unwind: "$product"
+        },
+        {
+          $group: {
+            "_id": {
+              "ownerId": "$ownerId",
+              month: {
+                $month: "$startAt"
+              },
+              day: {
+                $dayOfMonth: "$startAt"
+              },
+              year: {
+                $year: "$startAt"
+              }
+            },
+            count: {
+              $sum: 1
+            },
+            total: {
+              $sum: "$price"
+            },
+            products: {
+              $addToSet: "$product"
+            }
+          },
+
+        },
+        {
+          $project: {
+            _id: 0,
+            ownerId: "$_id.ownerId",
+            date: {
+              $concat: [{
+                $toString: "$_id.year"
+              }, "/", {
+                $toString: "$_id.month"
+              }, "/", {
+                $toString: "$_id.day"
+              }]
+            },
+            count: 1,
+            total: 1,
+            products: 1
+
+          }
+        },
+        {
+          $lookup: {
+            from: "user",
+            localField: "ownerId",
+            foreignField: "_id",
+            as: "owner"
+          }
+        },
+        {
+          $unwind: "$owner"
+        }
+      ])
+      users.get(function (err, data) {
+        // console.log(data);
+        if (err) return callback(err);
+        data = data.sort(function (a, b) {
+          var aDate = new Date(a.date).getTime();
+          var bDate = new Date(b.date).getTime();
+          return bDate - aDate
+        })
+        return callback(null, data);
+      })
+    })
+  }
+
+
   function margeTowarray(firArray, secArray, callback) {
     let result = {}
     firArray.forEach(element => {
@@ -1619,6 +1734,7 @@ module.exports = function (Item) {
     })
   }
 
+
   function sortObject(result, callback) {
     var keys = [];
 
@@ -1647,8 +1763,11 @@ module.exports = function (Item) {
     }
   }
 
+
   function addHours(date, h) {
     date.setTime(date.getTime() + (h * 60 * 60 * 1000));
     return date;
   }
+
+
 };
