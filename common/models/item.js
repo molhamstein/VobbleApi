@@ -1703,6 +1703,519 @@ module.exports = function (Item) {
     })
   }
 
+  function getItems(filter) {
+    return new Promise(function (resolve, reject) {
+      Item.getDataSource().connector.connect(function (err, db) {
+        var collection = db.collection('item');
+        var users = collection.aggregate([{
+            $match: filter
+          },
+          {
+            $lookup: {
+              from: "user",
+              localField: "ownerId",
+              foreignField: "_id",
+              as: "owner"
+            }
+          },
+          {
+            $unwind: "$owner"
+          },
+          {
+            $lookup: {
+              from: "product",
+              localField: "productId",
+              foreignField: "_id",
+              as: "product"
+            }
+          },
+          {
+            $unwind: "$product"
+          },
+          {
+            $lookup: {
+              from: "typeGoods",
+              let: {
+                id: {
+                  $convert: {
+                    input: "$product.typeGoodsId",
+                    to: "objectId"
+                  }
+                }
+              },
+              pipeline: [{
+                $match: {
+                  $expr: {
+                    $eq: ["$_id", "$$id"]
+                  }
+                }
+              }],
+              "as": "product.typeGoods"
+            }
+          },
+          {
+            $unwind: "$product.typeGoods"
+          },
+          {
+            $group: {
+              "_id": {
+                month: {
+                  $month: "$startAt"
+                },
+                day: {
+                  $dayOfMonth: "$startAt"
+                },
+                year: {
+                  $year: "$startAt"
+                }
+              },
+              "countCoins": {
+                "$sum": {
+                  "$cond": [{
+                      "$eq": ["$type", "coins"]
+                    },
+                    1,
+                    0
+                  ]
+                }
+              },
+              "coinsArray": {
+                "$addToSet": {
+                  "$cond": [{
+                      "$eq": ["$type", "coins"]
+                    },
+                    {
+                      startAt: "$startAt",
+                      name_en: "$product.name_en",
+                      name_ar: "$product.name_ar",
+                      username: "$owner.username",
+                      ownerId: "$ownerId",
+                    },
+                    null
+                  ]
+                }
+              },
+              "totalCoins": {
+                "$sum": {
+                  "$cond": [{
+                      "$eq": ["$type", "coins"]
+                    },
+                    "$price",
+                    0
+                  ]
+                }
+              },
+              "totalSpentCoins": {
+                "$sum": {
+                  "$cond": [{
+                      "$eq": ["$typePurchasing", "coins"]
+                    },
+                    "$price",
+                    0
+                  ]
+                }
+              },
+              "extendChatArray": {
+                "$addToSet": {
+                  "$cond": [{
+                      "$eq": ["$type", "Chat Extend"]
+                    },
+                    {
+                      startAt: "$startAt",
+                      name_en: "$product.name_en",
+                      name_ar: "$product.name_ar",
+                      username: "$owner.username",
+                      ownerId: "$ownerId",
+                    },
+                    null
+                  ]
+                }
+              },
+              "countExtendChat": {
+                "$sum": {
+                  "$cond": [{
+                      "$eq": ["$type", "Chat Extend"]
+                    },
+                    1,
+                    0
+                  ]
+                }
+              },
+              "totalExtendChat": {
+                "$sum": {
+                  "$cond": [{
+                      "$eq": ["$type", "Chat Extend"]
+                    },
+                    "$price",
+                    0
+                  ]
+                }
+              },
+              "filterByCountryArray": {
+                "$addToSet": {
+                  "$cond": [{
+                      "$eq": ["$product.typeGoods.name_en", "Filter By Country"]
+                    },
+                    {
+                      startAt: "$startAt",
+                      name_en: "$product.name_en",
+                      name_ar: "$product.name_ar",
+                      username: "$owner.username",
+                      ownerId: "$ownerId",
+                    },
+                    null
+                  ]
+                }
+              },
+              "totalFilterByCountry": {
+                "$sum": {
+                  "$cond": [{
+                      "$eq": ["$product.typeGoods.name_en", "Filter By Country"]
+                    },
+                    "$price",
+                    0
+                  ]
+                }
+              },
+              "countFilterByCountry": {
+                "$sum": {
+                  "$cond": [{
+                      "$eq": ["$product.typeGoods.name_en", "Filter By Country"]
+                    },
+                    1,
+                    0
+                  ]
+                }
+              },
+              "filterByGenderArray": {
+                "$addToSet": {
+                  "$cond": [{
+                      "$eq": ["$product.typeGoods.name_en", "Filter By Gender"]
+                    },
+                    {
+                      startAt: "$startAt",
+                      name_en: "$product.name_en",
+                      name_ar: "$product.name_ar",
+                      username: "$owner.username",
+                      ownerId: "$ownerId",
+                    },
+                    null
+                  ]
+                }
+              },
+              "totalFilterByGender": {
+                "$sum": {
+                  "$cond": [{
+                      "$eq": ["$product.typeGoods.name_en", "Filter By Gender"]
+                    },
+                    "$price",
+                    0
+                  ]
+                }
+              },
+              "countFilterByGender": {
+                "$sum": {
+                  "$cond": [{
+                      "$eq": ["$product.typeGoods.name_en", "Filter By Gender"]
+                    },
+                    1,
+                    0
+                  ]
+                }
+              },
+              "repliesArray": {
+                "$addToSet": {
+                  "$cond": [{
+                      "$eq": ["$product.typeGoods.name_en", "replies"]
+                    },
+                    {
+                      startAt: "$startAt",
+                      name_en: "$product.name_en",
+                      name_ar: "$product.name_ar",
+                      username: "$owner.username",
+                      ownerId: "$ownerId",
+                    },
+                    null
+                  ]
+                }
+              },
+              "totalReply": {
+                "$sum": {
+                  "$cond": [{
+                      "$eq": ["$product.typeGoods.name_en", "replies"]
+                    },
+                    "$price",
+                    0
+                  ]
+                }
+              },
+              "countReply": {
+                "$sum": {
+                  "$cond": [{
+                      "$eq": ["$product.typeGoods.name_en", "replies"]
+                    },
+                    1,
+                    0
+                  ]
+                }
+              },
+              "bottleArray": {
+                "$addToSet": {
+                  "$cond": [{
+                      "$eq": ["$product.typeGoods.name_en", "Bottles Packs"]
+                    },
+                    {
+                      startAt: "$startAt",
+                      name_en: "$product.name_en",
+                      name_ar: "$product.name_ar",
+                      username: "$owner.username",
+                      ownerId: "$ownerId",
+                    },
+                    null
+                  ]
+                }
+              },
+              "totalBottle": {
+                "$sum": {
+                  "$cond": [{
+                      "$eq": ["$product.typeGoods.name_en", "Bottles Packs"]
+                    },
+                    "$price",
+                    0
+                  ]
+                }
+              },
+              "countBottle": {
+                "$sum": {
+                  "$cond": [{
+                      "$eq": ["$product.typeGoods.name_en", "Bottles Packs"]
+                    },
+                    1,
+                    0
+                  ]
+                }
+              },
+              total: {
+                $sum: 1
+              }
+            },
+
+          },
+          {
+            $project: {
+              _id: 0,
+              coinsArray: 1,
+              totalBottle: 1,
+              countBottle: 1,
+              totalReply: 1,
+              countReply: 1,
+              countFilterByGender: 1,
+              totalFilterByGender: 1,
+              countFilterByCountry: 1,
+              totalFilterByCountry: 1,
+              totalExtendChat: 1,
+              countExtendChat: 1,
+              extendChatArray: 1,
+              filterByCountryArray: 1,
+              filterByGenderArray: 1,
+              repliesArray: 1,
+              bottleArray: 1,
+              countCoins: 1,
+              totalCoins: 1,
+              totalCount: 1,
+              totalSpentCoins: 1,
+              total: 1,
+              date: {
+                $concat: [{
+                  $toString: "$_id.year"
+                }, "/", {
+                  $toString: "$_id.month"
+                }, "/", {
+                  $toString: "$_id.day"
+                }]
+              }
+            }
+          }
+        ])
+        users.get(function (err, data) {
+          // console.log(data);
+          if (err) reject(err);
+          data = data.sort(function (a, b) {
+            var aDate = new Date(a.date).getTime();
+            var bDate = new Date(b.date).getTime();
+            return bDate - aDate
+          })
+          resolve(data)
+        })
+      })
+    })
+  }
+
+  function getGift(filter) {
+    return new Promise(function (resolve, reject) {
+
+      Item.getDataSource().connector.connect(function (err, db) {
+        var collection = db.collection('chatItem');
+        var users = collection.aggregate([{
+            $match: filter
+          },
+          {
+            $lookup: {
+              from: "user",
+              localField: "ownerId",
+              foreignField: "_id",
+              as: "owner"
+            }
+          },
+          {
+            $unwind: "$owner"
+          },
+          {
+            $lookup: {
+              from: "chatProduct",
+              localField: "chatProductId",
+              foreignField: "_id",
+              as: "chatProduct"
+            }
+          },
+          {
+            $unwind: "$chatProduct"
+          },
+          {
+            $group: {
+              "_id": {
+                month: {
+                  $month: "$createdAt"
+                },
+                day: {
+                  $dayOfMonth: "$createdAt"
+                },
+                year: {
+                  $year: "$createdAt"
+                }
+              },
+              "totalSpentCoins": {
+                "$sum": "$price"
+              },
+              "giftArray": {
+                "$addToSet": {
+
+                  startAt: "$createdAt",
+                  name_en: "$chatProduct.name_en",
+                  name_ar: "$chatProduct.name_ar",
+                  username: "$owner.username",
+                  ownerId: "$ownerId",
+
+                }
+              },
+              countGift: {
+                $sum: 1
+              }
+            }
+          },
+          {
+            $project: {
+              _id: 0,
+              giftArray: 1,
+              countGift: 1,
+              totalSpentCoins: 1,
+              date: {
+                $concat: [{
+                  $toString: "$_id.year"
+                }, "/", {
+                  $toString: "$_id.month"
+                }, "/", {
+                  $toString: "$_id.day"
+                }]
+              }
+            }
+          }
+        ])
+        users.get(function (err, data) {
+          // console.log(data);
+          if (err) reject(err);
+          data = data.sort(function (a, b) {
+            var aDate = new Date(a.date).getTime();
+            var bDate = new Date(b.date).getTime();
+            return bDate - aDate
+          })
+          resolve(data)
+        })
+      })
+    })
+  }
+
+  Item.getItemsByDay = async function (from, to, ownerId, callback) {
+    var filter = {};
+    filter['startAt'] = {
+      '$gt': new Date(from)
+    }
+    filter['startAt']['$lt'] = new Date(to)
+    if (ownerId)
+      filter['ownerId'] = ObjectId(ownerId)
+    var itemData = await getItems(filter);
+    var filterGift = {};
+    filterGift['createdAt'] = {
+      '$gt': new Date(from)
+    }
+    filterGift['createdAt']['$lt'] = new Date(to)
+    if (ownerId)
+      filterGift['ownerId'] = ObjectId(ownerId)
+    var itemGift = await getGift(filterGift);
+    var resultArray = []
+    itemData.forEach(function (value) {
+      var existing = itemGift.filter(function (v, i) {
+        return (v.date == value.date);
+      });
+      if (existing.length) {
+        value.totalSpentCoins += existing[0].totalSpentCoins;
+        value.totalGift = existing[0].totalSpentCoins;
+        value.giftArray = existing[0].giftArray;
+        value.countGift = existing[0].countGift;
+
+        resultArray.push(value)
+      } else {
+        value.giftArray = [];
+        value.countGift = 0;
+        value.totalGift = 0;
+        resultArray.push(value);
+      }
+    });
+    itemGift.forEach(function (value) {
+      var existing = itemData.filter(function (v, i) {
+        return (v.date == value.date);
+      });
+      if (existing.length == 0) {
+        value.coinsArray = [];
+        value.extendChatArray = [];
+        value.filterByCountryArray = [];
+        value.filterByGenderArray = [];
+        value.repliesArray = [];
+        value.bottleArray = [];
+        value.countCoins = 0;
+        value.totalCoins = 0;
+        value.countExtendChat = 0;
+        value.totalExtendChat = 0;
+        value.totalFilterByCountry = 0;
+        value.countFilterByCountry = 0;
+        value.totalFilterByGender = 0;
+        value.countFilterByGender = 0;
+        value.totalReply = 0;
+        value.countReply = 0;
+        value.totalBottle = 0;
+        value.countBottle = 0;
+        value.totalGift = value.totalSpentCoins
+        resultArray.push(value);
+      }
+    })
+    resultArray = resultArray.sort(function (a, b) {
+      var aDate = new Date(a.date).getTime();
+      var bDate = new Date(b.date).getTime();
+      return bDate - aDate
+    })
+    return callback(null, resultArray)
+  }
+
 
   function margeTowarray(firArray, secArray, callback) {
     let result = {}

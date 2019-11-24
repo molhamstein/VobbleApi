@@ -374,6 +374,32 @@
         "path": "/getUsersCoinsByDay",
         "verb": "get"
       }]
+    },
+    "getItemsByDay": {
+      "accepts": [{
+        "arg": "from",
+        "type": "date",
+        "required": true
+      }, {
+        "arg": "to",
+        "type": "date",
+        "required": true
+      }, {
+        "arg": "ownerId",
+        "type": "string",
+        "required": false
+      }],
+      "returns": [{
+        "arg": "result",
+        "type": "array",
+        "root": true,
+        "description": ""
+      }],
+      "description": "Get Items By Day",
+      "http": [{
+        "path": "/getItemsByDay",
+        "verb": "get"
+      }]
     }
   }
 }

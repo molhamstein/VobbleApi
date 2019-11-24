@@ -29,7 +29,7 @@
     },
     "thumbnail": {
       "type": "string",
-      "required": true
+      "required": false
     },
     "createdAt": {
       "type": "date",
@@ -58,6 +58,10 @@
     "addedScores": {
       "type": "number",
       "default": 0
+    },
+    "bottleType": {
+      "type": "string",
+      "default": "video"
     }
   },
   "validations": [],
