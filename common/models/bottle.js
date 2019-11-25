@@ -267,7 +267,7 @@ module.exports = function (Bottle) {
     })
   }
 
-  Bottle.getBottle = function (gender, ISOCode, shoreId, offsets = 0, limit = 5, seen = [], complete = [], req, callback) {
+  Bottle.getBottle = function (gender, ISOCode, shoreId, bottleType, offsets = 0, limit = 5, seen = [], complete = [], req, callback) {
     var userId = req.accessToken.userId;
     var filter = {
       "status": "active"
@@ -277,6 +277,12 @@ module.exports = function (Bottle) {
     if (shoreId) {
       filter['shoreId'] = ObjectId(shoreId)
     }
+
+    if (bottleType) {
+      filter['bottleType'] = bottleType
+    }
+
+
     if (gender) {
       filter['owner.gender'] = gender
     }
@@ -453,7 +459,7 @@ module.exports = function (Bottle) {
           var owner = bottle.owner();
           // console.log("filter.shoreId.toString() == bottle.shoreId.toString()")
           // console.log(filter.shoreId.toString() + "//" + bottle.shoreId.toString())
-          if (owner && owner.status == 'active' && (filter['owner.gender'] == null || filter['owner.gender'] == owner.gender) && (filter['owner.ISOCode'] == null || filter['owner.ISOCode'] == owner.ISOCode) && (filter.shoreId == null || new String(filter.shoreId).valueOf() === new String(bottle.shoreId).valueOf()))
+          if (owner && owner.status == 'active' && (filter['owner.gender'] == null || filter['owner.gender'] == owner.gender) && (filter['owner.ISOCode'] == null || filter['owner.ISOCode'] == owner.ISOCode) && (filter.bottleType == null || bottle.bottleType == filter.bottleType) && (filter.shoreId == null || new String(filter.shoreId).valueOf() === new String(bottle.shoreId).valueOf()))
             freq[element.bottleId] = 1;
 
         }

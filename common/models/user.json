@@ -761,8 +761,12 @@
           }
         },
         {
-          "arg": "date",
-          "type": "string"
+          "arg": "from",
+          "type": "date"
+        },
+        {
+          "arg": "to",
+          "type": "date"
         }
       ],
       "returns": [{

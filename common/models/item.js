@@ -1636,16 +1636,7 @@ module.exports = function (Item) {
         {
           $group: {
             "_id": {
-              "ownerId": "$ownerId",
-              month: {
-                $month: "$startAt"
-              },
-              day: {
-                $dayOfMonth: "$startAt"
-              },
-              year: {
-                $year: "$startAt"
-              }
+              "ownerId": "$ownerId"
             },
             count: {
               $sum: 1
@@ -1663,15 +1654,6 @@ module.exports = function (Item) {
           $project: {
             _id: 0,
             ownerId: "$_id.ownerId",
-            date: {
-              $concat: [{
-                $toString: "$_id.year"
-              }, "/", {
-                $toString: "$_id.month"
-              }, "/", {
-                $toString: "$_id.day"
-              }]
-            },
             count: 1,
             total: 1,
             products: 1
@@ -1694,8 +1676,8 @@ module.exports = function (Item) {
         // console.log(data);
         if (err) return callback(err);
         data = data.sort(function (a, b) {
-          var aDate = new Date(a.date).getTime();
-          var bDate = new Date(b.date).getTime();
+          var aDate = new Date(a.owner.createdAt).getTime();
+          var bDate = new Date(b.owner.createdAt).getTime();
           return bDate - aDate
         })
         return callback(null, data);

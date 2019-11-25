@@ -236,6 +236,12 @@
           "description": "shore id of  bottle"
         },
         {
+          "arg": "bottleType",
+          "type": "string",
+          "required": false,
+          "description": "type of  bottle"
+        },
+        {
           "arg": "offsets",
           "type": "number",
           "required": false,

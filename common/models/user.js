@@ -2043,10 +2043,10 @@ module.exports = function (User) {
     })
   }
 
-  User.getItemsByUser = async function (userId, date, callback) {
+  User.getItemsByUser = async function (userId, from, to, callback) {
     try {
-      var startDate = new Date(date)
-      var endDate = new Date(date)
+      var startDate = new Date(from)
+      var endDate = new Date(to)
       startDate.setHours(0);
       startDate.setMinutes(0);
       endDate.setHours(23);
