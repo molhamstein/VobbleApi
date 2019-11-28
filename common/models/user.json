@@ -76,6 +76,9 @@
     "unlimitedReplysOpenDate": {
       "type": "date"
     },
+    "dateRechargeReplies": {
+      "type": "date"
+    },
     "email": {
       "type": "string"
     },

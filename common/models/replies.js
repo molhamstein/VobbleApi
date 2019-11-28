@@ -43,27 +43,64 @@ module.exports = function (Replies) {
     })
   });
 
+  function addHours(date, h) {
+    date.setTime(date.getTime() + (h * 60 * 60 * 1000));
+    return date;
+  }
   Replies.afterRemote('create', function (context, result, next) {
     Replies.app.models.user.findById(context.req.body.userId, function (err, oneUser) {
       if (oneUser.extraReplysCount > 0)
         oneUser.extraReplysCount--;
-      else
+      else {
         oneUser.replysCount--;
+        if (oneUser.replysCount == 0) {
+          oneUser.dateRechargeReplies = addHours(new Date(), 24)
+        }
+      }
       oneUser.save();
       next();
     })
   });
 
-  cron.scheduleJob('0 0 0 * * *', function () {
+  cron.scheduleJob('0 0 * * * *', function () {
     var dataNotification = []
     Replies.app.models.User.find({
       where: {
-        "replysCount": 0
+        "and": [{
+            "replysCount": 0,
+          },
+          {
+            "or": [{
+                "dateRechargeReplies": null
+              },
+              {
+                "dateRechargeReplies": {
+                  "lt": new Date()
+                }
+              }
+            ]
+          }
+        ]
+
       }
     }, function (err, data) {
       dataNotification = data;
     })
-    Replies.app.models.User.updateAll({}, {
+    var tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    Replies.app.models.User.updateAll({
+      "or": [{
+          "dateRechargeReplies": null
+        },
+        {
+          "dateRechargeReplies": {
+            "lt": new Date()
+          }
+        }
+      ]
+    }, {
+      'dateRechargeReplies': tomorrow,
       'replysCount': 10,
     }, function (err, res) {
       if (err)

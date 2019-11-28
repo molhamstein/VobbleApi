@@ -56,7 +56,7 @@ module.exports = function (Bottle) {
     Bottle.app.models.User.findById(context.req.body.ownerId, function (err, user) {
       if (err) {
         console.log(err);
-        next();
+        next(err);
       }
       if (user.bottlesCount == 0 && user.extraBottlesCount == 0) {
         return next(errors.bottle.noAvailableBottleToday());

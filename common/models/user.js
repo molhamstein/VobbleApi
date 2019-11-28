@@ -64,6 +64,12 @@ module.exports = function (User) {
       nextRefill.setHours(24, 0, 0, 0);
       context.req.body.nextRefill = nextRefill
 
+
+      var tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      tomorrow.setHours(12)
+      context.req.body.dateRechargeReplies = tomorrow
+
       if (context.req.body.email) {
         User.findOne({
           where: {
@@ -243,11 +249,16 @@ module.exports = function (User) {
                 imageFile
               }) => {
                 image = urlFileRootSave + newFilename;
-                var date = new Date();
-                var nextRefillVar = new Date();
+                var nextRefillVar = new Date();          
                 nextRefillVar.setHours(24, 0, 0, 0);
+
+                var tomorrow = new Date();
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                tomorrow.setHours(12)
+
                 User.create({
                   socialId: socialId,
+                  dateRechargeReplies:tomorrow,
                   gender: gender,
                   email: email,
                   image: image,
@@ -418,6 +429,11 @@ module.exports = function (User) {
             }
             var nextRefillVar = new Date();
             nextRefillVar.setHours(24, 0, 0, 0);
+
+            var tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            tomorrow.setHours(12)
+
             download.image(options)
               .then(({
                 filename,
@@ -427,6 +443,7 @@ module.exports = function (User) {
                 var date = new Date();
                 User.create({
                   socialId: socialId,
+                  dateRechargeReplies:tomorrow,
                   gender: gender,
                   image: image,
                   email: email,
@@ -597,11 +614,15 @@ module.exports = function (User) {
               }) => {
                 image = urlFileRootSave + newFilename;
 
-                var date = new Date();
+                var tomorrow = new Date();
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                tomorrow.setHours(12)
+          
                 var nextRefillVar = new Date();
                 nextRefillVar.setHours(24, 0, 0, 0);
                 User.create({
                   nextRefill: nextRefillVar,
+                  dateRechargeReplies:tomorrow,
                   socialId: socialId,
                   gender: gender,
                   image: image,
