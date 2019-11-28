@@ -62,7 +62,7 @@ module.exports = function (Replies) {
     })
   });
 
-  cron.scheduleJob('0 12 * * * *', function () {
+  cron.scheduleJob('0 0 * * * *', function () {
     console.log("Ruuuuuuuuuuuuuuuuuuuuun")
     var dataNotification = []
     Replies.app.models.User.find({
@@ -129,7 +129,7 @@ module.exports = function (Replies) {
             }
           }
           console.log(message);
-          // sendNewNotification(message)
+          sendNewNotification(message)
         }
       }
 
