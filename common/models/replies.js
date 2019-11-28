@@ -62,7 +62,8 @@ module.exports = function (Replies) {
     })
   });
 
-  cron.scheduleJob('0 0 * * * *', function () {
+  cron.scheduleJob('0 12 * * * *', function () {
+    console.log("Ruuuuuuuuuuuuuuuuuuuuun")
     var dataNotification = []
     Replies.app.models.User.find({
       where: {
@@ -71,7 +72,7 @@ module.exports = function (Replies) {
           },
           {
             "or": [{
-                "dateRechargeReplies": null
+                "dateRechargeReplies": undefined
               },
               {
                 "dateRechargeReplies": {
@@ -91,7 +92,7 @@ module.exports = function (Replies) {
 
     Replies.app.models.User.updateAll({
       "or": [{
-          "dateRechargeReplies": null
+          "dateRechargeReplies": undefined
         },
         {
           "dateRechargeReplies": {
@@ -128,7 +129,7 @@ module.exports = function (Replies) {
             }
           }
           console.log(message);
-          sendNewNotification(message)
+          // sendNewNotification(message)
         }
       }
 
