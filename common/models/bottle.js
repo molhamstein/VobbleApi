@@ -268,6 +268,18 @@ module.exports = function (Bottle) {
   }
 
   Bottle.getBottle = function (gender, ISOCode, shoreId, bottleType, offsets = 0, limit = 5, seen = [], complete = [], req, callback) {
+    console.log("gender")
+    console.log(gender)
+    console.log("ISOCode")
+    console.log(ISOCode)
+    console.log("shoreId")
+    console.log(shoreId)
+    console.log("offsets")
+    console.log(offsets)
+    console.log("seen")
+    console.log(seen)
+    console.log("complete")
+    console.log(complete)
     var userId = req.accessToken.userId;
     var filter = {
       "status": "active"
@@ -355,6 +367,7 @@ module.exports = function (Bottle) {
         seenBottle = getFrequency(bottles, filter)
 
 
+
         console.log("seenBottle.length")
         console.log(seenBottle)
 
@@ -390,6 +403,7 @@ module.exports = function (Bottle) {
                 } else {
                   arrayBottle.unshift(element._id)
                 }
+                console.log(arrayBottle)
                 if (i == 0) {
                   arrayBottle = arrayBottle.concat(seenBottle)
                   oneUser.updateAttributes({
@@ -423,6 +437,7 @@ module.exports = function (Bottle) {
           var stack = users[0].stackBottleUser
           var length = stack.length;
           var newOffset = offsets % length
+          console.log(newOffset);
           var bottleIds = stack.slice(newOffset, newOffset + limit);
           // callback(null, bottleIds)
           Bottle.find({
@@ -430,14 +445,20 @@ module.exports = function (Bottle) {
               id: {
                 inq: bottleIds
               }
-            },
-            "order": "totalWeight DESC"
+            }
           }, function (err, data) {
             if (err)
               return callback(err, null)
+            var newData = [];
+            for (let index = 0; index < bottleIds.length; index++) {
+              const element = bottleIds[index];
+              let bottle = data.find(x => new String(x['id']).valueOf() === new String(element).valueOf());
+              console.log(bottle)
+              newData.push(bottle)
+            }
             console.log("newOffset");
             console.log(newOffset);
-            return callback(null, data)
+            return callback(null, newData)
           })
         })
       })
