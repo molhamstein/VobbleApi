@@ -375,6 +375,32 @@
         "verb": "get"
       }]
     },
+    "getUsersItems": {
+      "accepts": [{
+        "arg": "from",
+        "type": "date",
+        "required": true
+      }, {
+        "arg": "to",
+        "type": "date",
+        "required": true
+      }, {
+        "arg": "ownerId",
+        "type": "string",
+        "required": false
+      }],
+      "returns": [{
+        "arg": "result",
+        "type": "array",
+        "root": true,
+        "description": ""
+      }],
+      "description": "Get Users Items",
+      "http": [{
+        "path": "/getUsersItems",
+        "verb": "get"
+      }]
+    },
     "getItemsByDay": {
       "accepts": [{
         "arg": "from",
