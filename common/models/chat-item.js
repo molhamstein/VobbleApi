@@ -90,27 +90,27 @@ module.exports = function (ChatItem) {
 
     if (filter == null || filter['where']['and'][0] == null)
       filter = {}
-    // console.log("filter.where.and");
-    // console.log(filter.where.and);
+    // //console.log("filter.where.and");
+    // //console.log(filter.where.and);
     ChatItem.find(
       filter,
       function (err, items) {
         if (err)
           callback(err, null);
-        console.log("items")
-        console.log(items.length)
-        // console.log(items)
+        //console.log("items")
+        //console.log(items.length)
+        // //console.log(items)
         var result = [];
         if (items && items.length != 0) {
           items.forEach(function (element, index) {
             element.owner(function (err, owner) {
               // element.product(function (err, product) {
-              // console.log(goodId);
+              // //console.log(goodId);
               if (((ISOCode == "" || owner.ISOCode == ISOCode)) && (username == "" || owner.username.includes(username))) {
                 result.push(element);
               }
               if (index + 1 == items.length) {
-                console.log("resuuuuuuuult");
+                //console.log("resuuuuuuuult");
                 callback(null, result);
               }
               // })
@@ -129,7 +129,7 @@ module.exports = function (ChatItem) {
       offset = 0;
     if (limit == null)
       limit = 10;
-    // console.log(filter.where.and)
+    // //console.log(filter.where.and)
     delete filter['offset']
     delete filter['limit']
 
@@ -137,8 +137,8 @@ module.exports = function (ChatItem) {
       if (err)
         callback(err, null);
       var newData = data.slice(offset, offset + limit);
-      console.log("newData")
-      console.log(newData)
+      //console.log("newData")
+      //console.log(newData)
       callback(err, newData);
     })
 
@@ -219,7 +219,7 @@ module.exports = function (ChatItem) {
   //       }
   //     ]);
   //     cursor.get(function (err, data) {
-  //       // console.log(data);
+  //       // //console.log(data);
   //       if (err) return callback(err);
   //       return callback(null, data);
   //     })
@@ -273,7 +273,7 @@ module.exports = function (ChatItem) {
     };
 
     var data = [];
-    console.log(JSON.stringify(temFilter))
+    //console.log(JSON.stringify(temFilter))
     ChatItem.find(temFilter, function (err, items) {
       items.forEach(function (element) {
         var object = {};
@@ -393,8 +393,8 @@ module.exports = function (ChatItem) {
                 relatedUser: relatedUser['username']
               }
           }
-          console.log("relatedUser");
-          console.log(relatedUser);
+          //console.log("relatedUser");
+          //console.log(relatedUser);
         })
 
         object = Object.assign({}, objectItem, productObject);
@@ -408,7 +408,7 @@ module.exports = function (ChatItem) {
 
       /* Generate Excel */
       mongoXlsx.mongoData2Xlsx(data, model, config, function (err, data) {
-        console.log('File saved at:', data.fullPath);
+        //console.log('File saved at:', data.fullPath);
         callback(null, {
           'path': urlFileRootexcel + config['fileName']
         });
@@ -418,7 +418,7 @@ module.exports = function (ChatItem) {
 
     // model[0].access = 'id';
     // mongoXlsx.mongoData2Xlsx(data, model, config, function (err, data) {
-    //   console.log('File saved at:', path.join(__dirname, '../../', data.fullPath), data.fullPath);
+    //   //console.log('File saved at:', path.join(__dirname, '../../', data.fullPath), data.fullPath);
     //   return res.sendFile(path.join(__dirname, '../../', data.fullPath))
     // });
 
@@ -444,7 +444,7 @@ module.exports = function (ChatItem) {
       ownerMatch['ownerId'] = ObjectId(filter.userId)
     }
 
-    console.log(ownerMatch)
+    //console.log(ownerMatch)
 
     ChatItem.getDataSource().connector.connect(function (err, db) {
 
@@ -614,7 +614,7 @@ module.exports = function (ChatItem) {
       ownerMatch['ownerId'] = ObjectId(filter.userId)
     }
 
-    console.log(ownerMatch)
+    //console.log(ownerMatch)
 
     ChatItem.getDataSource().connector.connect(function (err, db) {
 

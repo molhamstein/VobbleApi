@@ -27,7 +27,7 @@ module.exports = function (User) {
     // TODO
     User.findById(id, function (err, user) {
       if (err) {
-        console.log(err);
+        //console.log(err);
         next();
       }
       user.status = "deactive";
@@ -151,14 +151,14 @@ module.exports = function (User) {
     ejs.renderFile(path.resolve(__dirname + "../../../server/views/reset-password-template.ejs"), {
       url: url
     }, function (err, html) {
-      if (err) return console.log('> error sending password reset email', err);
+      if (err) return //console.log('> error sending password reset email', err);
       User.app.models.Email.send({
         to: info.email,
         from: 'vobbleapp@gmail.com',
         subject: 'Password reset',
         html: html
       }, function (err) {
-        if (err) return console.log('> error sending password reset email', err);
+        if (err) return //console.log('> error sending password reset email', err);
       });
     });
   });
@@ -216,8 +216,8 @@ module.exports = function (User) {
       }, function (err, oneUser) {
         if (err)
           callback(err, null);
-        console.log("oneUser");
-        console.log(oneUser);
+        //console.log("oneUser");
+        //console.log(oneUser);
         if (oneUser == null) {
           // cheack if username is userd befor
           User.findOne({
@@ -310,7 +310,7 @@ module.exports = function (User) {
 
           })
           // .catch((err) => {
-          //     console.log('err', err)
+          //     //console.log('err', err)
 
           //     throw err
           // })
@@ -396,8 +396,8 @@ module.exports = function (User) {
       var image = data.image;
       var email = data.email;
       var name = data.name;
-      console.log("data")
-      console.log(data)
+      //console.log("data")
+      //console.log(data)
       User.findOne({
         where: {
           socialId: socialId,
@@ -407,7 +407,7 @@ module.exports = function (User) {
         if (err)
           callback(err, null);
         if (oneUser == null) {
-          console.log("new user")
+          //console.log("new user")
           User.findOne({
             where: {
               username: name
@@ -482,20 +482,20 @@ module.exports = function (User) {
                       result.isNew = true;
                       makeChat(newUser.id);
 
-                      console.log("new user Data")
-                      console.log(result)
+                      //console.log("new user Data")
+                      //console.log(result)
                       callback(null, result);
                     });
                   })
                 })
               }).catch((err) => {
-                console.log("err");
-                console.log(err);
+                //console.log("err");
+                //console.log(err);
               })
           })
         } else {
-          console.log("old user")
-          console.log(oneUser)
+          //console.log("old user")
+          //console.log(oneUser)
           if (oneUser.status != 'active') {
             return callback(errors.account.notActive());
           }
@@ -525,8 +525,8 @@ module.exports = function (User) {
                 ttl: 31536000000,
                 userId: oneUser.id
               }, function (err, newToken) {
-                console.log("new token")
-                console.log(newToken)
+                //console.log("new token")
+                //console.log(newToken)
                 User.app.models.AccessToken.findOne({
                   include: {
                     relation: 'user',
@@ -544,14 +544,14 @@ module.exports = function (User) {
                     callback(err, null);
                   result = token;
                   result.isNew = false;
-                  console.log("result")
-                  console.log(result)
+                  //console.log("result")
+                  //console.log(result)
                   callback(null, result);
                 });
               })
             } else {
-              console.log("old token")
-              console.log(result)
+              //console.log("old token")
+              //console.log(result)
               result.isNew = false;
               callback(null, result);
             }
@@ -952,7 +952,7 @@ module.exports = function (User) {
       if (body.errorCode == 40003)
         callback(errors.account.usernameNotValid(), null);
 
-      console.log(body);
+      //console.log(body);
       callback()
 
     });
@@ -983,14 +983,14 @@ module.exports = function (User) {
       callback()
       if (error) throw new Error(error);
 
-      console.log(body);
+      //console.log(body);
     });
 
   }
 
 
   User.loginByPhone = function (phonenumber, code, callback) {
-    console.log(new Date());
+    //console.log(new Date());
     User.findOne({
       "where": {
         "phonenumber": phonenumber
@@ -1161,8 +1161,8 @@ module.exports = function (User) {
   User.me = function (context, deviceName, callback) {
     var result;
     var deviceId = null
-    console.log("context.req.headers.version");
-    console.log(context.req.headers['ios-version']);
+    //console.log("context.req.headers.version");
+    //console.log(context.req.headers['ios-version']);
     let userVersion = context.req.headers['ios-version']
     User.app.models.Device.cheackDevice(deviceName, function (err, device) {
       if (err) {
@@ -1184,7 +1184,7 @@ module.exports = function (User) {
           if (userVersion == null)
             return callback(null, oneUser);
           else if (userVersion != null) {
-            console.log("version type")
+            //console.log("version type")
             var versionStatus = User.compirVersion(userVersion, version)
             var versionObject = {
               "status": "uptodate"
@@ -1234,15 +1234,15 @@ module.exports = function (User) {
     var arrayUserVersion = userVersion.toString().split('.');
     var arrayLastVersion = version.lastVersion.toString().split('.');
     var arrayLoadVersion = version.loadVersion.toString().split('.');
-    console.log(arrayUserVersion)
-    console.log(arrayLastVersion)
-    console.log(arrayLoadVersion)
+    //console.log(arrayUserVersion)
+    //console.log(arrayLastVersion)
+    //console.log(arrayLoadVersion)
     if (arrayUserVersion[2] == undefined)
       arrayUserVersion[2] = 0
     for (let index = 0; index < arrayUserVersion.length; index++) {
       const element = parseInt(arrayUserVersion[index]);
       const elementLoadVersion = parseInt(arrayLoadVersion[index]);
-      console.log(element + "  > " + elementLoadVersion)
+      //console.log(element + "  > " + elementLoadVersion)
       if (element > elementLoadVersion) {
         isAfterLoadVersion = true
         break;
@@ -1255,7 +1255,7 @@ module.exports = function (User) {
     for (let index = 0; index < arrayUserVersion.length; index++) {
       const element = parseInt(arrayUserVersion[index]);
       const elementLastVersion = parseInt(arrayLastVersion[index]);
-      console.log(element + "  < " + elementLastVersion)
+      //console.log(element + "  < " + elementLastVersion)
       if (element < elementLastVersion) {
         isBeforLastVersion = true
         break;
@@ -1409,7 +1409,7 @@ module.exports = function (User) {
 
 
   function afterLogin(context, client, next) {
-    // console.log(client);
+    // //console.log(client);
     // var clientM = app.models.client;
     var data = client;
     User.findOne({
@@ -1418,7 +1418,7 @@ module.exports = function (User) {
       }
     }, function (err, user) {
       if (user.emailVerified == false) {
-        console.log("unauthorized")
+        //console.log("unauthorized")
         data = {
           name: "unauthorized",
           status: 601,
@@ -1494,7 +1494,7 @@ module.exports = function (User) {
         },
       ]);
       cursor.get(function (err, data) {
-        console.log(data);
+        //console.log(data);
         if (err) return callback(err);
         var malePercent = 0
         var femalePercent = 0
@@ -1583,7 +1583,7 @@ module.exports = function (User) {
 
       /* Generate Excel */
       mongoXlsx.mongoData2Xlsx(data, model, config, function (err, data) {
-        console.log('File saved at:', data.fullPath);
+        //console.log('File saved at:', data.fullPath);
         callback(null, {
           'path': urlFileRootexcel + config['fileName']
         });
@@ -1593,7 +1593,7 @@ module.exports = function (User) {
 
     // model[0].access = 'id';
     // mongoXlsx.mongoData2Xlsx(data, model, config, function (err, data) {
-    //   console.log('File saved at:', path.join(__dirname, '../../', data.fullPath), data.fullPath);
+    //   //console.log('File saved at:', path.join(__dirname, '../../', data.fullPath), data.fullPath);
     //   return res.sendFile(path.join(__dirname, '../../', data.fullPath))
     // });
 
@@ -1844,7 +1844,7 @@ module.exports = function (User) {
   };
 
   cron.scheduleJob('00 00 * * * *', function () {
-    console.log("cron job is working")
+    //console.log("cron job is working")
     User.updateAll({
       "unlimitedReplysOpenDate": {
         "lt": new Date()
@@ -1863,9 +1863,9 @@ module.exports = function (User) {
       yesterday = new Date();
     weekDate.setTime(todayDate.getTime() - (8 * 24 * 3600000))
     yesterday.setTime(todayDate.getTime() - (24 * 3600000))
-    console.log("now", todayDate);
-    console.log("weekDate", weekDate);
-    console.log("yesterday", yesterday);
+    //console.log("now", todayDate);
+    //console.log("weekDate", weekDate);
+    //console.log("yesterday", yesterday);
     User.find({
       "where": {
         "and": [{
@@ -1885,9 +1885,9 @@ module.exports = function (User) {
         users.forEach(element => {
           // if (element.email == "fatherboard1@gmail.com") {
           var diffHour = calcDiff(element.lastLogin, todayDate)
-          console.log(diffHour)
+          //console.log(diffHour)
           if (diffHour >= 24 && diffHour < 48 && !element.has24Not) {
-            console.log("in 24 hourse");
+            //console.log("in 24 hourse");
             var message = {
               "app_id": "e8a91e90-a766-4f1b-a47e-e3b3f569dbef",
               "included_segments ": ["Active Users", "Inactive Users"],
@@ -1911,7 +1911,7 @@ module.exports = function (User) {
             }, sendNewNotification(message))
 
           } else if (diffHour >= 48 && diffHour < 72 && !element.has48Not) {
-            console.log("in 48 hourse");
+            //console.log("in 48 hourse");
             var message = {
               "app_id": "e8a91e90-a766-4f1b-a47e-e3b3f569dbef",
               "included_segments ": ["Active Users", "Inactive Users"],
@@ -1934,7 +1934,7 @@ module.exports = function (User) {
               has48Not: true
             }, sendNewNotification(message))
           } else if (diffHour >= 168 && diffHour < 192 && !element.has168Not) {
-            console.log("in 168 hourse");
+            //console.log("in 168 hourse");
             var message = {
               "app_id": "e8a91e90-a766-4f1b-a47e-e3b3f569dbef",
               "included_segments ": ["Active Users", "Inactive Users"],
@@ -2159,14 +2159,14 @@ module.exports = function (User) {
     var https = require('https');
     var req = https.request(options, function (res) {
       res.on('data', function (data) {
-        console.log("Response:");
-        // console.log(JSON.parse(data));
+        //console.log("Response:");
+        // //console.log(JSON.parse(data));
       });
     });
 
     req.on('error', function (e) {
-      console.log("ERROR:");
-      console.log(e);
+      //console.log("ERROR:");
+      //console.log(e);
     });
 
     req.write(JSON.stringify(data));

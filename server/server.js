@@ -14,8 +14,8 @@ app.use(loopback.token());
 app.use(function (req, res, next) {
   // console("App Use");
   if (!req.accessToken) return next();
-  console.log("Token");
-  console.log(req.accessToken.userId);
+  //console.log("Token");
+  //console.log(req.accessToken.userId);
   app.models.User.findById(req.accessToken.userId,
     function (err, user) {
       if (err) return next(err);
@@ -37,10 +37,10 @@ app.start = function () {
   return app.listen(function () {
     app.emit('started');
     var baseUrl = app.get('url').replace(/\/$/, '');
-    console.log('Web server listening at: %s', baseUrl);
+    //console.log('Web server listening at: %s', baseUrl);
     if (app.get('loopback-component-explorer')) {
       var explorerPath = app.get('loopback-component-explorer').mountPath;
-      console.log('Browse your REST API at %s%s', baseUrl, explorerPath);
+      //console.log('Browse your REST API at %s%s', baseUrl, explorerPath);
     }
   });
 };
@@ -50,14 +50,15 @@ var timer = schedule.scheduleJob('0 1 0 * * *', function () {
   // var date = new Date();
   // date = new Date(date.setTime(date.getTime() + 1 * 86400000));
   var date = new Date();
-  console.log(date);
+  //console.log(date);
   date.setHours(date.getHours() + 24);
-  console.log(date);
-  app.models.User.updateAll({}, { 'bottlesCount': 1, 'nextRefill': date }, function (err, res) {
+  //console.log(date);
+  app.models.User.updateAll({}, {
+    'bottlesCount': 1,
+    'nextRefill': date
+  }, function (err, res) {
     if (err)
       console.log(err);
-    else
-      console.log('done');
 
   });
 });

@@ -167,7 +167,7 @@ module.exports = function (Report) {
 
       /* Generate Excel */
       mongoXlsx.mongoData2Xlsx(data, model, config, function (err, data) {
-        console.log('File saved at:', data.fullPath);
+        //console.log('File saved at:', data.fullPath);
         callback(null, {
           'path': urlFileRootexcel + config['fileName']
         });

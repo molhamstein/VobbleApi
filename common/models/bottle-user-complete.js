@@ -64,7 +64,7 @@ module.exports = function (Bottleusercomplete) {
               "userId": userId
             }, function (err, data) {
               element.updateAttribute("bottleViewCount", element.bottleViewCount + 1, function (err, data) {
-                console.log("Create And Update Success")
+                //console.log("Create And Update Success")
                 updateSeenAllSync(index + 1, function () {
                   synccallback()
                 });
@@ -83,7 +83,7 @@ module.exports = function (Bottleusercomplete) {
               "userId": userId
             }, function (err, data) {
               element.updateAttribute("bottleCompleteCount", element.bottleCompleteCount + 1, function (err, data) {
-                console.log("Create And Update Success")
+                //console.log("Create And Update Success")
                 updateCompleteAllSync(index + 1, completeBottle, function () {
                   synccallback()
                 });
@@ -110,7 +110,7 @@ module.exports = function (Bottleusercomplete) {
   //           }
   //         }
   //       }, function (err, completeBottle) {
-  //         console.log(completeBottle);
+  //         //console.log(completeBottle);
   //         for (let index = 0; index < completeBottle.length; index++) {
   //           const element = completeBottle[index];
   //           element.bottleCompleteCount++;

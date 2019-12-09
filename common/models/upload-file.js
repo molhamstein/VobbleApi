@@ -46,7 +46,7 @@ module.exports = function (Uploadfile) {
         var size
         ffmpeg.ffprobe(src + "/" + folderName + "/" + file.name, function (err, metadata) {
           if (err) {} else {
-            console.log(metadata);
+            //console.log(metadata);
             metadata['streams'].forEach(function (element) {
               if (element.width) {
                 oldWidth = element.width;
@@ -58,8 +58,8 @@ module.exports = function (Uploadfile) {
               var res = oldWidth / oldHeight;
             else
               var res = 2
-            console.log("res");
-            console.log(res);
+            //console.log("res");
+            //console.log(res);
             if (rotation == -90 || rotation == 90) {
               newHeight = 400
               newWidth = newHeight * res
@@ -69,7 +69,7 @@ module.exports = function (Uploadfile) {
               newHeight = newWidth / res
               size = newWidth + 'x' + parseInt(newHeight)
             }
-            console.log(size)
+            //console.log(size)
             ffmpeg(src + "/" + folderName + "/" + file.name)
               .screenshot({
                 count: 1,

@@ -33,7 +33,7 @@ module.exports = function (Bottle) {
     // TODO
     Bottle.findById(id, function (err, bottle) {
       if (err) {
-        console.log(err);
+        //console.log(err);
         next();
       }
       bottle.status = "deactive";
@@ -55,7 +55,7 @@ module.exports = function (Bottle) {
     let weight = 0
     Bottle.app.models.User.findById(context.req.body.ownerId, function (err, user) {
       if (err) {
-        console.log(err);
+        //console.log(err);
         next(err);
       }
       if (user.bottlesCount == 0 && user.extraBottlesCount == 0) {
@@ -110,8 +110,8 @@ module.exports = function (Bottle) {
       Bottle.app.models.topics.findById(context.req.body.topicId, function (err, oneTopic) {
         if (err)
           return next(err)
-        console.log("ssss")
-        console.log(oneTopic)
+        //console.log("ssss")
+        //console.log(oneTopic)
         oneTopic.bottleCount++;
         oneTopic.save();
         next()
@@ -177,8 +177,8 @@ module.exports = function (Bottle) {
           callback(err, null);
         var result = [];
         if (bottles) {
-          console.log("bottles.length")
-          console.log(bottles.length)
+          //console.log("bottles.length")
+          //console.log(bottles.length)
 
           bottles.forEach(function (element) {
             element.owner(function (err, owner) {
@@ -189,8 +189,8 @@ module.exports = function (Bottle) {
             })
           }, this);
         }
-        console.log("result.length")
-        console.log(result.length)
+        //console.log("result.length")
+        //console.log(result.length)
         callback(null, result);
       })
   }
@@ -199,8 +199,8 @@ module.exports = function (Bottle) {
   Bottle.getFilterBottle = function (filter, callback) {
     var offset = filter['offset'];
     var limit = filter['limit'];
-    console.log(offset)
-    console.log(limit)
+    //console.log(offset)
+    //console.log(limit)
     if (offset == null)
       offset = 0;
     if (limit == null)
@@ -268,18 +268,18 @@ module.exports = function (Bottle) {
   }
 
   Bottle.getBottle = function (gender, ISOCode, shoreId, bottleType, offsets = 0, limit = 5, seen = [], complete = [], req, callback) {
-    console.log("gender")
-    console.log(gender)
-    console.log("ISOCode")
-    console.log(ISOCode)
-    console.log("shoreId")
-    console.log(shoreId)
-    console.log("offsets")
-    console.log(offsets)
-    console.log("seen")
-    console.log(seen)
-    console.log("complete")
-    console.log(complete)
+    //console.log("gender")
+    //console.log(gender)
+    //console.log("ISOCode")
+    //console.log(ISOCode)
+    //console.log("shoreId")
+    //console.log(shoreId)
+    //console.log("offsets")
+    //console.log(offsets)
+    //console.log("seen")
+    //console.log(seen)
+    //console.log("complete")
+    //console.log(complete)
     var userId = req.accessToken.userId;
     var filter = {
       "status": "active"
@@ -352,8 +352,8 @@ module.exports = function (Bottle) {
       });
 
       blockList.push(ObjectId(userId))
-      console.log("blockList")
-      console.log(blockList)
+      //console.log("blockList")
+      //console.log(blockList)
       filter['ownerId'] = {
         $nin: blockList
       }
@@ -368,8 +368,8 @@ module.exports = function (Bottle) {
 
 
 
-        console.log("seenBottle.length")
-        console.log(seenBottle)
+        //console.log("seenBottle.length")
+        //console.log(seenBottle)
 
         Bottle.getDataSource().connector.connect(function (err, db) {
 
@@ -403,7 +403,7 @@ module.exports = function (Bottle) {
                 } else {
                   arrayBottle.unshift(element._id)
                 }
-                console.log(arrayBottle)
+                //console.log(arrayBottle)
                 if (i == 0) {
                   arrayBottle = arrayBottle.concat(seenBottle)
                   oneUser.updateAttributes({
@@ -437,7 +437,7 @@ module.exports = function (Bottle) {
           var stack = users[0].stackBottleUser
           var length = stack.length;
           var newOffset = offsets % length
-          console.log(newOffset);
+          //console.log(newOffset);
           var bottleIds = stack.slice(newOffset, newOffset + limit);
           // callback(null, bottleIds)
           Bottle.find({
@@ -453,11 +453,11 @@ module.exports = function (Bottle) {
             for (let index = 0; index < bottleIds.length; index++) {
               const element = bottleIds[index];
               let bottle = data.find(x => new String(x['id']).valueOf() === new String(element).valueOf());
-              console.log(bottle)
+              //console.log(bottle)
               newData.push(bottle)
             }
-            console.log("newOffset");
-            console.log(newOffset);
+            //console.log("newOffset");
+            //console.log(newOffset);
             return callback(null, newData)
           })
         })
@@ -474,12 +474,12 @@ module.exports = function (Bottle) {
       if (freq[element.bottleId]) {
         freq[element.bottleId]++;
       } else {
-        // console.log("element.bottles.owner.gender")
+        // //console.log("element.bottles.owner.gender")
         var bottle = element.bottles()
         if (bottle && bottle.status == 'active') {
           var owner = bottle.owner();
-          // console.log("filter.shoreId.toString() == bottle.shoreId.toString()")
-          // console.log(filter.shoreId.toString() + "//" + bottle.shoreId.toString())
+          // //console.log("filter.shoreId.toString() == bottle.shoreId.toString()")
+          // //console.log(filter.shoreId.toString() + "//" + bottle.shoreId.toString())
           if (owner && owner.status == 'active' && (filter['owner.gender'] == null || filter['owner.gender'] == owner.gender) && (filter['owner.ISOCode'] == null || filter['owner.ISOCode'] == owner.ISOCode) && (filter.bottleType == null || bottle.bottleType == filter.bottleType) && (filter.shoreId == null || new String(filter.shoreId).valueOf() === new String(bottle.shoreId).valueOf()))
             freq[element.bottleId] = 1;
 
@@ -564,7 +564,7 @@ module.exports = function (Bottle) {
                 for (let index = 0; index < data.length; index++) {
                   const element = data[index];
                   if (cheackLogBootleOwner(oneUser, data[index].ownerId)) {
-                    console.log("log is fine")
+                    //console.log("log is fine")
                     var bottleUserseenObject = {
                       "userId": req.accessToken.userId,
                       "bottleId": data[index].id
@@ -579,9 +579,9 @@ module.exports = function (Bottle) {
                     data[index].save();
                     return callback(null, data[index]);
                   } else {
-                    console.log("log is not fine")
+                    //console.log("log is not fine")
                     if (index + 1 == data.length) {
-                      console.log("log is good")
+                      //console.log("log is good")
                       var bottleUserseenObject = {
                         "userId": req.accessToken.userId,
                         "bottleId": data[0].id
@@ -716,7 +716,7 @@ module.exports = function (Bottle) {
   //             }
   //             Bottle.app.models.bottleUserseen.create(bottleUserseenObject)
   //               .then()
-  //               .catch(err => console.log(err));
+  //               .catch(err => //console.log(err));
 
   //             oneUser.foundBottlesCount++;
   //             oneUser.save();
@@ -763,12 +763,12 @@ module.exports = function (Bottle) {
         }
       }, function (err, bottles) {
         seenBottle = bottles;
-        console.log("err");
-        console.log(err);
-        console.log("seenBottle")
-        console.log(bottles)
-        console.log("oneUser['id']")
-        console.log(oneUser['id'])
+        //console.log("err");
+        //console.log(err);
+        //console.log("seenBottle")
+        //console.log(bottles)
+        //console.log("oneUser['id']")
+        //console.log(oneUser['id'])
         // return (null, [])
         // get id user block list 
         Bottle.app.models.block.find({
@@ -912,7 +912,7 @@ module.exports = function (Bottle) {
               // result.push(tempProject);
               element.save(callback);
             }, function () {
-              console.log("Finish loop")
+              //console.log("Finish loop")
               // result.sort(tempCompare);
               // return mainCallback(null, result);
             })
@@ -983,7 +983,7 @@ module.exports = function (Bottle) {
               result.push(tempProject);
               element.save(callback);
             }, function () {
-              console.log("Finish loop")
+              //console.log("Finish loop")
               result.sort(tempCompare);
               return mainCallback(null, result);
             })
@@ -1020,9 +1020,9 @@ module.exports = function (Bottle) {
             numofDeleted++
           } else if (numberOfSeenThisBottle > 0) {
             ranking[index - numofDeleted].numberRepeted = numberOfSeenThisBottle;
-            console.log("numberOfSeenThisBottle");
-            console.log(ranking[index - numofDeleted].numberRepeted);
-            console.log(ranking[index - numofDeleted].id);
+            //console.log("numberOfSeenThisBottle");
+            //console.log(ranking[index - numofDeleted].numberRepeted);
+            //console.log(ranking[index - numofDeleted].id);
             newRanking.unshift(ranking[index - numofDeleted]);
             ranking.splice(index - numofDeleted, 1);
             numofDeleted++
@@ -1032,29 +1032,29 @@ module.exports = function (Bottle) {
       });
 
     }, function () {
-      console.log("Finish loop")
+      //console.log("Finish loop")
       newRanking.sort(compare);
       var res = ranking.concat(newRanking);
-      console.log("newRanking")
-      console.log(newRanking.length)
-      console.log("ranking")
-      console.log(ranking.length)
-      console.log("res")
-      console.log(res.length)
+      //console.log("newRanking")
+      //console.log(newRanking.length)
+      //console.log("ranking")
+      //console.log(ranking.length)
+      //console.log("res")
+      //console.log(res.length)
       mainCallback(res);
     });
     // while (index >= 0) {
     //   var element = ranking[index];
     //   if (element.owner() == null) {
-    //     console.log("element.id");
-    //     console.log(element.id);
+    //     //console.log("element.id");
+    //     //console.log(element.id);
     //   }
     //  element.owner(function (err, owner) {
     //     element.shore(function (err, shore) {
     //       var numberOfSeenThisBottle = findInSeenUser(seenBottle, userId, element.id);
     //       if (owner == undefined) {
-    //         console.log("element.id");
-    //         console.log(element.id);
+    //         //console.log("element.id");
+    //         //console.log(element.id);
     //       }
     //       var isBlocked = true
     //       if (owner != null)
@@ -1350,7 +1350,7 @@ module.exports = function (Bottle) {
           //       dates[prop] = element[prop]
           //   }
           //   mainData.push(dates);
-          //   console.log(mainData)
+          //   //console.log(mainData)
           //   // }
           // }, this);
           for (var prop in dates) {
@@ -1383,7 +1383,7 @@ module.exports = function (Bottle) {
           mongoXlsx.mongoData2Xlsx(mainData, model, config, function (err, data) {
             if (err)
               callback(err, null);
-            console.log('File saved at:', data.fullPath);
+            //console.log('File saved at:', data.fullPath);
             callback(null, {
               'path': urlFileRootexcel + config['fileName']
             });
@@ -1571,7 +1571,7 @@ module.exports = function (Bottle) {
 
       /* Generate Excel */
       mongoXlsx.mongoData2Xlsx(data, model, config, function (err, data) {
-        console.log('File saved at:', data.fullPath);
+        //console.log('File saved at:', data.fullPath);
         callback(null, {
           'path': urlFileRootexcel + config['fileName']
         });

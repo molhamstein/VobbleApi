@@ -5,12 +5,12 @@ module.exports = function (Useractivate) {
 
   Useractivate.beforeRemote('create', function (context, result, next) {
     // check user is active 
-    console.log(context.req.body);
+    //console.log(context.req.body);
     var deviceId = null;
     Useractivate.app.models.Device.cheackDevice(context.req.body.deviceName, function (err, device) {
       if (err) {
-        // console.log("err");
-        console.log(err);
+        // //console.log("err");
+        //console.log(err);
         return next(err)
       }
       if (device != null) {
@@ -55,11 +55,11 @@ module.exports = function (Useractivate) {
             if (err)
               return next(err);
             if (bottles[0]) {
-              console.log("error");
+              //console.log("error");
               return next(errors.account.youLoginToday());
             } else {
-              console.log("continue");
-              console.log("continue");
+              //console.log("continue");
+              //console.log("continue");
               user.deviceId = deviceId
               user.save();
               next();
@@ -119,14 +119,14 @@ module.exports = function (Useractivate) {
         if (err)
           return callback(err);
         if (bottles[0]) {
-          console.log("error");
+          //console.log("error");
           return callback(null, {});
         } else {
-          console.log("continue");
+          //console.log("continue");
           Useractivate.create(data, function (err, data) {
             if (err)
               return callback(err, null);
-            console.log("created");
+            //console.log("created");
             return callback(err, {});
           })
         }

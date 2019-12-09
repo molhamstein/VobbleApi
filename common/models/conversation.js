@@ -34,14 +34,14 @@ module.exports = function (Conversation) {
     ref.orderByChild("expired").equalTo(0).once("value", function (snapshot) {
       var now = new Date()
       var lastweak = new Date(now.getTime() - (5 * 24 * 60 * 60 * 1000));
-      console.log("lastweak")
-      console.log(lastweak)
-      console.log(snapshot.length);
+      //console.log("lastweak")
+      //console.log(lastweak)
+      //console.log(snapshot.length);
       snapshot.forEach(function (child) {
         var conv = child.val();
         conv['key'] = child.key;
         if ((new Date(conv['createdAt']).getTime() < lastweak.getTime() && (conv['finishTime'] == 0 || conv['finishTime'] == null)) || (conv['finishTime'] != 0 && conv['finishTime'] != null && new Date(conv['finishTime']).getTime() + (5 * 60 * 1000) < now.getTime())) {
-          console.log("yes")
+          //console.log("yes")
           let del_ref = admin.database().ref("conversations/" + conv.key);
           del_ref.remove()
             .then(function () {})
@@ -61,14 +61,16 @@ module.exports = function (Conversation) {
         "email": "vobbleapp@gmail.com"
       }
     }, function (err, viboUser) {
-      if (err)
-        console.log(err)
-      else {
+      if (err) {
+
+
+        //console.log(err)
+      } else {
         Conversation.app.models.User.findById(userId, function (err, secUSer) {
-          if (err)
-            console.log(err)
-          else {
-            console.log(secUSer)
+          if (err) {
+            //console.log(err)
+          } else {
+            //console.log(secUSer)
             var startTime = new Date().getTime();
             var finishTime = new Date(startTime + 24 * 60 * 60 * 1000).getTime()
             var tempData = {
@@ -115,8 +117,8 @@ module.exports = function (Conversation) {
               "قوانین المحتوى وشروط الاستخدام: \n\n لضمان بقائك معنا في التطبیق ولكي تصل فیدیوهاتك لباقي المستخدمین.. \n\n - یرجى عدم تصویر اي فیدیوهات ذات محتوى جنسي \n\n - یرجى عدم التطرق لاي محتوى سیاسي او دیني یثیر الخلاف بین المستخدمین \n\n- جودة الفیدیو تساعد في انتشاره بین المستخدمین.",
               "یمكنك التبلیغ عن اي فیدیو بالضغط على النقاط في اعلى شاشة عرض الفیدیو و سنقوم بالتعامل معه على الفور \n\n في حال كان لدیك اي اقتراح او استفسار لاتتردد بالتواصل معنا على برید الدعم من زر الاعدادات خیار \"تواصل معنا\" \n شكرا لك \nفریق عمل Vibo"
             ]
-            console.log("newPostRef.key");
-            console.log(newPostRef.key);
+            //console.log("newPostRef.key");
+            //console.log(newPostRef.key);
             messages.forEach(element => {
               var postsMesRef = db.ref("conversations/" + newPostRef.key + "/messages");
               var newPostMesRef = postsMesRef.push({

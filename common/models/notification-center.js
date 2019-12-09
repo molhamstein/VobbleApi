@@ -27,8 +27,8 @@ module.exports = function (Notificationcenter) {
 
   Notificationcenter.makeNotificationSeen = function (notificationIds, context, callback) {
     var userId = context.req.accessToken.userId;
-    console.log(userId)
-    console.log(notificationIds)
+    //console.log(userId)
+    //console.log(notificationIds)
     Notificationcenter.updateAll({
       id: {
         inq: notificationIds

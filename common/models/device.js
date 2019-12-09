@@ -18,8 +18,8 @@ module.exports = function (Device) {
       function (err, data) {
         if (err)
           return cb(err)
-        console.log("dataaaaaaaaaaaaaa")
-        console.log(data)
+        //console.log("dataaaaaaaaaaaaaa")
+        //console.log(data)
         if (data == null) {
           Device.create({
             "name": name

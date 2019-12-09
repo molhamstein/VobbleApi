@@ -52,8 +52,8 @@ module.exports = function (Item) {
 
       //     context.req.body.type = product.type;
       //     context.req.body.price = product.price;
-      //     console.log("context.req.body");
-      //     console.log(context.req.body);
+      //     //console.log("context.req.body");
+      //     //console.log(context.req.body);
 
       //     next();
       //   })
@@ -65,10 +65,10 @@ module.exports = function (Item) {
         if (user.status != 'active') {
           return next(errors.product.unvalidReceipt());
         }
-        console.log("receipt")
-        console.log(context.req.body.receipt)
-        console.log("context.req.body.transactionId")
-        console.log(context.req.body.transactionId)
+        //console.log("receipt")
+        //console.log(context.req.body.receipt)
+        //console.log("context.req.body.transactionId")
+        //console.log(context.req.body.transactionId)
         Item.find({
           "where": {
             "and": [{
@@ -82,8 +82,8 @@ module.exports = function (Item) {
             receipt: context.req.body.receipt
           }, function (err, products) {
             if (err) {
-              console.log("err")
-              console.log(err)
+              //console.log("err")
+              //console.log(err)
               return next(errors.product.unvalidReceipt());
             } else {
               var transactionId = context.req.body.transactionId;
@@ -111,7 +111,7 @@ module.exports = function (Item) {
                     next();
                   })
                 } else if (index == products.length - 1 && isInProcess == false) {
-                  console.log("transactionId not found")
+                  //console.log("transactionId not found")
                   return next(errors.product.unvalidReceipt());
                 }
               }
@@ -191,28 +191,28 @@ module.exports = function (Item) {
 
     if (filter == null || filter['where']['and'][0] == null)
       filter = {}
-    // console.log("filter.where.and");
-    // console.log(filter.where.and);
+    // //console.log("filter.where.and");
+    // //console.log(filter.where.and);
     Item.find(
       filter,
       function (err, items) {
         if (err)
           callback(err, null);
-        console.log("items")
-        console.log(items.length)
-        // console.log(items)
+        //console.log("items")
+        //console.log(items.length)
+        // //console.log(items)
         var result = [];
         if (items && items.length != 0) {
           items.forEach(function (element, index) {
             element.owner(function (err, owner) {
               element.product(function (err, product) {
-                // console.log(goodId);
+                // //console.log(goodId);
                 if (((ISOCode == "" || owner.ISOCode == ISOCode) && (goodId == "" || product.typeGoodsId == goodId)) && (username == "" || owner.username.includes(username))) {
                   result.push(element);
                 }
 
                 if (index + 1 == items.length) {
-                  console.log("resuuuuuuuult");
+                  //console.log("resuuuuuuuult");
                   callback(null, result);
                 }
               })
@@ -232,7 +232,7 @@ module.exports = function (Item) {
       offset = 0;
     if (limit == null)
       limit = 10;
-    // console.log(filter.where.and)
+    // //console.log(filter.where.and)
     delete filter['offset']
     delete filter['limit']
 
@@ -240,8 +240,8 @@ module.exports = function (Item) {
       if (err)
         callback(err, null);
       var newData = data.slice(offset, offset + limit);
-      console.log("newData")
-      console.log(newData)
+      //console.log("newData")
+      //console.log(newData)
       callback(err, newData);
     })
 
@@ -381,7 +381,7 @@ module.exports = function (Item) {
         }
       ]);
       cursor.get(function (err, data) {
-        // console.log(data);
+        // //console.log(data);
         if (err) return callback(err);
         return callback(null, data);
       })
@@ -520,8 +520,8 @@ module.exports = function (Item) {
           }
         }
 
-        console.log("productObject")
-        console.log(productObject)
+        //console.log("productObject")
+        //console.log(productObject)
 
         if (ownerObject != undefined && productObject != undefined) {
           if (element.type == "Chat Extend") {
@@ -571,8 +571,8 @@ module.exports = function (Item) {
                     typeLogInRelatedUser: relatedUser['typeLogIn'],
                     relatedUser: relatedUser['username']
                   }
-                console.log("relatedUser");
-                console.log(relatedUser);
+                //console.log("relatedUser");
+                //console.log(relatedUser);
               }
             })
           }
@@ -587,7 +587,7 @@ module.exports = function (Item) {
 
       /* Generate Excel */
       mongoXlsx.mongoData2Xlsx(data, model, config, function (err, data) {
-        console.log('File saved at:', data.fullPath);
+        //console.log('File saved at:', data.fullPath);
         callback(null, {
           'path': urlFileRootexcel + config['fileName']
         });
@@ -597,7 +597,7 @@ module.exports = function (Item) {
 
     // model[0].access = 'id';
     // mongoXlsx.mongoData2Xlsx(data, model, config, function (err, data) {
-    //   console.log('File saved at:', path.join(__dirname, '../../', data.fullPath), data.fullPath);
+    //   //console.log('File saved at:', path.join(__dirname, '../../', data.fullPath), data.fullPath);
     //   return res.sendFile(path.join(__dirname, '../../', data.fullPath))
     // });
 
@@ -627,7 +627,7 @@ module.exports = function (Item) {
       ownerMatch['ownerId'] = ObjectId(filter.userId)
     }
 
-    console.log(ownerMatch)
+    //console.log(ownerMatch)
 
     Item.getDataSource().connector.connect(function (err, db) {
 
@@ -777,7 +777,7 @@ module.exports = function (Item) {
       ownerMatch['ownerId'] = ObjectId(filter.userId)
     }
 
-    console.log(ownerMatch)
+    //console.log(ownerMatch)
 
     Item.getDataSource().connector.connect(function (err, db) {
 
@@ -1239,7 +1239,7 @@ module.exports = function (Item) {
       }
       data.forEach(element => {
         calcToUser(element);
-        // console.log(element.id);
+        // //console.log(element.id);
       });
     })
   };
@@ -1261,8 +1261,8 @@ module.exports = function (Item) {
         const element = data[index];
         totalPrice += element.price;
         if (index == data.length - 1) {
-          console.log(user.email)
-          console.log(totalPrice);
+          //console.log(user.email)
+          //console.log(totalPrice);
           user.totalPaid = totalPrice;
           user.save();
         }
@@ -1571,12 +1571,12 @@ module.exports = function (Item) {
     itemCoinslMatch['type'] = "coins";
 
 
-    console.log("itemNormalMatch")
-    console.log(itemNormalMatch)
-    console.log("itemCoinslMatch")
-    console.log(itemCoinslMatch)
-    console.log("itemChatlMatch")
-    console.log(itemChatlMatch)
+    //console.log("itemNormalMatch")
+    //console.log(itemNormalMatch)
+    //console.log("itemCoinslMatch")
+    //console.log(itemCoinslMatch)
+    //console.log("itemChatlMatch")
+    //console.log(itemChatlMatch)
 
     Item.getReportOfItem(itemNormalMatch, function (err, itemNormalData) {
       if (err)
@@ -1673,7 +1673,7 @@ module.exports = function (Item) {
         }
       ])
       users.get(function (err, data) {
-        // console.log(data);
+        // //console.log(data);
         if (err) return callback(err);
         data = data.sort(function (a, b) {
           var aDate = new Date(a.owner.createdAt).getTime();
@@ -2020,7 +2020,7 @@ module.exports = function (Item) {
           }
         ])
         users.get(function (err, data) {
-          // console.log(data);
+          // //console.log(data);
           if (err) reject(err);
           data = data.sort(function (a, b) {
             var aDate = new Date(a.date).getTime();
@@ -2114,7 +2114,7 @@ module.exports = function (Item) {
           }
         ])
         users.get(function (err, data) {
-          // console.log(data);
+          // //console.log(data);
           if (err) reject(err);
           data = data.sort(function (a, b) {
             var aDate = new Date(a.date).getTime();
@@ -2464,7 +2464,7 @@ module.exports = function (Item) {
           }
         ])
         users.get(function (err, data) {
-          // console.log(data);
+          // //console.log(data);
           if (err) reject(err);
           resolve(data)
         })
@@ -2551,7 +2551,7 @@ module.exports = function (Item) {
           }
         ])
         users.get(function (err, data) {
-          // console.log(data);
+          // //console.log(data);
           if (err) reject(err);
           data = data.sort(function (a, b) {
             var aDate = new Date(a.date).getTime();
@@ -2828,12 +2828,12 @@ module.exports = function (Item) {
       }
     }
 
-    console.log(keys)
+    //console.log(keys)
     keys.sort((function (a, b) {
       return new Date(a) - new Date(b);
     }));
-    console.log("keysssssssssss")
-    console.log(keys)
+    //console.log("keysssssssssss")
+    //console.log(keys)
     var len = keys.length;
     var newResult = {}
     if (keys.length == 0)

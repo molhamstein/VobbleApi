@@ -62,79 +62,79 @@ module.exports = function (Replies) {
     })
   });
 
-  // cron.scheduleJob('0 5 * * * *', function () {
-  //   console.log("Ruuuuuuuuuuuuuuuuuuuuun")
-  //   var dataNotification = []
-  //   Replies.app.models.User.find({
-  //     where: {
-  //       "and": [{
-  //           "replysCount": 0,
-  //         },
-  //         {
-  //           "or": [{
-  //               "dateRechargeReplies": undefined
-  //             },
-  //             {
-  //               "dateRechargeReplies": {
-  //                 "lt": new Date()
-  //               }
-  //             }
-  //           ]
-  //         }
-  //       ]
+  cron.scheduleJob('0 5 * * * *', function () {
+    //console.log("Ruuuuuuuuuuuuuuuuuuuuun")
+    var dataNotification = []
+    Replies.app.models.User.find({
+      where: {
+        "and": [{
+            "replysCount": 0,
+          },
+          {
+            "or": [{
+                "dateRechargeReplies": undefined
+              },
+              {
+                "dateRechargeReplies": {
+                  "lt": new Date()
+                }
+              }
+            ]
+          }
+        ]
 
-  //     }
-  //   }, function (err, data) {
-  //     dataNotification = data;
-  //   })
-  //   var tomorrow = new Date();
-  //   tomorrow.setDate(tomorrow.getDate() + 1);
+      }
+    }, function (err, data) {
+      dataNotification = data;
+    })
+    var tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
 
-  //   Replies.app.models.User.updateAll({
-  //     "or": [{
-  //         "dateRechargeReplies": undefined
-  //       },
-  //       {
-  //         "dateRechargeReplies": {
-  //           "lt": new Date()
-  //         }
-  //       }
-  //     ]
-  //   }, {
-  //     'dateRechargeReplies': tomorrow,
-  //     'replysCount': 10,
-  //   }, function (err, res) {
-  //     if (err)
-  //       console.log(err);
-  //     else {
-  //       console.log('done');
-  //       for (let index = 0; index < dataNotification.length; index++) {
-  //         const element = dataNotification[index];
-  //         var message = {
-  //           "app_id": "e8a91e90-a766-4f1b-a47e-e3b3f569dbef",
-  //           "included_segments ": ["Active Users", "Inactive Users"],
-  //           "contents": {
-  //             "ar": "صار فيك تعلق عالفيديوهات يلي بتحبها",
-  //             "en": "Now, you can reply to video "
-  //           },
-  //           "filters": [{
-  //             "field": "tag",
-  //             "key": "user_id",
-  //             "relation": "=",
-  //             "value": element.id
-  //           }],
-  //           "headings": {
-  //             "en": "Go back and reply",
-  //             "ar": "رجاع علق عالفيديوهات"
-  //           }
-  //         }
-  //         console.log(message);
-  //         sendNewNotification(message)
-  //       }
-  //     }
+    Replies.app.models.User.updateAll({
+      "or": [{
+          "dateRechargeReplies": undefined
+        },
+        {
+          "dateRechargeReplies": {
+            "lt": new Date()
+          }
+        }
+      ]
+    }, {
+      'dateRechargeReplies': tomorrow,
+      'replysCount': 10,
+    }, function (err, res) {
+      if (err) {
+        //console.log(err);
+      } else {
+        //console.log('done');
+        for (let index = 0; index < dataNotification.length; index++) {
+          const element = dataNotification[index];
+          var message = {
+            "app_id": "e8a91e90-a766-4f1b-a47e-e3b3f569dbef",
+            "included_segments ": ["Active Users", "Inactive Users"],
+            "contents": {
+              "ar": "صار فيك تعلق عالفيديوهات يلي بتحبها",
+              "en": "Now, you can reply to video "
+            },
+            "filters": [{
+              "field": "tag",
+              "key": "user_id",
+              "relation": "=",
+              "value": element.id
+            }],
+            "headings": {
+              "en": "Go back and reply",
+              "ar": "رجاع علق عالفيديوهات"
+            }
+          }
+          //console.log(message);
+          sendNewNotification(message)
+        }
+      }
 
-  //   });
-  // });
+    });
+  });
 
 
   var sendNewNotification = function (data) {
@@ -154,14 +154,14 @@ module.exports = function (Replies) {
     var https = require('https');
     var req = https.request(options, function (res) {
       res.on('data', function (data) {
-        console.log("Response:");
-        // console.log(JSON.parse(data));
+        //console.log("Response:");
+        // //console.log(JSON.parse(data));
       });
     });
 
     req.on('error', function (e) {
-      console.log("ERROR:");
-      console.log(e);
+      //console.log("ERROR:");
+      //console.log(e);
     });
 
     req.write(JSON.stringify(data));

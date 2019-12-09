@@ -365,7 +365,7 @@ module.exports = async function (app) {
         //   nextRefill: date
         // }
       ]);
-      // console.log('Created users:', users);
+      // //console.log('Created users:', users);
 
       // let shores = await shore.create([
       //   {
@@ -394,7 +394,7 @@ module.exports = async function (app) {
 
 
 
-      // console.log('Created reports:', reports);
+      // //console.log('Created reports:', reports);
 
       // let customer = users.find(o => o.email === 'customer1@vobble.com');
       // let customer2 = users.find(o => o.email === 'customer2@vobble.com');
@@ -404,12 +404,12 @@ module.exports = async function (app) {
       Role.create({
         name: 'admin'
       }).then(role => {
-        console.log('Created role:', role);
+        //console.log('Created role:', role);
         role.principals.create({
           principalType: RoleMapping.USER,
           principalId: appAdmin.id
         }).then(principal => {
-          console.log('Created principal:', principal);
+          //console.log('Created principal:', principal);
         });
       });
 
@@ -554,11 +554,11 @@ module.exports = async function (app) {
       //   }
 
       // ])
-      console.log('seedData: DONE!');
+      //console.log('seedData: DONE!');
     }
 
   } catch (err) {
-    console.log(err)
+    //console.log(err)
     throw err;
   }
 };
