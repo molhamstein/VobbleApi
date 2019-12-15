@@ -511,6 +511,32 @@
         "path": "/export",
         "verb": "get"
       }]
+    },
+    "typeStateReport": {
+      "accepts": [{
+          "arg": "from",
+          "type": "date",
+          "required": false,
+          "description": ""
+        },
+        {
+          "arg": "to",
+          "type": "date",
+          "required": false,
+          "description": ""
+        }
+      ],
+      "returns": [{
+        "arg": "result",
+        "type": "object",
+        "root": true,
+        "description": ""
+      }],
+      "description": "",
+      "http": [{
+        "path": "/typeStateReport",
+        "verb": "get"
+      }]
     }
   }
 }

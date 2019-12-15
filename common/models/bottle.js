@@ -1579,34 +1579,73 @@ module.exports = function (Bottle) {
       });
     });
 
-
-    // {
-    //   "where": {
-    //     "and": [{
-    //       "owner.gender": "male"
-    //     }, {
-    //       "shoreId": "5b2a6dae4341292648004b2b"
-    //     }, {
-    //       "owner.ISOCode": "CC"
-    //     }, {
-    //       "createdAt": {
-    //         "gt": "2014-10-20T00:00:00.000Z"
-    //       }
-    //     }, {
-    //       "createdAt": {
-    //         "lt": "2018-10-20T00:00:00.000Z"
-    //       }
-    //     }]
-    //   }
-    // }
-
-    // "shoreId": "5b2a6dae4341292648004b2b"
-    //     }, {
-
-
-
-
   };
 
+
+  Bottle.typeStateReport = function (from, to, callback) {
+
+    var filter = {};
+    if (from) {
+      filter['createdAt'] = {
+        '$gt': new Date(from)
+      }
+    }
+    if (to) {
+      if (filter['createdAt'] == null)
+        filter['createdAt'] = {}
+      filter['createdAt']['$lt'] = new Date(to)
+    }
+    Bottle.getDataSource().connector.connect(function (err, db) {
+
+      var collection = db.collection('bottle');
+      var cursor = collection.aggregate([{
+          $match: filter
+        },
+        {
+          $project: {
+            audio: {
+              $cond: [{
+                $eq: ["$bottleType", "audio"]
+              }, 1, 0]
+            },
+            video: {
+              $cond: [{
+                $eq: ["$bottleType", "video"]
+              }, 1, 0]
+            },
+          }
+        },
+        {
+          $group: {
+            _id: null,
+            audio: {
+              $sum: "$audio"
+            },
+            video: {
+              $sum: "$video"
+            },
+            total: {
+              $sum: 1
+            },
+          }
+        },
+      ]);
+      cursor.get(function (err, data) {
+        //console.log(data);
+        if (err) return callback(err);
+        var audioPercent = 0
+        var videoPercent = 0
+        if (data[0] != null && data[0]['audio'] != 0 && data[0]['total'] != 0)
+          audioPercent = data[0]['audio'] * 100 / data[0]['total']
+        if (data[0] != null && data[0]['video'] != 0 && data[0]['total'] != 0)
+          videoPercent = data[0]['video'] * 100 / data[0]['total']
+        var result = {
+          "audio": audioPercent,
+          "video": videoPercent
+        }
+        return callback(null, result);
+      })
+    });
+  };
 
 };
