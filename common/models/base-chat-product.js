@@ -63,6 +63,10 @@ module.exports = function (BaseChatProduct) {
             }, 0]
           }
         }
+      }, {
+        $sort: {
+          createdAt: -1
+        }
       }]);
       cursor.get(function (err, data) {
         if (err) return callback(err);
