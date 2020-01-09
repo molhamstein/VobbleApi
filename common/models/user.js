@@ -1196,7 +1196,7 @@ module.exports = function (User) {
             oneUser['version'] = versionObject
           }
           oneUser['cost'] = {
-            "audioCall": 20
+            "audioCall": 50
           }
           return callback(null, oneUser);
         }
