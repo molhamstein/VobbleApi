@@ -1184,7 +1184,8 @@ module.exports = function (User) {
           if (userVersion == null)
             return callback(null, oneUser);
           else if (userVersion != null) {
-            //console.log("version type")
+            console.log("userVersion")
+            console.log(userVersion)
             var versionStatus = User.compirVersion(userVersion, version)
             var versionObject = {
               "status": "uptodate"
