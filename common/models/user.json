@@ -41,6 +41,10 @@
       "type": "number",
       "default": 0
     },
+    "totalCallPaidCoins": {
+      "type": "number",
+      "default": 0
+    },
     "totalBottlesThrown": {
       "type": "number",
       "default": 0
@@ -151,6 +155,15 @@
     "canEditUsername": {
       "type": "boolean",
       "default": true
+    },
+    "pushkitToken": {
+      "type": "string",
+      "required": false
+    },
+    "isHost": {
+      "type": "boolean",
+      "required": true,
+      "default": true
     }
   },
   "validations": [],
@@ -186,6 +199,11 @@
       "type": "hasMany",
       "model": "item",
       "foreignKey": "ownerId"
+    },
+    "agency": {
+      "type": "belongsTo",
+      "model": "agency",
+      "foreignKey": "agencyId"
     },
     "myBottles": {
       "type": "hasMany",
@@ -318,6 +336,12 @@
       "principalId": "$authenticated",
       "permission": "ALLOW",
       "property": "editUsername"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "editPushkitToken"
     },
     {
       "principalType": "ROLE",
@@ -677,6 +701,32 @@
       "description": "edit username",
       "http": [{
         "path": "/editUsername",
+        "verb": "put"
+      }]
+    },
+    "editPushkitToken": {
+      "accepts": [{
+          "arg": "context",
+          "type": "object",
+          "http": {
+            "source": "context"
+          }
+        },
+        {
+          "arg": "token",
+          "type": "string",
+          "required": true
+        }
+      ],
+      "returns": [{
+        "arg": "result",
+        "type": "object",
+        "root": true,
+        "description": ""
+      }],
+      "description": "edit Pushkit Token",
+      "http": [{
+        "path": "/editPushkitToken",
         "verb": "put"
       }]
     },

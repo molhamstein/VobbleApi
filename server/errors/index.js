@@ -39,13 +39,20 @@ module.exports.account = {
   },
   youCannotEditUsername: function () {
     return new cError('YOU_CAN_NOT_EDIT_USERNAME', 423, 'you can\'t edit username', 423);
-  }
+  },
+  userCanNotRinging: function () {
+    return new cError("USER_CAN_NOT_RINGING", 425, "user can't ringing", 425);
+  },
 
 
 };
 
+module.exports.callLog = {
 
-
+callLogNotFound: function () {
+  return new cError("CALL_LOG_NOT_FOUND", 426, "call log not fount", 426);
+}
+}
 
 module.exports.bottle = {
   noAvailableBottleToday: function () {

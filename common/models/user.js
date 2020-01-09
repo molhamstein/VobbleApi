@@ -249,7 +249,7 @@ module.exports = function (User) {
                 imageFile
               }) => {
                 image = urlFileRootSave + newFilename;
-                var nextRefillVar = new Date();          
+                var nextRefillVar = new Date();
                 nextRefillVar.setHours(24, 0, 0, 0);
 
                 var tomorrow = new Date();
@@ -258,7 +258,7 @@ module.exports = function (User) {
 
                 User.create({
                   socialId: socialId,
-                  dateRechargeReplies:tomorrow,
+                  dateRechargeReplies: tomorrow,
                   gender: gender,
                   email: email,
                   image: image,
@@ -443,7 +443,7 @@ module.exports = function (User) {
                 var date = new Date();
                 User.create({
                   socialId: socialId,
-                  dateRechargeReplies:tomorrow,
+                  dateRechargeReplies: tomorrow,
                   gender: gender,
                   image: image,
                   email: email,
@@ -617,12 +617,12 @@ module.exports = function (User) {
                 var tomorrow = new Date();
                 tomorrow.setDate(tomorrow.getDate() + 1);
                 tomorrow.setHours(12)
-          
+
                 var nextRefillVar = new Date();
                 nextRefillVar.setHours(24, 0, 0, 0);
                 User.create({
                   nextRefill: nextRefillVar,
-                  dateRechargeReplies:tomorrow,
+                  dateRechargeReplies: tomorrow,
                   socialId: socialId,
                   gender: gender,
                   image: image,
@@ -1187,13 +1187,16 @@ module.exports = function (User) {
             //console.log("version type")
             var versionStatus = User.compirVersion(userVersion, version)
             var versionObject = {
-              "status": "uptodate"
+              "status": versionStatus
             };
             if (versionStatus == 'obsolete' || versionStatus == 'update available') {
               versionObject["status"] = versionStatus;
               versionObject["link"] = version.iosLink;
             }
             oneUser['version'] = versionObject
+          }
+          oneUser['cost'] = {
+            "audioCall": 20
           }
           return callback(null, oneUser);
         }
@@ -1226,6 +1229,19 @@ module.exports = function (User) {
     // TODO
   };
 
+  User.editPushkitToken = function (context, token, callback) {
+    var result;
+    var deviceId = null
+    var userId = context.req.accessToken.userId;
+    User.findById(userId, function (err, oneUser) {
+      if (err)
+        return callback(err, null);
+      oneUser.updateAttributes({
+        "pushkitToken": token
+      })
+      return callback(null, oneUser)
+    })
+  };
 
   User.compirVersion = function (userVersion, version) {
 
@@ -1234,6 +1250,10 @@ module.exports = function (User) {
     var arrayUserVersion = userVersion.toString().split('.');
     var arrayLastVersion = version.lastVersion.toString().split('.');
     var arrayLoadVersion = version.loadVersion.toString().split('.');
+    var reviewVersion = version.reviewVersion
+    if (userVersion == reviewVersion) {
+      return ("review")
+    }
     //console.log(arrayUserVersion)
     //console.log(arrayLastVersion)
     //console.log(arrayLoadVersion)
