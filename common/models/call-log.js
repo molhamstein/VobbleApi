@@ -43,7 +43,8 @@ module.exports = function (Calllog) {
       note.sound = "ping.aiff";
       note.alert = "\uD83D\uDCE7 \u2709 You have a new message";
       note.payload = {
-        'callUUID': '0991735234'
+        'conversationId': context.req.body.conversationId,
+        'owner': context.res.locals.user
       };
       note.topic = "com.yallavideo.Vibo.voip";
 
