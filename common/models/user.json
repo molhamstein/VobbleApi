@@ -16,10 +16,14 @@
   ],
   "scope": {
     "include": [{
-      "relation": "country"
-    }, {
-      "relation": "device"
-    }]
+        "relation": "country"
+      }, {
+        "relation": "device"
+      },
+      {
+        "relation": "agency"
+      }
+    ]
   },
   "properties": {
     "gender": {
