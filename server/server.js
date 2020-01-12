@@ -33,6 +33,7 @@ app.use(function (req, res, next) {
 
 
 app.start = function () {
+  console.log("SSSSSSSS")
   // start the web server
   return app.listen(function () {
     app.emit('started');

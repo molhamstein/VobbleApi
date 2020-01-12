@@ -165,6 +165,13 @@
   "chatItem": {
     "dataSource": "db",
     "public": true
+  },
+  "callLog": {
+    "dataSource": "db",
+    "public": true
+  },
+  "agency": {
+    "dataSource": "db",
+    "public": true
   }
-
 }

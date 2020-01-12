@@ -38,10 +38,10 @@
     },
 
     "user1_unseen": {
-      "type": "boolaen"
+      "type": "Boolean"
     },
     "user2_unseen": {
-      "type": "boolaen"
+      "type": "Boolean"
     }
   },
   "validations": [],
