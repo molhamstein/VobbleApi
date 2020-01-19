@@ -421,6 +421,11 @@
         "http": {
           "source": "path"
         }
+      }, {
+        "arg": "deleteFile",
+        "type": "boolean",
+        "required": false,
+        "description": ""
       }],
       "returns": [],
       "description": "",

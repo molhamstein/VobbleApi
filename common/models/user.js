@@ -18,6 +18,9 @@ var serviceAccount = require("../../server/boot/serviceAccountKey.json");
 var version = require("../../server/boot/version.json");
 var ObjectId = require('mongodb').ObjectID;
 
+var fs = require("fs");
+
+
 
 // "siteDomain": "http://104.217.253.15/vobbleApp/Vobble-webApp",
 
@@ -1623,55 +1626,77 @@ module.exports = function (User) {
 
   User.getTransaction = async function (userId, callback) {
     try {
-      var item = await User.app.models.Item.find({
+      var item = await User.app.models.Bottle.find({
         "where": {
-          "ownerId": ObjectId(userId),
-          "type": {
-            "neq": "coins"
-          }
+          "status": "deactive",
         },
-        "order": "startAt DESC"
+        "order": "createdAt DESC",
+        "limit": 1
       })
 
-      var coins = await User.app.models.Item.find({
-        "where": {
-          "ownerId": ObjectId(userId),
-          "type": "coins"
-        },
-        "order": "startAt DESC"
-      })
-      var chatItem = await User.app.models.ChatItem.find({
-        "where": {
-          "ownerId": ObjectId(userId),
-        },
-        "order": "startAt DESC"
-      })
-
-      item = item.concat(chatItem)
-      item.sort(function (a, b) {
-        var dateA;
-        var dateB;
-        if (a.startAt)
-          dateA = new Date(a.startAt);
-        else
-          dateA = new Date(a.createdAt);
-        if (b.startAt)
-          dateB = new Date(b.startAt);
-        else
-          dateB = new Date(b.createdAt);
-
-        return dateA > dateB ? -1 : dateA < dateB ? 1 : 0;
+      item.forEach(element => {
+        var filePath = config.filePath;
+        var fileName = filePath + "videos" + element.file.slice(element.file.lastIndexOf("/"))
+        if (fs.existsSync(fileName)) {
+          //file exists
+          fs.unlinkSync(fileName)
+        }
+        // console.log(fileName)
       });
-
-      var data = await getAggregate(userId)
-      callback(null, {
-        "item": item,
-        "groupe": data,
-        "coins": coins,
-      })
+      callback(null, item.length)
     } catch (error) {
-      return callback(error)
+      callback(error)
     }
+    // try {
+    //   var item = await User.app.models.Item.find({
+    //     "where": {
+    //       "ownerId": ObjectId(userId),
+    //       "type": {
+    //         "neq": "coins"
+    //       }
+    //     },
+    //     "order": "startAt DESC"
+    //   })
+
+    //   var coins = await User.app.models.Item.find({
+    //     "where": {
+    //       "ownerId": ObjectId(userId),
+    //       "type": "coins"
+    //     },
+    //     "order": "startAt DESC"
+    //   })
+    //   var chatItem = await User.app.models.ChatItem.find({
+    //     "where": {
+    //       "ownerId": ObjectId(userId),
+    //     },
+    //     "order": "startAt DESC"
+    //   })
+
+    //   item = item.concat(chatItem)
+    //   item.sort(function (a, b) {
+    //     var dateA;
+    //     var dateB;
+    //     if (a.startAt)
+    //       dateA = new Date(a.startAt);
+    //     else
+    //       dateA = new Date(a.createdAt);
+    //     if (b.startAt)
+    //       dateB = new Date(b.startAt);
+    //     else
+    //       dateB = new Date(b.createdAt);
+
+    //     return dateA > dateB ? -1 : dateA < dateB ? 1 : 0;
+    //   });
+
+    //   var data = await getAggregate(userId)
+    //   callback(null, {
+    //     "item": item,
+    //     "groupe": data,
+    //     "coins": coins,
+    //   })
+    // } catch (error) {
+    //   return callback(error)
+    // }
   }
 
   function getAggregate(userId) {
@@ -1912,7 +1937,7 @@ module.exports = function (User) {
               "app_id": "e8a91e90-a766-4f1b-a47e-e3b3f569dbef",
               "included_segments ": ["Active Users", "Inactive Users"],
               "contents": {
-                "ar": "عروس البحر تركت لك فيديو في البحر، تعال شوفه!!!",
+                "ar": "عروس البحر تركت لك فيديو في البحر تعال شوفه!!!",
                 "en": "You signed in yesterday! Why don't you check in today?"
               },
               "filters": [{
@@ -1923,7 +1948,7 @@ module.exports = function (User) {
               }],
               "headings": {
                 "en": "Hey " + element.username + " !",
-                "ar": "مرحباً " + element.username + " !"
+                "ar": "مرحبا " + element.username + " !"
               }
             }
             element.updateAttributes({
@@ -1947,7 +1972,7 @@ module.exports = function (User) {
               }],
               "headings": {
                 "en": "48h Where are you??",
-                "ar": "مشغول؟؟"
+                "ar": "مشغول"
               }
             }
             element.updateAttributes({
@@ -1970,7 +1995,7 @@ module.exports = function (User) {
               }],
               "headings": {
                 "en": "7 days " + element.username + " seems you are busy",
-                "ar": "ايش عندك؟"
+                "ar": "ايش عندك"
               }
             }
             element.updateAttributes({
