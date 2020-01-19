@@ -1630,6 +1630,7 @@ module.exports = function (User) {
         "where": {
           "status": "deactive",
         },
+        "order": "createdAt DESC",
         "limit": 1
       })
 
