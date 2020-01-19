@@ -1629,8 +1629,7 @@ module.exports = function (User) {
       var item = await User.app.models.Bottle.find({
         "where": {
           "status": "deactive",
-        },
-        "order": "createdAt DESC"
+        }
       })
 
       item.forEach(element => {
