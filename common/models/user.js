@@ -1630,8 +1630,7 @@ module.exports = function (User) {
         "where": {
           "status": "deactive",
         },
-        "order": "createdAt DESC",
-        "limit": 1
+        "order": "createdAt DESC"
       })
 
       item.forEach(element => {
