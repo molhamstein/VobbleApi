@@ -4,6 +4,7 @@
   "domain": "http://159.65.202.38:3000",
   "siteDomain": "http://159.65.202.38/vobbleApp/Vobble-webApp",
   "thumbUrl": "C:/FFmpeg/bin/",
+  "filePath":"/home/vobbleDev/VobbleApi/uploadFiles/",
   "programFFmpegName": [
     "ffmpeg.exe",
     "ffprobe.exe"

@@ -10,6 +10,7 @@ var cron = require('node-schedule');
 var rule = new cron.RecurrenceRule();
 var async = require("async");
 var ObjectId = require('mongodb').ObjectID;
+var fs = require("fs");
 
 
 module.exports = function (Bottle) {
@@ -29,15 +30,21 @@ module.exports = function (Bottle) {
    * @param {Function(Error)} callback
    */
 
-  Bottle.deactiveBottle = function (id, callback) {
+  Bottle.deactiveBottle = function (id, deleteFile = false, callback) {
     // TODO
     Bottle.findById(id, function (err, bottle) {
       if (err) {
         //console.log(err);
-        next();
+        callback();
       }
       bottle.status = "deactive";
       bottle.save();
+      if (deleteFile == true) {
+        var filePath = config.filePath;
+        var fileName = filePath + "videos" + bottle.file.slice(bottle.file.lastIndexOf("/"))
+        // console.log(fileName)
+        fs.unlinkSync(fileName)
+      }
       callback(null);
     });
   };
