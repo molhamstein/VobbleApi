@@ -1629,7 +1629,8 @@ module.exports = function (User) {
       var item = await User.app.models.Bottle.find({
         "where": {
           "status": "deactive",
-        }
+        },
+        "limit": 1
       })
 
       item.forEach(element => {
@@ -1638,7 +1639,7 @@ module.exports = function (User) {
         if (fs.existsSync(fileName)) {
           //file exists
           fs.unlinkSync(fileName)
-          }
+        }
         // console.log(fileName)
       });
       callback(null, item.length)
