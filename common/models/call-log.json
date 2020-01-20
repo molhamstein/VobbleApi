@@ -38,6 +38,11 @@
       "required": true,
       "default": "ringing"
     },
+    "cost": {
+      "type": "number",
+      "required": true,
+      "default": "0"
+    },
     "createdAt": {
       "type": "date",
       "defaultFn": "now"

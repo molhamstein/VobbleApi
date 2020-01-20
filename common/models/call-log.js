@@ -59,20 +59,23 @@ module.exports = function (Calllog) {
       var callLog = await Calllog.findById(id)
       if (callLog == null)
         throw (errors.callLog.callLogNotFound());
+      var updateObject = {}
       if (startAt)
-        await callLog.updateAttribute("startAt", startAt)
+        updateObject["startAt"] = startAt
       if (endAt) {
         var duration = (endAt.getTime() - callLog.startAt.getTime()) / 1000;
-        await callLog.updateAttribute("duration", duration)
-        await callLog.updateAttribute("endAt", endAt)
+        updateObject["duration"] = duration
+        updateObject[cost] = minCost * Math.ceil(duration / 60)
+        updateObject["endAt"] = endAt
       }
       if (status)
-        await callLog.updateAttribute("status", status)
+        updateObject["status"] = status
 
       var owner = callLog.owner();
       if (owner.pocketCoins < minCost && isReview == false) {
         return callback(errors.product.youDonotHaveCoins())
       }
+      await callLog.updateAttributes(updateObject)
       if (isFinish == false && isReview == false) {
         var newPocketCoins = owner.pocketCoins - minCost
         var newTotalCallPaidCoins = owner.totalCallPaidCoins + minCost

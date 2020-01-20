@@ -164,6 +164,10 @@
       "type": "string",
       "required": false
     },
+    "phoneType": {
+      "type": "string",
+      "required": false
+    },
     "isHost": {
       "type": "boolean",
       "required": true,
@@ -718,6 +722,11 @@
         },
         {
           "arg": "token",
+          "type": "string",
+          "required": true
+        },
+        {
+          "arg": "phoneType",
           "type": "string",
           "required": true
         }
