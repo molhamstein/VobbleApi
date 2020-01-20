@@ -1232,7 +1232,7 @@ module.exports = function (User) {
     // TODO
   };
 
-  User.editPushkitToken = function (context, token, callback) {
+  User.editPushkitToken = function (context, token, phoneType, callback) {
     var result;
     var deviceId = null
     var userId = context.req.accessToken.userId;
@@ -1240,7 +1240,8 @@ module.exports = function (User) {
       if (err)
         return callback(err, null);
       oneUser.updateAttributes({
-        "pushkitToken": token
+        "pushkitToken": token,
+        "phoneType": phoneType
       })
       return callback(null, oneUser)
     })
