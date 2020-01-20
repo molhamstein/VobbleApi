@@ -33,7 +33,7 @@
       "required": true,
       "default": 0
     },
-    "staus": {
+    "status": {
       "type": "string",
       "required": true,
       "default": "ringing"
@@ -72,6 +72,24 @@
       "principalType": "ROLE",
       "principalId": "$authenticated",
       "permission": "ALLOW"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$unauthenticated",
+      "permission": "DENY",
+      "property": "getFilterCallLog"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "countFilterCallLog"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "exportFilterCallLog"
     }
   ],
   "methods": {
@@ -157,6 +175,25 @@
       "description": "filter On the Call Log",
       "http": [{
         "path": "/getFilterCallLog",
+        "verb": "get"
+      }]
+    },
+    "exportFilterCallLog": {
+      "accepts": [{
+        "arg": "where",
+        "type": "object",
+        "required": false,
+        "description": "filter Item"
+      }],
+      "returns": [{
+        "arg": "result",
+        "type": "object",
+        "root": true,
+        "description": ""
+      }],
+      "description": "filter On the Call Log",
+      "http": [{
+        "path": "/exportFilterCallLog",
         "verb": "get"
       }]
     }

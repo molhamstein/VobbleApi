@@ -1,8 +1,20 @@
 'use strict';
 const errors = require('../../server/errors');
 var https = require('https');
+var ObjectId = require('mongodb').ObjectID;
+const mongoXlsx = require('mongo-xlsx');
+const configPath = process.env.NODE_ENV === undefined ?
+  '../../server/config.json' :
+  `../../server/config.${process.env.NODE_ENV}.json`;
+const config = require(configPath);
+
 module.exports = function (Calllog) {
   //   var appleAccount = require("../../server/boot/appleAccountKey.json");
+
+  var urlFileRoot = config.domain + config.restApiRoot + "/uploadFiles";
+
+  var urlFileRootexcel = urlFileRoot + '/excelFiles/download/';
+
   const minCost = 50
   Calllog.beforeRemote('create', function (context, result, next) {
     if (context.res.locals.user.status != 'active') {
@@ -93,35 +105,70 @@ module.exports = function (Calllog) {
   }
 
 
-  function getFilter(filter, callback) {
-    var collection = db.collection('callLog');
-    var callLogs = collection.aggregate([{
-        $match: filter
-      }, {
-        $lookup: {
-          from: "user",
-          localField: "ownerId",
-          foreignField: "_id",
-          as: "owner"
+  Calllog.getFilter = function (filter, callback) {
+    Calllog.getDataSource().connector.connect(function (err, db) {
+      if (filter.where == null)
+        filter.where = {}
+
+      if (filter.where == null)
+        filter.where = {}
+      if (filter.where.relatedUserId != null)
+        filter.where.relatedUserId = ObjectId(filter.where.relatedUserId)
+      if (filter.where.ownerId != null)
+        filter.where.ownerId = ObjectId(filter.where.ownerId)
+      if (filter.where['owner.agencyId'] != null)
+        filter.where["owner.agencyId"] = ObjectId(filter.where["owner.agencyId"])
+      if (filter.where['relatedUser.agencyId'] != null)
+        filter.where["relatedUser.agencyId"] = ObjectId(filter.where["relatedUser.agencyId"])
+
+      var collection = db.collection('callLog');
+      var callLogs = collection.aggregate([{
+          $lookup: {
+            from: "user",
+            localField: "ownerId",
+            foreignField: "_id",
+            as: "owner"
+          }
+        },
+        {
+          $unwind: "$owner"
+        },
+        {
+          $lookup: {
+            from: "user",
+            localField: "relatedUserId",
+            foreignField: "_id",
+            as: "relatedUser"
+          }
+        },
+        {
+          $unwind: "$relatedUser"
+        },
+        {
+          $match: filter['where']
+        },
+        {
+          $project: {
+            _id: 0,
+            id: '$_id',
+            conversationId: 1,
+            status: 1,
+            createdAt: 1,
+            relatedUserId: 1,
+            ownerId: 1,
+            startAt: 1,
+            endAt: 1,
+            duration: 1,
+            cost: 1,
+            owner: 1,
+            relatedUser: 1,
+          }
         }
-      },
-      {
-        $lookup: {
-          from: "user",
-          localField: "relatedUserId",
-          foreignField: "_id",
-          as: "relatedUser"
-        }
-      },
-      {
-        $project: {
-          _id: 0
-        }
-      }
-    ]);
-    cursor.get(function (err, data) {
-      if (err) return callback(err);
-      return callback(null, data);
+      ]);
+      callLogs.get(function (err, data) {
+        if (err) return callback(err);
+        return callback(null, data);
+      })
     })
   }
 
@@ -138,7 +185,7 @@ module.exports = function (Calllog) {
     delete filter['offset']
     delete filter['limit']
 
-    getFilter(filter, function (err, data) {
+    Calllog.getFilter(filter, function (err, data) {
       if (err)
         callback(err, null);
       var newData = data.slice(offset, offset + limit);
@@ -150,13 +197,86 @@ module.exports = function (Calllog) {
   }
 
   Calllog.countFilterCallLog = function (filter, callback) {
-    getFilter(filter, function (err, data) {
+    Calllog.getFilter(filter, function (err, data) {
       if (err)
         callback(err, null);
       callback(err, {
         "count": data.length
       });
     })
+  };
+  Calllog.exportFilterCallLog = function (where = {}, callback) {
+    var filter = {
+      "where": where
+    }
+    Calllog.getFilter(filter, function (err, callLogs) {
+      if (err)
+        callback(err, null);
+      var config = {
+        path: 'uploadFiles/excelFiles',
+        save: true,
+        fileName: 'callLog' + Date.now() + '.xlsx'
+      };
+      var object = {}
+      var data = [];
+      callLogs.forEach(function (element) {
+        object = {
+          image: element.owner['image'],
+          totalBottlesThrown: element.owner['totalBottlesThrown'],
+          repliesBottlesCount: element.owner['repliesBottlesCount'],
+          repliesReceivedCount: element.owner['repliesReceivedCount'],
+          foundBottlesCount: element.owner['foundBottlesCount'],
+          extraBottlesCount: element.owner['extraBottlesCount'],
+          bottlesCount: element.owner['bottlesCount'],
+          registrationCompleted: element.owner['registrationCompleted'],
+          gender: element.owner['gender'],
+          nextRefill: element.owner['nextRefill'].toString(),
+          createdAt: element.owner['createdAt'].toString(),
+          lastLogin: element.owner['lastLogin'] ? element.owner['lastLogin'].toString() : "",
+          email: element.owner['email'],
+          status: element.owner['status'],
+          typeLogIn: element.owner['typeLogIn'],
+          username: element.owner['username'],
+          isHost: element.owner['isHost'],
+          duration: element.duration,
+          "call status": element.status,
+          createdAt: element.createdAt.toString(),
+          startAt: element.startAt ? element.startAt.toString() : "",
+          endAt: element.endAt ? element.endAt.toString() : "",
+          cost: element.cost,
+          "image related": element.relatedUser['image'],
+          "totalBottlesThrown related": element.relatedUser['totalBottlesThrown'],
+          "repliesBottlesCount related": element.relatedUser['repliesBottlesCount'],
+          "repliesReceivedCount related": element.relatedUser['repliesReceivedCount'],
+          "foundBottlesCount related": element.relatedUser['foundBottlesCount'],
+          "extraBottlesCount related": element.relatedUser['extraBottlesCount'],
+          "bottlesCount related": element.relatedUser['bottlesCount'],
+          "registrationCompleted related": element.relatedUser['registrationCompleted'],
+          "gender related": element.relatedUser['gender'],
+          "nextRefill related": element.relatedUser['nextRefill'].toString(),
+          "createdAt related": element.relatedUser['createdAt'].toString(),
+          "lastLogin related": element.relatedUser['lastLogin'] ? element.relatedUser['lastLogin'].toString() : "",
+          "email related": element.relatedUser['email'],
+          "status related": element.relatedUser['status'],
+          "typeLogIn related": element.relatedUser['typeLogIn'],
+          "username related": element.relatedUser['username'],
+          "isHost related": element.relatedUser['isHost'],
+        }
+        data.push(object)
+      })
+      var model = mongoXlsx.buildDynamicModel(data);
+
+
+      /* Generate Excel */
+      mongoXlsx.mongoData2Xlsx(data, model, config, function (err, data) {
+        //console.log('File saved at:', data.fullPath);
+        callback(null, {
+          'path': urlFileRootexcel + config['fileName']
+        });
+
+      });
+    });
+
   };
 
 };
