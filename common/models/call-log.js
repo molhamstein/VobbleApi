@@ -21,10 +21,10 @@ module.exports = function (Calllog) {
     Calllog.app.models.User.findById(context.req.body.relatedUserId, function (err, user) {
       if (err)
         return next(err)
-      if (user.pushketToken == null) {
+      if (user.pushkitToken == null) {
         return next(errors.account.userCanNotRinging())
       }
-      let deviceToken = user.pushketToken
+      let deviceToken = user.pushkitToken
       var options = {
         token: {
           key: "server/boot/AuthKey_SC8495N9AY.p8",
@@ -91,5 +91,72 @@ module.exports = function (Calllog) {
       callback(error)
     }
   }
+
+
+  function getFilter(filter, callback) {
+    var collection = db.collection('callLog');
+    var callLogs = collection.aggregate([{
+        $match: filter
+      }, {
+        $lookup: {
+          from: "user",
+          localField: "ownerId",
+          foreignField: "_id",
+          as: "owner"
+        }
+      },
+      {
+        $lookup: {
+          from: "user",
+          localField: "relatedUserId",
+          foreignField: "_id",
+          as: "relatedUser"
+        }
+      },
+      {
+        $project: {
+          _id: 0
+        }
+      }
+    ]);
+    cursor.get(function (err, data) {
+      if (err) return callback(err);
+      return callback(null, data);
+    })
+  }
+
+
+
+  Calllog.getFilterCallLog = function (filter, callback) {
+    var offset = filter['offset'];
+    var limit = filter['limit'];
+    if (offset == null)
+      offset = 0;
+    if (limit == null)
+      limit = 10;
+    // //console.log(filter.where.and)
+    delete filter['offset']
+    delete filter['limit']
+
+    getFilter(filter, function (err, data) {
+      if (err)
+        callback(err, null);
+      var newData = data.slice(offset, offset + limit);
+      //console.log("newData")
+      //console.log(newData)
+      callback(err, newData);
+    })
+
+  }
+
+  Calllog.countFilterCallLog = function (filter, callback) {
+    getFilter(filter, function (err, data) {
+      if (err)
+        callback(err, null);
+      callback(err, {
+        "count": data.length
+      });
+    })
+  };
 
 };

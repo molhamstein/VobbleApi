@@ -121,6 +121,44 @@
         "path": "/:id/updateCallLog",
         "verb": "put"
       }]
+    },
+    "countFilterCallLog": {
+      "accepts": [{
+        "arg": "filter",
+        "type": "object",
+        "required": true,
+        "description": "filter item"
+      }],
+      "returns": [{
+        "arg": "result",
+        "type": "object",
+        "root": true,
+        "description": ""
+      }],
+      "description": "",
+      "http": [{
+        "path": "/countFilterCallLog",
+        "verb": "get"
+      }]
+    },
+    "getFilterCallLog": {
+      "accepts": [{
+        "arg": "filter",
+        "type": "object",
+        "required": false,
+        "description": "filter Item"
+      }],
+      "returns": [{
+        "arg": "result",
+        "type": "object",
+        "root": true,
+        "description": ""
+      }],
+      "description": "filter On the Call Log",
+      "http": [{
+        "path": "/getFilterCallLog",
+        "verb": "get"
+      }]
     }
   }
 }
