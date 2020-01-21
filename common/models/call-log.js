@@ -37,32 +37,69 @@ module.exports = function (Calllog) {
         return next(errors.account.userCanNotRinging())
       }
       let deviceToken = user.pushkitToken
-      var options = {
-        token: {
-          key: "server/boot/AuthKey_SC8495N9AY.p8",
-          keyId: "SC8495N9AY",
-          teamId: "U2DR46FA6M"
-        },
-        production: false,
-        hideExperimentalHttp2Warning: true // the http2 module in node is experimental and will log 
-      };
+      if (user.phoneType == "IPHONE") {
+        var options = {
+          token: {
+            key: "server/boot/AuthKey_SC8495N9AY.p8",
+            keyId: "SC8495N9AY",
+            teamId: "U2DR46FA6M"
+          },
+          production: false,
+          hideExperimentalHttp2Warning: true // the http2 module in node is experimental and will log 
+        };
 
-      var apnProvider = new apn.Provider(options);
+        var apnProvider = new apn.Provider(options);
 
-      var note = new apn.Notification();
-      note.expiry = Math.floor(Date.now() / 1000) + 30; // Expires 1 hour from now.
-      note.badge = 3;
-      note.sound = "ping.aiff";
-      note.alert = "\uD83D\uDCE7 \u2709 You have a new message";
-      note.payload = {
-        'conversationId': context.req.body.conversationId,
-        'owner': context.res.locals.user
-      };
-      note.topic = "com.yallavideo.Vibo.voip";
+        var note = new apn.Notification();
+        note.expiry = Math.floor(Date.now() / 1000) + 30; // Expires 1 hour from now.
+        note.badge = 3;
+        note.sound = "ping.aiff";
+        note.alert = "\uD83D\uDCE7 \u2709 You have a new message";
+        note.payload = {
+          'conversationId': context.req.body.conversationId,
+          'owner': context.res.locals.user
+        };
+        note.topic = "com.yallavideo.Vibo.voip";
 
-      apnProvider.send(note, deviceToken).then((result) => {
-        apnProvider.shutdown()
-      });
+        apnProvider.send(note, deviceToken).then((result) => {
+          apnProvider.shutdown()
+        });
+      } else {
+        const data = JSON.stringify({
+          "priority": "high",
+          "data": {
+            "click_action": "FLUTTER_NOTIFICATION_CLICK",
+            'conversationId': context.req.body.conversationId,
+            'owner': context.res.locals.user
+          },
+          "to": deviceToken
+        })
+
+        const options = {
+          hostname: 'fcm.googleapis.com',
+          path: '/fcm/send',
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': config.androidCallToken
+          }
+        }
+
+        const req = https.request(options, res => {
+          console.log(`statusCode: ${res.statusCode}`)
+
+          res.on('data', d => {
+            process.stdout.write(d)
+          })
+        })
+
+        req.on('error', error => {
+          console.error(error)
+        })
+
+        req.write(data)
+        req.end()
+      }
       next()
     })
   });
@@ -120,6 +157,19 @@ module.exports = function (Calllog) {
         filter.where["owner.agencyId"] = ObjectId(filter.where["owner.agencyId"])
       if (filter.where['relatedUser.agencyId'] != null)
         filter.where["relatedUser.agencyId"] = ObjectId(filter.where["relatedUser.agencyId"])
+
+
+      if (filter.where['createdAt'] != null) {
+        if (filter.where['createdAt']['gte'] != null) {
+          filter.where['createdAt']['$gte'] = new Date(filter.where['createdAt']['gte'])
+          delete filter.where['createdAt']['gte']
+        }
+        if (filter.where['createdAt']['lte'] != null) {
+          filter.where['createdAt']['$lte'] = new Date(filter.where['createdAt']['lte'])
+          delete filter.where['createdAt']['lte']
+        }
+
+      }
 
       var collection = db.collection('callLog');
       var callLogs = collection.aggregate([{
@@ -196,8 +246,10 @@ module.exports = function (Calllog) {
 
   }
 
-  Calllog.countFilterCallLog = function (filter, callback) {
-    Calllog.getFilter(filter, function (err, data) {
+  Calllog.countFilterCallLog = function (where = {}, callback) {
+    Calllog.getFilter({
+      "where": where
+    }, function (err, data) {
       if (err)
         callback(err, null);
       callback(err, {
@@ -205,6 +257,8 @@ module.exports = function (Calllog) {
       });
     })
   };
+
+
   Calllog.exportFilterCallLog = function (where = {}, callback) {
     var filter = {
       "where": where
@@ -278,5 +332,7 @@ module.exports = function (Calllog) {
     });
 
   };
+
+
 
 };

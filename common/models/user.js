@@ -1887,6 +1887,329 @@ module.exports = function (User) {
 
   };
 
+  User.mainReportHost = function (filter, callback) {
+
+    if (filter.where == null) {
+      filter.where = {}
+    }
+
+    if (filter.where['relatedUser.agencyId'] != null) {
+      filter.where['relatedUser.agencyId'] = ObjectId(filter.where['relatedUser.agencyId'])
+    }
+
+    if (filter.where['relatedUserId'] != null) {
+      filter.where['relatedUserId'] = ObjectId(filter.where['relatedUserId'])
+    }
+
+    if (filter.where['createdAt'] != null) {
+      if (filter.where['createdAt']['gte'] != null) {
+        filter.where['createdAt']['$gte'] = new Date(filter.where['createdAt']['gte'])
+        delete filter.where['createdAt']['gte']
+      }
+      if (filter.where['createdAt']['lte'] != null) {
+        filter.where['createdAt']['$lte'] = new Date(filter.where['createdAt']['lte'])
+        delete filter.where['createdAt']['lte']
+      }
+
+    }
+    console.log(filter['where'])
+
+    User.getDataSource().connector.connect(function (err, db) {
+
+      var callLogCollection = db.collection('callLog');
+      var callLogs = callLogCollection.aggregate([{
+          $lookup: {
+            from: "user",
+            localField: "relatedUserId",
+            foreignField: "_id",
+            as: "relatedUser"
+          }
+        },
+        {
+          $unwind: "$relatedUser"
+        },
+        {
+          $match: filter['where']
+        },
+        {
+          $group: {
+            _id: '$relatedUserId',
+            callTotalCost: {
+              $sum: "$cost"
+            },
+            callTotalDuration: {
+              $sum: {
+                $ceil: {
+                  $divide: ["$duration", 60]
+                }
+              }
+            },
+            callCount: {
+              $sum: 1
+            }
+          }
+        },
+        {
+          $lookup: {
+            from: "user",
+            localField: "_id",
+            foreignField: "_id",
+            as: "relatedUser"
+          }
+        },
+        {
+          $unwind: "$relatedUser"
+        },
+        {
+          $lookup: {
+            from: "agency",
+            localField: "relatedUser.agencyId",
+            foreignField: "_id",
+            as: "agency"
+          }
+        },
+        {
+          $unwind: {
+            path: "$agency",
+            preserveNullAndEmptyArrays: true
+          }
+        },
+        {
+          $project: {
+            relatedUser: 1,
+            callTotalCost: 1,
+            callCount: 1,
+            agency: 1,
+            callTotalDuration: 1
+          }
+        }
+      ])
+      var chatItemCollection = db.collection('chatItem');
+      var chatItems = chatItemCollection.aggregate([{
+          $lookup: {
+            from: "user",
+            localField: "relatedUserId",
+            foreignField: "_id",
+            as: "relatedUser"
+          }
+        },
+        {
+          $unwind: "$relatedUser"
+        },
+        {
+          $match: filter['where']
+        },
+        {
+          $group: {
+            _id: '$relatedUserId',
+            giftTotalCost: {
+              $sum: "$price"
+            }
+          }
+        },
+        {
+          $lookup: {
+            from: "user",
+            localField: "_id",
+            foreignField: "_id",
+            as: "relatedUser"
+          }
+        },
+        {
+          $unwind: "$relatedUser"
+        },
+        {
+          $lookup: {
+            from: "agency",
+            localField: "relatedUser.agencyId",
+            foreignField: "_id",
+            as: "agency"
+          }
+        },
+        {
+          $unwind: {
+            path: "$agency",
+            preserveNullAndEmptyArrays: true
+          }
+        },
+        {
+          $project: {
+            relatedUser: 1,
+            giftTotalCost: 1,
+            agency: 1
+          }
+        }
+      ])
+      var itemCollection = db.collection('item');
+      var items = itemCollection.aggregate([{
+          $lookup: {
+            from: "user",
+            localField: "relatedUserId",
+            foreignField: "_id",
+            as: "relatedUser"
+          }
+        },
+        {
+          $unwind: "$relatedUser"
+        },
+        {
+          $match: filter['where']
+        },
+        {
+          $group: {
+            _id: '$relatedUserId',
+            itemTotalCost: {
+              $sum: "$price"
+            }
+          }
+        },
+        {
+          $lookup: {
+            from: "user",
+            localField: "_id",
+            foreignField: "_id",
+            as: "relatedUser"
+          }
+        },
+        {
+          $unwind: "$relatedUser"
+        },
+        {
+          $lookup: {
+            from: "agency",
+            localField: "relatedUser.agencyId",
+            foreignField: "_id",
+            as: "agency"
+          }
+        },
+        {
+          $unwind: {
+            path: "$agency",
+            preserveNullAndEmptyArrays: true
+          }
+        },
+        {
+          $project: {
+            relatedUser: 1,
+            itemTotalCost: 1,
+            agency: 1
+          }
+        }
+      ])
+      callLogs.get(function (err, call) {
+        chatItems.get(function (err, chatItem) {
+          items.get(function (err, item) {
+            var hashData = []
+            call.forEach(element => {
+              hashData[element._id] = {
+                "id": element._id,
+                "name": element.relatedUser.username,
+                "agency": element.agency ? element.agency.name : "",
+                "callTotalCost": element.callTotalCost,
+                "callCount": element.callCount,
+                "callTotalDuration": element.callTotalDuration,
+                "agencyId": element.agency ? element.agency.agencyId : "",
+                "giftTotalCost": 0,
+                "itemTotalCost": 0,
+                "total": element.callTotalCost
+              }
+            });
+            chatItem.forEach(element => {
+              if (hashData[element._id] == null) {
+                hashData[element._id] = {
+                  "id": element._id,
+                  "name": element.relatedUser.username,
+                  "agency": element.agency ? element.agency.name : "",
+                  "callTotalCost": 0,
+                  "callCount": 0,
+                  "agencyId": element.agency ? element.agency.agencyId : "",
+                  "callTotalDuration": 0,
+                  "giftTotalCost": element.giftTotalCost,
+                  "itemTotalCost": 0,
+                  "total": 0
+                }
+              } else {
+                hashData[element._id]["giftTotalCost"] += element.giftTotalCost
+              }
+              hashData[element._id]["total"] += element.giftTotalCost
+            });
+            item.forEach(element => {
+              if (hashData[element._id] == null) {
+                hashData[element._id] = {
+                  "id": element._id,
+                  "name": element.relatedUser.username,
+                  "agency": element.agency ? element.agency.name : "",
+                  "callTotalCost": 0,
+                  "callCount": 0,
+                  "agencyId": element.agency ? element.agency.agencyId : "",
+                  "callTotalDuration": 0,
+                  "giftTotalCost": 0,
+                  "itemTotalCost": element.itemTotalCost,
+                  "total": 0
+                }
+              } else {
+                hashData[element._id]["itemTotalCost"] += element.itemTotalCost
+              }
+              hashData[element._id]["total"] += element.itemTotalCost
+            });
+            var data = []
+            for (const key in hashData) {
+              if (hashData.hasOwnProperty(key)) {
+                const element = hashData[key];
+                data.push(element)
+              }
+            }
+            callback(null, data)
+          })
+        })
+      })
+    })
+  }
+
+
+  User.getReportHost = function (filter = {
+    "where": {}
+  }, callback) {
+
+    User.mainReportHost(filter, function (err, data) {
+      callback(null, data)
+    })
+
+  };
+
+
+  User.exportReportHost = function (filter = {
+    "where": {}
+  }, callback) {
+
+    User.mainReportHost(filter, function (err, data) {
+      var config = {
+        path: 'uploadFiles/excelFiles',
+        save: true,
+        fileName: 'callLog' + Date.now() + '.xlsx'
+      };
+      for (let index = 0; index < data.length; index++) {
+        const element = data[index];
+        if (filter['where'] != null && filter['where']["createdAt"] != null && filter['where']["createdAt"]["$gte"] != null)
+          data[index]["start"] = new Date(filter['where']["createdAt"]["$gte"]).toISOString()
+        if (filter['where'] && filter['where']["createdAt"] && filter['where']["createdAt"]["$lte"])
+          data[index]["end"] = new Date(filter['where']["createdAt"]["$lte"]).toISOString()
+        delete data[index]["id"]
+        delete data[index]["agencyId"]
+      }
+      var model = mongoXlsx.buildDynamicModel(data);
+
+      mongoXlsx.mongoData2Xlsx(data, model, config, function (err, data) {
+        //console.log('File saved at:', data.fullPath);
+        callback(null, {
+          'path': urlFileRootexcel + config['fileName']
+        });
+      });
+    })
+
+  };
+
+
   cron.scheduleJob('00 00 * * * *', function () {
     //console.log("cron job is working")
     User.updateAll({
@@ -2005,6 +2328,7 @@ module.exports = function (User) {
       }
     })
   })
+
 
 
   User.login = function (credentials, include, fn) {

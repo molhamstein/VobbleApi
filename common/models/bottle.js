@@ -860,74 +860,74 @@ module.exports = function (Bottle) {
 
 
   rule.minute = 2;
-  // cron.scheduleJob('*/5 * * * *', function () {
-  //   Bottle.updateAll({
-  //     totalWeight: '-99999999999999999999999'
-  //   }, function (err, info) {
+  cron.scheduleJob('*/5 * * * *', function () {
+    Bottle.updateAll({
+      totalWeight: '-99999999999999999999999'
+    }, function (err, info) {
 
-  //     var maxHourse = 7 * 24;
+      var maxHourse = 7 * 24;
 
-  //     var replyCountAvr = 0;
-  //     var paidAvr = 0;
-  //     Bottle.find({
-  //       order: 'createdAt DESC',
-  //       limit: 2000,
-  //       where: {
-  //         "status": "active"
-  //       },
-  //       include: {
-  //         relation: 'owner',
-  //       }
-  //     }, function (err, data) {
-  //       for (let index = 0; index < data.length; index++) {
-  //         const element = data[index];
-  //         replyCountAvr += element.repliesUserCount;
-  //         paidAvr += JSON.parse(JSON.stringify(element.owner())).totalPaid;
+      var replyCountAvr = 0;
+      var paidAvr = 0;
+      Bottle.find({
+        order: 'createdAt DESC',
+        limit: 2000,
+        where: {
+          "status": "active"
+        },
+        include: {
+          relation: 'owner',
+        }
+      }, function (err, data) {
+        for (let index = 0; index < data.length; index++) {
+          const element = data[index];
+          replyCountAvr += element.repliesUserCount;
+          paidAvr += JSON.parse(JSON.stringify(element.owner())).totalPaid;
 
-  //         if (index == data.length - 1) {
-  //           replyCountAvr = replyCountAvr / data.length;
-  //           paidAvr = paidAvr / data.length;
-  //           var repliesCountWieght = 200 / replyCountAvr;
-  //           var paidWieght = 60 / paidAvr;
+          if (index == data.length - 1) {
+            replyCountAvr = replyCountAvr / data.length;
+            paidAvr = paidAvr / data.length;
+            var repliesCountWieght = 200 / replyCountAvr;
+            var paidWieght = 60 / paidAvr;
 
-  //           async.forEachOf(data, function (element, index, callback) {
-  //             var gender = element.owner().gender;
-  //             var totalPaid = element.owner().totalPaid;
-  //             var username = element.owner().username;
-  //             // var tempProject = {
-  //             //   "paidWieght": paidWieght,
-  //             //   "repliesCountWieght": repliesCountWieght,
-  //             //   "replyCountAvr": replyCountAvr,
-  //             //   "paidAvr": paidAvr,
-  //             //   "createdAt": element.createdAt,
-  //             //   "numDay": diffdays(element.createdAt),
-  //             //   "numHours": diffHourse(element.createdAt),
-  //             //   "repliesUserCount": element.repliesUserCount,
-  //             //   "totalPaid": totalPaid,
-  //             //   "gender": gender,
-  //             //   "username": username,
-  //             //   "time score": ((maxHourse - diffHourse(element.createdAt)) * 10),
-  //             //   "reply score": element.repliesUserCount * repliesCountWieght,
-  //             //   "totalPaid score": totalPaid * paidWieght,
-  //             //   "score": (totalPaid * paidWieght) + ((maxHourse - diffHourse(element.createdAt)) * 10) + (element.repliesUserCount * repliesCountWieght)
-  //             // }
-  //             element.totalWeight = (totalPaid * paidWieght) + ((maxHourse - diffHourse(element.createdAt)) * 10) + (element.repliesUserCount * repliesCountWieght);
-  //             if (gender == "female") {
-  //               // tempProject['score'] = tempProject['score'] * 0.6
-  //               element.totalWeight = element.totalWeight * 0.6
-  //             }
-  //             // result.push(tempProject);
-  //             element.save(callback);
-  //           }, function () {
-  //             //console.log("Finish loop")
-  //             // result.sort(tempCompare);
-  //             // return mainCallback(null, result);
-  //           })
-  //         }
-  //       }
-  //     })
-  //   })
-  // });
+            async.forEachOf(data, function (element, index, callback) {
+              var gender = element.owner().gender;
+              var totalPaid = element.owner().totalPaid;
+              var username = element.owner().username;
+              // var tempProject = {
+              //   "paidWieght": paidWieght,
+              //   "repliesCountWieght": repliesCountWieght,
+              //   "replyCountAvr": replyCountAvr,
+              //   "paidAvr": paidAvr,
+              //   "createdAt": element.createdAt,
+              //   "numDay": diffdays(element.createdAt),
+              //   "numHours": diffHourse(element.createdAt),
+              //   "repliesUserCount": element.repliesUserCount,
+              //   "totalPaid": totalPaid,
+              //   "gender": gender,
+              //   "username": username,
+              //   "time score": ((maxHourse - diffHourse(element.createdAt)) * 10),
+              //   "reply score": element.repliesUserCount * repliesCountWieght,
+              //   "totalPaid score": totalPaid * paidWieght,
+              //   "score": (totalPaid * paidWieght) + ((maxHourse - diffHourse(element.createdAt)) * 10) + (element.repliesUserCount * repliesCountWieght)
+              // }
+              element.totalWeight = (totalPaid * paidWieght) + ((maxHourse - diffHourse(element.createdAt)) * 10) + (element.repliesUserCount * repliesCountWieght);
+              if (gender == "female") {
+                // tempProject['score'] = tempProject['score'] * 0.6
+                element.totalWeight = element.totalWeight * 0.6
+              }
+              // result.push(tempProject);
+              element.save(callback);
+            }, function () {
+              //console.log("Finish loop")
+              // result.sort(tempCompare);
+              // return mainCallback(null, result);
+            })
+          }
+        }
+      })
+    })
+  });
   Bottle.recommendationTest = function (mainCallback) {
     var result = []
     Bottle.updateAll({

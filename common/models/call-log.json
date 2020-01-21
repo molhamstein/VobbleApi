@@ -142,7 +142,7 @@
     },
     "countFilterCallLog": {
       "accepts": [{
-        "arg": "filter",
+        "arg": "where",
         "type": "object",
         "required": true,
         "description": "filter item"

@@ -365,6 +365,19 @@
     },
     {
       "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "getReportHost"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW",
+      "property": "exportReportHost"
+    },
+    
+    {
+      "principalType": "ROLE",
       "principalId": "$unauthenticated",
       "permission": "ALLOW",
       "property": "loginByPhone"
@@ -871,6 +884,40 @@
       "http": [{
         "path": "/loginByPhonenumber",
         "verb": "post"
+      }]
+    },
+    "getReportHost": {
+      "accepts": [{
+        "arg": "filter",
+        "type": "object"
+      }],
+      "returns": [{
+        "arg": "result",
+        "type": "array",
+        "root": true,
+        "description": ""
+      }],
+      "description": "",
+      "http": [{
+        "path": "/getReportHost",
+        "verb": "get"
+      }]
+    },
+    "exportReportHost": {
+      "accepts": [{
+        "arg": "filter",
+        "type": "object"
+      }],
+      "returns": [{
+        "arg": "result",
+        "type": "array",
+        "root": true,
+        "description": ""
+      }],
+      "description": "",
+      "http": [{
+        "path": "/exportReportHost",
+        "verb": "get"
       }]
     }
   }
