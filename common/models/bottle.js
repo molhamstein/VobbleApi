@@ -329,7 +329,7 @@ module.exports = function (Bottle) {
 
         if (offsets == 0) {
 
-          createStack(userId, filter, oneUser, function () {
+          createStack(userId, filter, oneUser, now, function (dataTime) {
             var createStack = (new Date().getTime() - now) / 1000
             getFromStack(userId, offsets, limit, function (err, data) {
               var getFromStack = (new Date().getTime() - now) / 1000
@@ -337,9 +337,9 @@ module.exports = function (Bottle) {
                 data[0]['start'] = start
                 data[0]['afterSeen'] = afterSeen
                 data[0]['getUser'] = getUser
+                data[0]["dataTime"] = dataTime
                 data[0]['createStack'] = createStack
                 data[0]['getFromStack'] = getFromStack
-
               }
               return callback(null, data);
             })
@@ -360,7 +360,7 @@ module.exports = function (Bottle) {
   }
 
 
-  function createStack(userId, filter, oneUser, callback) {
+  function createStack(userId, filter, oneUser, now, callback) {
     var blockList = []
     var seenBottle = []
 
@@ -383,6 +383,8 @@ module.exports = function (Bottle) {
       });
 
       blockList.push(ObjectId(userId))
+      var getBlock = (new Date().getTime() - now) / 1000
+
       //console.log("blockList")
       //console.log(blockList)
       filter['ownerId'] = {
@@ -397,6 +399,7 @@ module.exports = function (Bottle) {
       }, function (err, bottles) {
         seenBottle = getFrequency(bottles, filter)
 
+        var getSeen = (new Date().getTime() - now) / 1000
 
 
         //console.log("seenBottle.length")
@@ -437,10 +440,19 @@ module.exports = function (Bottle) {
                 //console.log(arrayBottle)
                 if (i == 0) {
                   arrayBottle = arrayBottle.concat(seenBottle)
+                  var getDataTime = (new Date().getTime() - now) / 1000
+
                   oneUser.updateAttributes({
                     "stackBottleUser": arrayBottle
                   }, function (err, data) {
-                    return callback()
+                    var updateUserTime = (new Date().getTime() - now) / 1000
+
+                    return callback({
+                      "updateUserTime": updateUserTime,
+                      "getDataTime": getDataTime,
+                      "getSeen": getSeen,
+                      "getBlock": getBlock,
+                    })
                   })
                 }
               }
