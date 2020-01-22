@@ -115,7 +115,7 @@ module.exports = function (Calllog) {
       var duration = (endAt.getTime() - startAt.getTime()) / 1000;
       updateObject["duration"] = duration
 
-      updateObject[cost] = minCost * Math.ceil(duration / 60)
+      updateObject["cost"] = minCost * Math.ceil(duration / 60)
 
       if (status)
         updateObject["status"] = status
