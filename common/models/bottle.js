@@ -394,7 +394,10 @@ module.exports = function (Bottle) {
 
       Bottle.app.models.bottleUserseen.find({
         where: {
-          userId: userId
+          userId: userId,
+          "createdAt": {
+            "$gt": new Date("2019-06-01T13:39:44.419Z")
+          }
         }
       }, function (err, bottles) {
         seenBottle = getFrequency(bottles, filter)
