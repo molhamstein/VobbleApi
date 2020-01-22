@@ -109,14 +109,14 @@ module.exports = function (Calllog) {
       if (callLog == null)
         throw (errors.callLog.callLogNotFound());
       var updateObject = {}
-      if (startAt)
-        updateObject["startAt"] = startAt
-      if (endAt) {
-        var duration = (endAt.getTime() - callLog.startAt.getTime()) / 1000;
-        updateObject["duration"] = duration
-        updateObject[cost] = minCost * Math.ceil(duration / 60)
-        updateObject["endAt"] = endAt
-      }
+      updateObject["startAt"] = startAt
+      updateObject["endAt"] = endAt
+
+      var duration = (endAt.getTime() - startAt.getTime()) / 1000;
+      updateObject["duration"] = duration
+
+      updateObject[cost] = minCost * Math.ceil(duration / 60)
+
       if (status)
         updateObject["status"] = status
 
