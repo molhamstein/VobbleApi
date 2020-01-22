@@ -291,7 +291,7 @@ module.exports = function (Bottle) {
     var filter = {
       "status": "active",
       "createdAt": {
-        "$gt": "2019-06-01T13:39:44.419Z"
+        "$gt": new Date("2019-06-01T13:39:44.419Z")
       }
     }
     filter['owner.status'] = "active"
