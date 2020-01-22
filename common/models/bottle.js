@@ -396,7 +396,7 @@ module.exports = function (Bottle) {
         where: {
           userId: userId,
           "createdAt": {
-            "$gt": new Date("2019-06-01T13:39:44.419Z")
+            "gt": new Date("2019-06-01T13:39:44.419Z")
           }
         }
       }, function (err, bottles) {
