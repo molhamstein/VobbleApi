@@ -329,7 +329,7 @@ module.exports = function (Bottle) {
 
         if (offsets == 0) {
 
-          createStack(userId, filter, oneUser, now, function (dataTime) {
+          createStack(userId, filter, now, function (dataTime) {
             var createStack = (new Date().getTime() - now) / 1000
             getFromStack(userId, offsets, limit, function (err, data) {
               var getFromStack = (new Date().getTime() - now) / 1000
@@ -360,106 +360,119 @@ module.exports = function (Bottle) {
   }
 
 
-  function createStack(userId, filter, oneUser, now, callback) {
+  function createStack(userId, filter, now, callback) {
     var blockList = []
-    var seenBottle = []
-
-    Bottle.app.models.block.find({
-      where: {
-        or: [{
-            "ownerId": ObjectId(userId)
-          },
-          {
-            "userId": ObjectId(userId)
-          },
-        ]
-      }
-    }, function (err, blocksList) {
-      blockList = blocksList.map(function (block) {
-        if (new String(userId).valueOf() === new String(block.ownerId).valueOf())
-          return ObjectId(block.userId);
-        else
-          return ObjectId(block.ownerId);
-      });
-
-      blockList.push(ObjectId(userId))
-      var getBlock = (new Date().getTime() - now) / 1000
-
-      //console.log("blockList")
-      //console.log(blockList)
-      filter['ownerId'] = {
-        $nin: blockList
-      }
+    Bottle.app.models.user.findById(userId, function (err, oneUser) {
 
 
-      Bottle.app.models.bottleUserseen.find({
+      Bottle.app.models.block.find({
         where: {
-          userId: userId,
-          "createdAt": {
-            "gt": new Date("2019-06-01T13:39:44.419Z")
-          }
+          or: [{
+              "ownerId": ObjectId(userId)
+            },
+            {
+              "userId": ObjectId(userId)
+            },
+          ]
         }
-      }, function (err, bottles) {
-        seenBottle = getFrequency(bottles, filter)
+      }, function (err, blocksList) {
+        blockList = blocksList.map(function (block) {
+          if (new String(userId).valueOf() === new String(block.ownerId).valueOf())
+            return ObjectId(block.userId);
+          else
+            return ObjectId(block.ownerId);
+        });
 
-        var getSeen = (new Date().getTime() - now) / 1000
+        blockList.push(ObjectId(userId))
+        var getBlock = (new Date().getTime() - now) / 1000
+
+        //console.log("blockList")
+        //console.log(blockList)
+        filter['ownerId'] = {
+          $nin: blockList
+        }
 
 
-        //console.log("seenBottle.length")
-        //console.log(seenBottle)
+        // Bottle.app.models.bottleUserseen.find({
+        //   where: {
+        //     userId: userId,
+        //     "createdAt": {
+        //       "gt": new Date("2019-06-01T13:39:44.419Z")
+        //     }
+        //   }
+        // }, function (err, bottles) {
+        // seenBottle = getFrequency(bottles, filter)
+        Bottle.getFrequency(userId, filter, function (err, seenBottle) {
 
-        Bottle.getDataSource().connector.connect(function (err, db) {
 
-          var collection = db.collection('bottle');
-          var cursor = collection.aggregate([{
-              $match: filter
-            },
-            {
-              $sort: {
-                totalWeight: -1
-              }
-            },
-            {
-              $limit: 900
-            }
-          ])
-          cursor.get(function (err, data) {
-            if (err) return callback(err);
-            var arrayBottle = []
-            if (data.length == 0) {
-              oneUser.updateAttributes({
-                "stackBottleUser": arrayBottle
-              }, function (err, data) {
-                return callback()
-              })
-            } else {
-              for (var i = data.length - 1; i >= 0; i--) {
-                var element = data[i]
-                if (seenBottle.indexOf(element._id.toString()) != -1) {
-                  data.splice(i, 1);
-                } else {
-                  arrayBottle.unshift(element._id)
+          var getSeen = (new Date().getTime() - now) / 1000
+
+
+          //console.log("seenBottle.length")
+          //console.log(seenBottle)
+
+          console.log(filter)
+          Bottle.getDataSource().connector.connect(function (err, db) {
+
+            var collection = db.collection('bottle');
+            var cursor = collection.aggregate([{
+                $match: filter
+              },
+              {
+                $sort: {
+                  totalWeight: -1
                 }
-                //console.log(arrayBottle)
-                if (i == 0) {
-                  arrayBottle = arrayBottle.concat(seenBottle)
-                  var getDataTime = (new Date().getTime() - now) / 1000
+              },
+              {
+                $limit: 900
+              }
+            ])
+            cursor.get(function (err, data) {
+              // console.log(data)
+              if (err) return callback(err);
+              var arrayBottle = []
+              console.log("data.length")
+              console.log(data.length)
+              if (data.length == 0) {
+                oneUser.updateAttributes({
+                  "stackBottleUser": arrayBottle
+                }, function (err, data) {
+                  return callback()
+                })
+              } else {
+                for (var i = data.length - 1; i >= 0; i--) {
+                  var element = data[i]
+                  // if (seenBottle.indexOf(element._id.toString()) != -1) {
+                  //   data.splice(i, 1);
+                  // } else {
+                  //   arrayBottle.unshift(element._id)
+                  // }
+                  if (seenBottle.indexOf(element._id.toString()) == -1) {
+                    arrayBottle.unshift(element._id)
+                  }
+                  //console.log(arrayBottle)
+                  if (i == 0) {
+                    arrayBottle = arrayBottle.concat(seenBottle)
+                    var getDataTime = (new Date().getTime() - now) / 1000
+                    // console.log(arrayBottle)
+                    oneUser.updateAttribute(
+                      "stackBottleUser", arrayBottle,
+                      function (err, data) {
+                        if (err) console.log(err)
+                        console.log(data)
+                        var updateUserTime = (new Date().getTime() - now) / 1000
 
-                  oneUser.updateAttributes({
-                    "stackBottleUser": arrayBottle
-                  }, function (err, data) {
-                    var updateUserTime = (new Date().getTime() - now) / 1000
-
-                    return callback({
-                      "updateUserTime": updateUserTime,
-                      "getDataTime": getDataTime,
-                      "getSeen": getSeen,
-                      "getBlock": getBlock,
-                    })
-                  })
+                        return callback({
+                          "updateUserTime": updateUserTime,
+                          "getDataTime": getDataTime,
+                          "getSeen": getSeen,
+                          "getBlock": getBlock,
+                        })
+                      })
+                  }
                 }
               }
-            }
+            })
           })
         })
       })
@@ -481,6 +494,8 @@ module.exports = function (Bottle) {
         cursor.get(function (err, users) {
           if (err) return callback(err);
           var stack = users[0].stackBottleUser
+          console.log("stack")
+          console.log(stack)
           var length = stack.length;
           var newOffset = offsets % length
           //console.log(newOffset);
@@ -513,30 +528,109 @@ module.exports = function (Bottle) {
   }
 
 
-  function getFrequency(array, filter) {
-    var freq = {};
-    for (var i = 0; i < array.length; i++) {
-      var element = array[i];
-      if (freq[element.bottleId]) {
-        freq[element.bottleId]++;
-      } else {
-        // //console.log("element.bottles.owner.gender")
-        var bottle = element.bottles()
-        if (bottle && bottle.status == 'active') {
-          var owner = bottle.owner();
-          // //console.log("filter.shoreId.toString() == bottle.shoreId.toString()")
-          // //console.log(filter.shoreId.toString() + "//" + bottle.shoreId.toString())
-          if (owner && owner.status == 'active' && (filter['owner.gender'] == null || filter['owner.gender'] == owner.gender) && (filter['owner.ISOCode'] == null || filter['owner.ISOCode'] == owner.ISOCode) && (filter.bottleType == null || bottle.bottleType == filter.bottleType) && (filter.shoreId == null || new String(filter.shoreId).valueOf() === new String(bottle.shoreId).valueOf()))
-            freq[element.bottleId] = 1;
+  // function getFrequency(array, filter) {
+  //   var freq = {};
+  //   for (var i = 0; i < array.length; i++) {
+  //     var element = array[i];
+  //     if (freq[element.bottleId]) {
+  //       freq[element.bottleId]++;
+  //     } else {
+  //       // //console.log("element.bottles.owner.gender")
+  //       var bottle = element.bottles()
+  //       if (bottle && bottle.status == 'active') {
+  //         var owner = bottle.owner();
+  //         // //console.log("filter.shoreId.toString() == bottle.shoreId.toString()")
+  //         // //console.log(filter.shoreId.toString() + "//" + bottle.shoreId.toString())
+  //         if (owner && owner.status == 'active' && (filter['owner.gender'] == null || filter['owner.gender'] == owner.gender) && (filter['owner.ISOCode'] == null || filter['owner.ISOCode'] == owner.ISOCode) && (filter.bottleType == null || bottle.bottleType == filter.bottleType) && (filter.shoreId == null || new String(filter.shoreId).valueOf() === new String(bottle.shoreId).valueOf()))
+  //           freq[element.bottleId] = 1;
 
-        }
-      }
+  //       }
+  //     }
+  //   }
+  //   var sortFreq = Object.keys(freq).sort(function (a, b) {
+  //     return freq[a] - freq[b]
+  //   })
+  //   return sortFreq;
+  // };
+
+  Bottle.getFrequency = function (userId, mainfilter = {}, callback) {
+    var filter = Object.assign({}, mainfilter);
+
+    filter["owner.status"] = "active"
+    filter["userId"] = ObjectId(userId)
+    if (filter.createdAt) {
+      delete filter.createdAt
     }
-    var sortFreq = Object.keys(freq).sort(function (a, b) {
-      return freq[a] - freq[b]
+    if (filter.status) {
+      delete filter.status
+    }
+    if (filter.ownerId) {
+      delete filter.ownerId
+    }
+
+    if (filter.createdAt) {
+      delete filter.createdAt
+    }
+    if (filter.bottleType != null) {
+      filter["bottle.bottleType"] = filter.bottleType
+      delete filter.bottleType
+    }
+    if (filter.shoreId != null) {
+      filter["bottle.shoreId"] = ObjectId(filter.shoreId)
+      delete filter.shoreId
+    }
+    console.log(filter)
+    Bottle.getDataSource().connector.connect(function (err, db) {
+
+      var collection = db.collection('bottleUserseen');
+      var seen = collection.aggregate([{
+          $lookup: {
+            from: "user",
+            localField: "userId",
+            foreignField: "_id",
+            as: "owner"
+          }
+        },
+        {
+          $unwind: "$owner"
+        },
+        {
+          $lookup: {
+            from: "bottle",
+            localField: "bottleId",
+            foreignField: "_id",
+            as: "bottle"
+          }
+        },
+        {
+          $unwind: "$bottle"
+        },
+        {
+          $match: filter
+        },
+        {
+          $group: {
+            _id: '$bottleId',
+            count: {
+              $sum: 1
+            }
+          }
+        }
+      ])
+      seen.get(function (err, seens) {
+        console.log(seens)
+        var data = [];
+        seens.forEach(element => {
+          data[element._id] = element.count
+        });
+        var sortFreq = Object.keys(data).sort(function (a, b) {
+          return data[a] - data[b]
+        })
+
+        callback(err, sortFreq)
+      })
     })
-    return sortFreq;
-  };
+  }
 
   Bottle.getOneBottle = function (gender, ISOCode, shoreId, req, callback) {
     var result;
