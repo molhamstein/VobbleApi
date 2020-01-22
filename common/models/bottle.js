@@ -287,6 +287,7 @@ module.exports = function (Bottle) {
     //console.log(seen)
     //console.log("complete")
     //console.log(complete)
+    var now = new Date().getTime();
     var userId = req.accessToken.userId;
     var filter = {
       "status": "active",
@@ -312,9 +313,13 @@ module.exports = function (Bottle) {
     if (ISOCode) {
       filter['owner.ISOCode'] = ISOCode
     }
+    var start = (new Date().getTime() - now) / 1000
     Bottle.app.models.bottleUserComplete.seenAndComplete(seen, complete, req, function () {
+      var afterSeen = (new Date().getTime() - now) / 1000
 
       Bottle.app.models.user.findById(userId, function (err, oneUser) {
+        var getUser = (new Date().getTime() - now) / 1000
+
         if (err) {
           return callback(err);
         }
@@ -325,13 +330,29 @@ module.exports = function (Bottle) {
         if (offsets == 0) {
 
           createStack(userId, filter, oneUser, function () {
+            var createStack = (new Date().getTime() - now) / 1000
             getFromStack(userId, offsets, limit, function (err, data) {
+              var getFromStack = (new Date().getTime() - now) / 1000
+              if (data[0] != null) {
+                data[0]['start'] = start
+                data[0]['afterSeen'] = afterSeen
+                data[0]['getUser'] = getUser
+                data[0]['createStack'] = createStack
+                data[0]['getFromStack'] = getFromStack
+
+              }
               return callback(null, data);
             })
           })
         } else
           getFromStack(userId, offsets, limit, function (err, data) {
-
+            var getFromStack = (new Date().getTime() - now) / 1000
+            if (data[0] != null) {
+              data[0]['start'] = start
+              data[0]['afterSeen'] = afterSeen
+              data[0]['getUser'] = getUser
+              data[0]['getFromStack'] = getFromStack
+            }
             return callback(null, data);
           })
       })
