@@ -289,7 +289,10 @@ module.exports = function (Bottle) {
     //console.log(complete)
     var userId = req.accessToken.userId;
     var filter = {
-      "status": "active"
+      "status": "active",
+      "createdAt": {
+        "$gt": "2019-06-01T13:39:44.419Z"
+      }
     }
     filter['owner.status'] = "active"
 
@@ -873,7 +876,10 @@ module.exports = function (Bottle) {
         order: 'createdAt DESC',
         limit: 2000,
         where: {
-          "status": "active"
+          "status": "active",
+          "createdAt": {
+            "gt": "2019-06-01T13:39:44.419Z"
+          }
         },
         include: {
           relation: 'owner',
