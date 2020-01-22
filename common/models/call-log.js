@@ -36,7 +36,9 @@ module.exports = function (Calllog) {
       if (user.pushkitToken == null) {
         return next(errors.account.userCanNotRinging())
       }
-      let deviceToken = user.pushkitToken
+      var callId = context.req.body.callId;
+      delete context.req.body.callId
+        let deviceToken = user.pushkitToken
       if (user.phoneType == "IPHONE") {
         var options = {
           token: {
@@ -57,7 +59,8 @@ module.exports = function (Calllog) {
         note.alert = "\uD83D\uDCE7 \u2709 You have a new message";
         note.payload = {
           'conversationId': context.req.body.conversationId,
-          'owner': context.res.locals.user
+          'owner': context.res.locals.user,
+          'callId':callId
         };
         note.topic = "com.yallavideo.Vibo.voip";
 
@@ -70,7 +73,9 @@ module.exports = function (Calllog) {
           "data": {
             "click_action": "FLUTTER_NOTIFICATION_CLICK",
             'conversationId': context.req.body.conversationId,
-            'owner': context.res.locals.user
+            'owner': context.res.locals.user,
+            'callId':callId
+
           },
           "to": deviceToken
         })
