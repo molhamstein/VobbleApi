@@ -1184,6 +1184,9 @@ module.exports = function (User) {
           oneUser.lastLogin = new Date();
           oneUser.deviceId = deviceId;
           oneUser.save();
+          oneUser['cost'] = {
+            "audioCall": 50
+          }
           if (userVersion == null)
             return callback(null, oneUser);
           else if (userVersion != null) {
@@ -1197,9 +1200,6 @@ module.exports = function (User) {
               versionObject["link"] = version.iosLink;
             }
             oneUser['version'] = versionObject
-          }
-          oneUser['cost'] = {
-            "audioCall": 50
           }
           return callback(null, oneUser);
         }
