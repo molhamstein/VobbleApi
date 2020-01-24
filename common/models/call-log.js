@@ -7,6 +7,7 @@ const configPath = process.env.NODE_ENV === undefined ?
   '../../server/config.json' :
   `../../server/config.${process.env.NODE_ENV}.json`;
 const config = require(configPath);
+var serviceAccount = require("../../server/boot/serviceAccountKey.json");
 
 module.exports = function (Calllog) {
   //   var appleAccount = require("../../server/boot/appleAccountKey.json");
@@ -86,11 +87,10 @@ module.exports = function (Calllog) {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': config.androidCallToken
+            'Authorization': serviceAccount.androidCallToken
           }
         }
 
-        console.log(config.androidCallToken)
         const req = https.request(options, res => {
           console.log(`statusCode: ${res.statusCode}`)
 
