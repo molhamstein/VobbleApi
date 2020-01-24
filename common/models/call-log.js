@@ -38,7 +38,7 @@ module.exports = function (Calllog) {
       }
       var callId = context.req.body.callId;
       delete context.req.body.callId
-        let deviceToken = user.pushkitToken
+      let deviceToken = user.pushkitToken
       if (user.phoneType == "IPHONE") {
         var options = {
           token: {
@@ -60,7 +60,7 @@ module.exports = function (Calllog) {
         note.payload = {
           'conversationId': context.req.body.conversationId,
           'owner': context.res.locals.user,
-          'callId':callId
+          'callId': callId
         };
         note.topic = "com.yallavideo.Vibo.voip";
 
@@ -74,7 +74,7 @@ module.exports = function (Calllog) {
             "click_action": "FLUTTER_NOTIFICATION_CLICK",
             'conversationId': context.req.body.conversationId,
             'owner': context.res.locals.user,
-            'callId':callId
+            'callId': callId
 
           },
           "to": deviceToken
@@ -90,6 +90,7 @@ module.exports = function (Calllog) {
           }
         }
 
+        console.log(config.androidCallToken)
         const req = https.request(options, res => {
           console.log(`statusCode: ${res.statusCode}`)
 
