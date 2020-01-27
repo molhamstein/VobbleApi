@@ -74,7 +74,7 @@ module.exports = function (Calllog) {
           "data": {
             "click_action": "FLUTTER_NOTIFICATION_CLICK",
             'conversationId': context.req.body.conversationId,
-            'owner': context.res.locals.user,
+            'username': context.res.locals.user.username,
             'callId': callId
 
           },
