@@ -172,6 +172,16 @@
       "type": "boolean",
       "required": true,
       "default": true
+    },
+    "callTutShowed": {
+      "type": "boolean",
+      "required": true,
+      "default": false
+    },
+    "audioBottleTutShowed": {
+      "type": "boolean",
+      "required": true,
+      "default": false
     }
   },
   "validations": [],

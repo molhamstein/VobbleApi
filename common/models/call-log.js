@@ -130,7 +130,7 @@ module.exports = function (Calllog) {
         updateObject["status"] = status
 
       var owner = callLog.owner();
-      if (owner.pocketCoins < minCost && isReview == false) {
+      if (owner.pocketCoins < minCost && isFinish == false && isReview == false) {
         return callback(errors.product.youDonotHaveCoins())
       }
       await callLog.updateAttributes(updateObject)
