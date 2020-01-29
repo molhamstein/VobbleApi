@@ -222,6 +222,11 @@ module.exports = function (Calllog) {
             owner: 1,
             relatedUser: 1,
           }
+        },
+        {
+          $sort: {
+            createdAt: -1
+          }
         }
       ]);
       callLogs.get(function (err, data) {
