@@ -150,60 +150,151 @@ module.exports = function (Bottle) {
   //   }
   // ]
 
-  function getFilter(filter, callback) {
-    var shoreId = ""
-    var gt = ""
-    var ls = ""
-    var gender = ""
-    var username = ""
-    var ISOCode = ""
-
-    var index
-    if (filter != null)
-      index = filter['where']['and'].length - 1;
-    else
-      index = -1
-
-    while (index >= 0) {
-      if (filter['where']['and'][index]['owner.gender'] != null) {
-        gender = filter['where']['and'][index]['owner.gender'];
-        filter['where']['and'].splice(index, 1)
-      } else if (filter['where']['and'][index]['owner.ISOCode'] != null) {
-        ISOCode = filter['where']['and'][index]['owner.ISOCode'];
-        filter['where']['and'].splice(index, 1)
-      } else if (filter['where']['and'][index]['owner.username'] != null) {
-        username = filter['where']['and'][index]['owner.username'];
-        filter['where']['and'].splice(index, 1)
+  function getFilter(filter, limit, offset, callback) {
+    // var shoreId = ""
+    // var gt = ""
+    // var ls = ""
+    // var gender = ""
+    // var username = ""
+    // var ISOCode = ""
+    var skip;
+    var limitObject;
+    if (offset) {
+      skip = {
+        $skip: offset
       }
-
-      index -= 1;
     }
+    if (limit) {
+      var tempOffset = offset ? offset : 0;
+      limitObject = {
+        $limit: limit + tempOffset
+      }
+    }
+    // var index
+    // if (filter != null)
+    //   index = filter['where']['and'].length - 1;
+    // else
+    //   index = -1
 
-    if (filter == null || filter['where']['and'][0] == null)
-      filter = {}
-    Bottle.find(
-      filter,
-      function (err, bottles) {
-        if (err)
-          callback(err, null);
-        var result = [];
-        if (bottles) {
-          //console.log("bottles.length")
-          //console.log(bottles.length)
+    // while (index >= 0) {
+    //   if (filter['where']['and'][index]['owner.gender'] != null) {
+    //     gender = filter['where']['and'][index]['owner.gender'];
+    //     filter['where']['and'].splice(index, 1)
+    //   } else if (filter['where']['and'][index]['owner.ISOCode'] != null) {
+    //     ISOCode = filter['where']['and'][index]['owner.ISOCode'];
+    //     filter['where']['and'].splice(index, 1)
+    //   } else if (filter['where']['and'][index]['owner.username'] != null) {
+    //     username = filter['where']['and'][index]['owner.username'];
+    //     filter['where']['and'].splice(index, 1)
+    //   }
 
-          bottles.forEach(function (element) {
-            element.owner(function (err, owner) {
-              if (owner)
-                if (((gender == "" || owner.gender == gender) && (username == "" || owner.username.includes(username)) && (ISOCode == "" || owner.ISOCode == ISOCode))) {
-                  result.push(element);
-                }
-            })
-          }, this);
+    //   index -= 1;
+    // }
+
+    // if (filter == null || filter['where']['and'][0] == null)
+    //   filter = {}
+
+    var where = {}
+    if (filter['where']['and'] != null) {
+      where['$and'] = []
+      filter['where']['and'].forEach(element => {
+        if (element['owner.username'] == null) {
+          where['$and'].push(element)
+        } else {
+          var value=element['owner.username']
+          where['$and'].push({
+            "owner.username": {
+              $regex: value,
+              $options: 'i'
+            }
+          })
         }
-        //console.log("result.length")
-        //console.log(result.length)
-        callback(null, result);
+
+      });
+    }
+    var aggregate = [{
+        $lookup: {
+          from: "user",
+          let: {
+            ownerId: {
+              $convert: {
+                input: "$ownerId",
+                to: "objectId"
+              }
+            }
+          },
+          pipeline: [{
+              $match: {
+                $expr: {
+                  $eq: ["$_id", "$$ownerId"]
+                }
+              }
+            },
+            {
+              $project: {
+                stackBottleUser: 0
+              }
+            }
+
+          ],
+          as: "owner"
+        }
+      },
+      {
+        $unwind: "$owner"
+      },
+      {
+        $lookup: {
+          from: "shore",
+          localField: "shoreId",
+          foreignField: "_id",
+          as: "shore"
+        }
+      },
+      {
+        $unwind: "$shore"
+      }
+    ]
+    if (where["$and"].length != 0)
+      aggregate.push({
+        $match: where
       })
+    aggregate.push({
+      $project: {
+        _id: 0,
+        id: '$_id',
+        file: 1,
+        status: 1,
+        createdAt: 1,
+        thumbnail: 1,
+        ownerId: 1,
+        repliesUserCount: 1,
+        bottleViewCount: 1,
+        bottleCompleteCount: 1,
+        bottleType: 1,
+        shore: 1,
+        shoreId: 1,
+        owner: 1
+      }
+    }, {
+      $sort: {
+        createdAt: -1
+      }
+    })
+    if (limit) {
+      aggregate.push(limitObject)
+    }
+    if (offset) {
+      aggregate.push(skip)
+    }
+    Bottle.getDataSource().connector.connect(function (err, db) {
+      var collection = db.collection('bottle');
+      var bottles = collection.aggregate(aggregate);
+      bottles.get(function (err, data) {
+        if (err) return callback(err);
+        return callback(null, data);
+      })
+    })
   }
 
   // get bottle to view
@@ -218,11 +309,11 @@ module.exports = function (Bottle) {
       limit = 10;
     delete filter['offset']
     delete filter['limit']
-    getFilter(filter, function (err, data) {
+    console.log(limit)
+    getFilter(filter, limit, offset, function (err, data) {
       if (err)
         callback(err, null);
-      var newData = data.slice(offset, offset + limit);
-      callback(err, newData);
+      callback(err, data);
     })
 
   }
@@ -234,7 +325,7 @@ module.exports = function (Bottle) {
 
   Bottle.countFilter = function (filter, callback) {
 
-    getFilter(filter, function (err, data) {
+    getFilter(filter, null, null, function (err, data) {
       if (err)
         callback(err, null);
       callback(err, {
