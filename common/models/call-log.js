@@ -184,8 +184,28 @@ module.exports = function (Calllog) {
       var callLogs = collection.aggregate([{
           $lookup: {
             from: "user",
-            localField: "ownerId",
-            foreignField: "_id",
+            let: {
+              ownerId: {
+                $convert: {
+                  input: "$ownerId",
+                  to: "objectId"
+                }
+              }
+            },
+            pipeline: [{
+                $match: {
+                  $expr: {
+                    $eq: ["$_id", "$$ownerId"]
+                  }
+                }
+              },
+              {
+                $project: {
+                  stackBottleUser: 0
+                }
+              }
+
+            ],
             as: "owner"
           }
         },
@@ -195,8 +215,28 @@ module.exports = function (Calllog) {
         {
           $lookup: {
             from: "user",
-            localField: "relatedUserId",
-            foreignField: "_id",
+            let: {
+              relatedUserId: {
+                $convert: {
+                  input: "$relatedUserId",
+                  to: "objectId"
+                }
+              }
+            },
+            pipeline: [{
+                $match: {
+                  $expr: {
+                    $eq: ["$_id", "$$relatedUserId"]
+                  }
+                }
+              },
+              {
+                $project: {
+                  stackBottleUser: 0
+                }
+              }
+
+            ],
             as: "relatedUser"
           }
         },
@@ -219,8 +259,8 @@ module.exports = function (Calllog) {
             endAt: 1,
             duration: 1,
             cost: 1,
-            owner: 1,
             relatedUser: 1,
+            owner: 1
           }
         },
         {
