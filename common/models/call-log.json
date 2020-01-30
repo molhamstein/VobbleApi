@@ -41,7 +41,7 @@
     "cost": {
       "type": "number",
       "required": true,
-      "default": "0"
+      "default": 0
     },
     "createdAt": {
       "type": "date",
