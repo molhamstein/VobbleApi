@@ -220,7 +220,13 @@ module.exports = function (Calllog) {
             duration: 1,
             cost: 1,
             owner: 1,
-            relatedUser: 1
+            owner: {
+              stackBottleUser: 0
+            },
+            relatedUser: 1,
+            relatedUser: {
+              stackBottleUser: 0
+            }
           }
         },
         {
