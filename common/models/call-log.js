@@ -68,6 +68,9 @@ module.exports = function (Calllog) {
         apnProvider.send(note, deviceToken).then((result) => {
           console.log("result")
           console.log(result)
+          if (result['failed'].length > 0) {
+            console.log(result['failed'][0]['response'])
+          }
           apnProvider.shutdown()
         });
       } else {
