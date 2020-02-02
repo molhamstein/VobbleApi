@@ -66,6 +66,8 @@ module.exports = function (Calllog) {
         note.topic = "com.yallavideo.Vibo.voip";
 
         apnProvider.send(note, deviceToken).then((result) => {
+          console.log("result")
+          console.log(result)
           apnProvider.shutdown()
         });
       } else {
