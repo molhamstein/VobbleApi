@@ -47,7 +47,7 @@ module.exports = function (Calllog) {
             keyId: "SC8495N9AY",
             teamId: "U2DR46FA6M"
           },
-          production: false,
+          production: true,
           hideExperimentalHttp2Warning: true // the http2 module in node is experimental and will log 
         };
 
