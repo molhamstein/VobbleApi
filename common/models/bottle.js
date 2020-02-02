@@ -589,8 +589,8 @@ module.exports = function (Bottle) {
         cursor.get(function (err, users) {
           if (err) return callback(err);
           var stack = users[0].stackBottleUser
-          console.log("stack")
-          console.log(stack)
+          // console.log("stack")
+          // console.log(stack)
           var length = stack.length;
           var newOffset = offsets % length
           //console.log(newOffset);
