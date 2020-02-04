@@ -1804,85 +1804,94 @@ module.exports = function (User) {
     //   callback(null, data);
     // })
 
-    User.app.models.Item.destroyAll({
-      "or": [{
-          "ownerId": ObjectId("5c2640f52946491a550cb132")
-        },
-        {
-          "ownerId": ObjectId("5d9dbba8a49e014bfc032f0d")
-        },
-        {
-          "ownerId": ObjectId("5c2fbe592946491a550cb6b0")
-        },
-        {
-          "ownerId": ObjectId("5d96dbbe131a163ff152c10c")
-        },
-        {
-          "ownerId": ObjectId("5d99c3fc03d2f91006f0b55a")
-        },
-        {
-          "ownerId": ObjectId("5d917892b2cf5c43578ea99d")
-        },
-        {
-          "ownerId": ObjectId("5d94a28cb404c7363af46ead")
-        },
-        {
-          "ownerId": ObjectId("5d772a3193056a3deaef465c")
-        },
-        {
-          "ownerId": ObjectId("5c96d9c03ed4960ae9a13cac")
-        },
-        {
-          "ownerId": ObjectId("5d96d341131a163ff152c0da")
-        },
-        {
-          "ownerId": ObjectId("5c20f54f4c6c42445da94e7c")
-        }
+    User.updateAll({}, {
+      'isHost': false,
+    }, function (err, res) {
+      if (err)
+        console.log(err);
+      callback(res)
+    });
 
-      ]
-    }, function (err, data) {
-      if (err) return callback(err)
-      User.app.models.ChatItem.destroyAll({
-        "or": [{
-            "ownerId": ObjectId("5c2640f52946491a550cb132")
-          },
-          {
-            "ownerId": ObjectId("5d9dbba8a49e014bfc032f0d")
-          },
-          {
-            "ownerId": ObjectId("5c2fbe592946491a550cb6b0")
-          },
-          {
-            "ownerId": ObjectId("5d96dbbe131a163ff152c10c")
-          },
-          {
-            "ownerId": ObjectId("5d99c3fc03d2f91006f0b55a")
-          },
-          {
-            "ownerId": ObjectId("5d917892b2cf5c43578ea99d")
-          },
-          {
-            "ownerId": ObjectId("5d94a28cb404c7363af46ead")
-          },
-          {
-            "ownerId": ObjectId("5d772a3193056a3deaef465c")
-          },
-          {
-            "ownerId": ObjectId("5c96d9c03ed4960ae9a13cac")
-          },
-          {
-            "ownerId": ObjectId("5d96d341131a163ff152c0da")
-          },
-          {
-            "ownerId": ObjectId("5c20f54f4c6c42445da94e7c")
-          }
-        ]
-      }, function (err, data) {
-        if (err) return callback(err)
-        callback
-      })
 
-    })
+    // User.app.models.Item.destroyAll({
+    //   "or": [{
+    //       "ownerId": ObjectId("5c2640f52946491a550cb132")
+    //     },
+    //     {
+    //       "ownerId": ObjectId("5d9dbba8a49e014bfc032f0d")
+    //     },
+    //     {
+    //       "ownerId": ObjectId("5c2fbe592946491a550cb6b0")
+    //     },
+    //     {
+    //       "ownerId": ObjectId("5d96dbbe131a163ff152c10c")
+    //     },
+    //     {
+    //       "ownerId": ObjectId("5d99c3fc03d2f91006f0b55a")
+    //     },
+    //     {
+    //       "ownerId": ObjectId("5d917892b2cf5c43578ea99d")
+    //     },
+    //     {
+    //       "ownerId": ObjectId("5d94a28cb404c7363af46ead")
+    //     },
+    //     {
+    //       "ownerId": ObjectId("5d772a3193056a3deaef465c")
+    //     },
+    //     {
+    //       "ownerId": ObjectId("5c96d9c03ed4960ae9a13cac")
+    //     },
+    //     {
+    //       "ownerId": ObjectId("5d96d341131a163ff152c0da")
+    //     },
+    //     {
+    //       "ownerId": ObjectId("5c20f54f4c6c42445da94e7c")
+    //     }
+
+    //   ]
+    // }, function (err, data) {
+    //   if (err) return callback(err)
+    //   User.app.models.ChatItem.destroyAll({
+    //     "or": [{
+    //         "ownerId": ObjectId("5c2640f52946491a550cb132")
+    //       },
+    //       {
+    //         "ownerId": ObjectId("5d9dbba8a49e014bfc032f0d")
+    //       },
+    //       {
+    //         "ownerId": ObjectId("5c2fbe592946491a550cb6b0")
+    //       },
+    //       {
+    //         "ownerId": ObjectId("5d96dbbe131a163ff152c10c")
+    //       },
+    //       {
+    //         "ownerId": ObjectId("5d99c3fc03d2f91006f0b55a")
+    //       },
+    //       {
+    //         "ownerId": ObjectId("5d917892b2cf5c43578ea99d")
+    //       },
+    //       {
+    //         "ownerId": ObjectId("5d94a28cb404c7363af46ead")
+    //       },
+    //       {
+    //         "ownerId": ObjectId("5d772a3193056a3deaef465c")
+    //       },
+    //       {
+    //         "ownerId": ObjectId("5c96d9c03ed4960ae9a13cac")
+    //       },
+    //       {
+    //         "ownerId": ObjectId("5d96d341131a163ff152c0da")
+    //       },
+    //       {
+    //         "ownerId": ObjectId("5c20f54f4c6c42445da94e7c")
+    //       }
+    //     ]
+    //   }, function (err, data) {
+    //     if (err) return callback(err)
+    //     callback
+    //   })
+
+    // })
 
 
   };

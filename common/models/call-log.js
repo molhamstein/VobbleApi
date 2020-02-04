@@ -85,6 +85,13 @@ module.exports = function (Calllog) {
           },
           "to": deviceToken
         })
+        const tempData = JSON.stringify({
+          "priority": "high",
+          "notification": {
+            "title": "Incoming Call"
+          },
+          "to": deviceToken
+        })
 
         const options = {
           hostname: 'fcm.googleapis.com',
@@ -95,6 +102,22 @@ module.exports = function (Calllog) {
             'Authorization': serviceAccount.androidCallToken
           }
         }
+
+        const tempReq = https.request(options, res => {
+          console.log(`statusCode: ${res.statusCode}`)
+
+          res.on('data', d => {
+            process.stdout.write(d)
+          })
+        })
+
+        tempReq.on('error', error => {
+          console.error(error)
+        })
+
+        tempReq.write(tempData)
+        tempReq.end()
+
 
         const req = https.request(options, res => {
           console.log(`statusCode: ${res.statusCode}`)
