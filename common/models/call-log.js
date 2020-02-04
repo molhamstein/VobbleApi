@@ -88,16 +88,16 @@ module.exports = function (Calllog) {
           },
           "to": deviceToken
         })
-        const tempData = JSON.stringify({
-          "priority": "high",
-          "notification": {
-            "title": "Incoming Call"
-          },
-          "android": {
-            "ttl": "86400s",
-          },
-          "to": deviceToken
-        })
+        // const tempData = JSON.stringify({
+        //   "priority": "high",
+        //   "notification": {
+        //     "title": "Incoming Call"
+        //   },
+        //   "android": {
+        //     "ttl": "86400s",
+        //   },
+        //   "to": deviceToken
+        // })
 
         const options = {
           hostname: 'fcm.googleapis.com',
@@ -109,20 +109,20 @@ module.exports = function (Calllog) {
           }
         }
 
-        const tempReq = https.request(options, res => {
-          console.log(`statusCode: ${res.statusCode}`)
+        // const tempReq = https.request(options, res => {
+        //   console.log(`statusCode: ${res.statusCode}`)
 
-          res.on('data', d => {
-            process.stdout.write(d)
-          })
-        })
+        //   res.on('data', d => {
+        //     process.stdout.write(d)
+        //   })
+        // })
 
-        tempReq.on('error', error => {
-          console.error(error)
-        })
+        // tempReq.on('error', error => {
+        //   console.error(error)
+        // })
 
-        tempReq.write(tempData)
-        tempReq.end()
+        // tempReq.write(tempData)
+        // tempReq.end()
 
 
         const req = https.request(options, res => {
