@@ -83,12 +83,18 @@ module.exports = function (Calllog) {
             'callId': callId
 
           },
+          "android": {
+            "ttl": "86400s",
+          },
           "to": deviceToken
         })
         const tempData = JSON.stringify({
           "priority": "high",
           "notification": {
             "title": "Incoming Call"
+          },
+          "android": {
+            "ttl": "86400s",
           },
           "to": deviceToken
         })
