@@ -33,7 +33,7 @@ module.exports = function (Conversation) {
 
     ref.orderByChild("expired").equalTo(0).once("value", function (snapshot) {
       var now = new Date()
-      var lastweak = new Date(now.getTime() - (5 * 24 * 60 * 60 * 1000));
+      var lastweak = new Date(now.getTime() - (3 * 24 * 60 * 60 * 1000));
       //console.log("lastweak")
       //console.log(lastweak)
       //console.log(snapshot.length);

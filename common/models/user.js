@@ -1902,27 +1902,48 @@ module.exports = function (User) {
       filter.where = {}
     }
 
-    if (filter.where['relatedUser.agencyId'] != null) {
-      filter.where['relatedUser.agencyId'] = ObjectId(filter.where['relatedUser.agencyId'])
+    var mainFilter = {
+      "$and": []
     }
 
-    if (filter.where['relatedUserId'] != null) {
-      filter.where['relatedUserId'] = ObjectId(filter.where['relatedUserId'])
-    }
-
-    if (filter.where['createdAt'] != null) {
-      if (filter.where['createdAt']['gte'] != null) {
-        filter.where['createdAt']['$gte'] = new Date(filter.where['createdAt']['gte'])
-        delete filter.where['createdAt']['gte']
+    var startDate = new Date().toISOString()
+    var endDate = new Date().toISOString()
+    if (filter.where.and != null) {
+      for (let index = 0; index < filter.where.and.length; index++) {
+        const element = filter.where.and[index];
+        if (element['relatedUser.agencyId'] != null) {
+          mainFilter["$and"].push({
+            'relatedUser.agencyId': ObjectId(element['relatedUser.agencyId'])
+          })
+        } else if (element['relatedUserId'] != null) {
+          mainFilter["$and"].push({
+            'relatedUserId': ObjectId(element['relatedUserId'])
+          })
+        } else if (element['createdAt'] != null) {
+          if (element['createdAt']['gte'] != null) {
+            startDate = new Date(element['createdAt']['gte']).toISOString()
+            mainFilter["$and"].push({
+              'createdAt': {
+                "$gte": new Date(element['createdAt']['gte'])
+              }
+            })
+          } else if (element['createdAt']['lte'] != null) {
+            endDate = new Date(element['createdAt']['lte']).toISOString()
+            mainFilter["$and"].push({
+              'createdAt': {
+                "$lte": new Date(element['createdAt']['lte'])
+              }
+            })
+          }else {
+            mainFilter["$and"].push(element)
+          }
+        }
       }
-      if (filter.where['createdAt']['lte'] != null) {
-        filter.where['createdAt']['$lte'] = new Date(filter.where['createdAt']['lte'])
-        delete filter.where['createdAt']['lte']
-      }
-
     }
-    console.log(filter['where'])
 
+
+    console.log(mainFilter['$and'])
+    
     User.getDataSource().connector.connect(function (err, db) {
 
       var callLogCollection = db.collection('callLog');
@@ -1938,7 +1959,7 @@ module.exports = function (User) {
           $unwind: "$relatedUser"
         },
         {
-          $match: filter['where']
+          $match: mainFilter
         },
         {
           $group: {
@@ -2006,7 +2027,7 @@ module.exports = function (User) {
           $unwind: "$relatedUser"
         },
         {
-          $match: filter['where']
+          $match: mainFilter
         },
         {
           $group: {
@@ -2062,7 +2083,7 @@ module.exports = function (User) {
           $unwind: "$relatedUser"
         },
         {
-          $match: filter['where']
+          $match: mainFilter
         },
         {
           $group: {
@@ -2120,7 +2141,9 @@ module.exports = function (User) {
                 "agencyId": element.agency ? element.agency.agencyId : "",
                 "giftTotalCost": 0,
                 "itemTotalCost": 0,
-                "total": element.callTotalCost
+                "total": element.callTotalCost,
+                "start":startDate,
+                "end":endDate,
               }
             });
             chatItem.forEach(element => {
@@ -2135,7 +2158,9 @@ module.exports = function (User) {
                   "callTotalDuration": 0,
                   "giftTotalCost": element.giftTotalCost,
                   "itemTotalCost": 0,
-                  "total": 0
+                  "total": 0,
+                  "start":startDate,
+                  "end":endDate,  
                 }
               } else {
                 hashData[element._id]["giftTotalCost"] += element.giftTotalCost
@@ -2154,7 +2179,9 @@ module.exports = function (User) {
                   "callTotalDuration": 0,
                   "giftTotalCost": 0,
                   "itemTotalCost": element.itemTotalCost,
-                  "total": 0
+                  "total": 0,
+                  "start":startDate,
+                  "end":endDate  
                 }
               } else {
                 hashData[element._id]["itemTotalCost"] += element.itemTotalCost
@@ -2199,10 +2226,10 @@ module.exports = function (User) {
       };
       for (let index = 0; index < data.length; index++) {
         const element = data[index];
-        if (filter['where'] != null && filter['where']["createdAt"] != null && filter['where']["createdAt"]["$gte"] != null)
-          data[index]["start"] = new Date(filter['where']["createdAt"]["$gte"]).toISOString()
-        if (filter['where'] && filter['where']["createdAt"] && filter['where']["createdAt"]["$lte"])
-          data[index]["end"] = new Date(filter['where']["createdAt"]["$lte"]).toISOString()
+        // if (filter['where'] != null && filter['where']["createdAt"] != null && filter['where']["createdAt"]["$gte"] != null)
+        //   data[index]["start"] = new Date(filter['where']["createdAt"]["$gte"]).toISOString()
+        // if (filter['where'] && filter['where']["createdAt"] && filter['where']["createdAt"]["$lte"])
+        //   data[index]["end"] = new Date(filter['where']["createdAt"]["$lte"]).toISOString()
         delete data[index]["id"]
         delete data[index]["agencyId"]
       }

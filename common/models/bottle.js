@@ -151,12 +151,6 @@ module.exports = function (Bottle) {
   // ]
 
   function getFilter(filter, limit, offset, callback) {
-    // var shoreId = ""
-    // var gt = ""
-    // var ls = ""
-    // var gender = ""
-    // var username = ""
-    // var ISOCode = ""
     var skip;
     var limitObject;
     if (offset) {
@@ -170,29 +164,6 @@ module.exports = function (Bottle) {
         $limit: limit + tempOffset
       }
     }
-    // var index
-    // if (filter != null)
-    //   index = filter['where']['and'].length - 1;
-    // else
-    //   index = -1
-
-    // while (index >= 0) {
-    //   if (filter['where']['and'][index]['owner.gender'] != null) {
-    //     gender = filter['where']['and'][index]['owner.gender'];
-    //     filter['where']['and'].splice(index, 1)
-    //   } else if (filter['where']['and'][index]['owner.ISOCode'] != null) {
-    //     ISOCode = filter['where']['and'][index]['owner.ISOCode'];
-    //     filter['where']['and'].splice(index, 1)
-    //   } else if (filter['where']['and'][index]['owner.username'] != null) {
-    //     username = filter['where']['and'][index]['owner.username'];
-    //     filter['where']['and'].splice(index, 1)
-    //   }
-
-    //   index -= 1;
-    // }
-
-    // if (filter == null || filter['where']['and'][0] == null)
-    //   filter = {}
 
     var where = {}
     if (filter['where']['and'] != null) {

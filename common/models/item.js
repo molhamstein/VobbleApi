@@ -163,65 +163,189 @@ module.exports = function (Item) {
   });
 
 
-  function getFilter(filter, callback) {
-    var ISOCode = ""
-    var goodId = ""
-    var index
-    var username = ""
-    if (filter != null)
-      index = filter['where']['and'].length - 1;
-    else
-      index = -1
+  function getFilter(filter, limit, offset, callback) {
 
-    while (index >= 0) {
-      if (filter['where']['and'][index]['owner.ISOCode'] != null) {
-        ISOCode = filter['where']['and'][index]['owner.ISOCode'];
-        filter['where']['and'].splice(index, 1)
-      } else if (filter['where']['and'][index]['product.typeGoodsId'] != null) {
-        goodId = filter['where']['and'][index]['product.typeGoodsId'];
-        filter['where']['and'].splice(index, 1)
-      } else if (filter['where']['and'][index]['owner.username'] != null) {
-        username = filter['where']['and'][index]['owner.username'];
-        filter['where']['and'].splice(index, 1)
+
+    var skip;
+    var limitObject;
+    if (offset) {
+      skip = {
+        $skip: offset
       }
-
-
-      index -= 1;
+    }
+    if (limit) {
+      var tempOffset = offset ? offset : 0;
+      limitObject = {
+        $limit: limit + tempOffset
+      }
     }
 
-    if (filter == null || filter['where']['and'][0] == null)
-      filter = {}
-    // //console.log("filter.where.and");
-    // //console.log(filter.where.and);
-    Item.find(
-      filter,
-      function (err, items) {
-        if (err)
-          callback(err, null);
-        //console.log("items")
-        //console.log(items.length)
-        // //console.log(items)
-        var result = [];
-        if (items && items.length != 0) {
-          items.forEach(function (element, index) {
-            element.owner(function (err, owner) {
-              element.product(function (err, product) {
-                // //console.log(goodId);
-                if (((ISOCode == "" || owner.ISOCode == ISOCode) && (goodId == "" || product.typeGoodsId == goodId)) && (username == "" || owner.username.includes(username))) {
-                  result.push(element);
-                }
-
-                if (index + 1 == items.length) {
-                  //console.log("resuuuuuuuult");
-                  callback(null, result);
-                }
-              })
+    var where = {}
+    if (filter['where']['and'] != null) {
+      where['$and'] = []
+      filter['where']['and'].forEach(element => {
+        if (element['owner.username'] != null) {
+          var value = element['owner.username']
+          where['$and'].push({
+            "owner.username": {
+              $regex: value,
+              $options: 'i'
+            }
+          })
+        } else if (element['product.typeGoodsId'] != null) {
+          where['$and'].push({
+            "product.typeGoodsId": ObjectId(element['product.typeGoodsId'])
+          })
+        } else if (element['startAt'] != null) {
+          if (element['startAt']['gt'] != null) {
+            // startDate = new Date(element['createdAt']['gte']).toISOString()
+            where["$and"].push({
+              'startAt': {
+                "$gte": new Date(element['startAt']['gt'])
+              }
             })
-          }, this);
+          } else if (element['startAt']['lt'] != null) {
+            // endDate = new Date(element['createdAt']['lt']).toISOString()
+            where["$and"].push({
+              'startAt': {
+                "$lte": new Date(element['startAt']['lt'])
+              }
+            })
+          }
         } else {
-          callback(null, [])
+          where['$and'].push(element)
         }
+
+      });
+    }
+
+    var aggregate = [{
+        $lookup: {
+          from: "user",
+          let: {
+            ownerId: {
+              $convert: {
+                input: "$ownerId",
+                to: "objectId"
+              }
+            }
+          },
+          pipeline: [{
+              $match: {
+                $expr: {
+                  $eq: ["$_id", "$$ownerId"]
+                }
+              }
+            },
+            {
+              $project: {
+                stackBottleUser: 0
+              }
+            }
+
+          ],
+          as: "owner"
+        }
+      },
+      {
+        $unwind: "$owner"
+      },
+      {
+        $lookup: {
+          from: "user",
+          let: {
+            relatedUserId: {
+              $convert: {
+                input: "$relatedUserId",
+                to: "objectId"
+              }
+            }
+          },
+          pipeline: [{
+              $match: {
+                $expr: {
+                  $eq: ["$_id", "$$relatedUserId"]
+                }
+              }
+            },
+            {
+              $project: {
+                stackBottleUser: 0
+              }
+            }
+
+          ],
+          as: "relatedUser"
+        }
+      },
+      {
+        $unwind: {
+          "path": "$relatedUser",
+          "preserveNullAndEmptyArrays": true
+        }
+      },
+      {
+        $lookup: {
+          from: "product",
+          localField: "productId",
+          foreignField: "_id",
+          as: "product"
+        }
+      },
+      {
+        $unwind: "$product"
+      }
+    ]
+
+
+    if (where["$and"].length != 0)
+      aggregate.push({
+        $match: where
       })
+
+    aggregate.push({
+      $project: {
+        _id: 0,
+        id: '$_id',
+        storeType: 1,
+        isConsumed: 1,
+        valid: 1,
+        startAt: 1,
+        endAt: 1,
+        ownerId: 1,
+        owner: 1,
+        relatedUserId: 1,
+        relatedUser: 1,
+        product: 1,
+        productId: 1,
+        price: 1,
+        type: 1,
+        typePurchasing: 1,
+      }
+    }, {
+      $sort: {
+        startAt: -1
+      }
+    })
+
+    if (limit) {
+      aggregate.push(limitObject)
+    }
+    if (offset) {
+      aggregate.push(skip)
+    }
+    console.log(where["$and"])
+    console.log(aggregate)
+    Item.getDataSource().connector.connect(function (err, db) {
+      var collection = db.collection('item');
+      var items = collection.aggregate(aggregate);
+      items.get(function (err, data) {
+        if (err) return callback(err);
+        return callback(null, data);
+      })
+    })
+
+
   }
 
 
@@ -236,14 +360,14 @@ module.exports = function (Item) {
     delete filter['offset']
     delete filter['limit']
 
-    getFilter(filter, function (err, data) {
-      if (err)
-        callback(err, null);
-      var newData = data.slice(offset, offset + limit);
-      //console.log("newData")
-      //console.log(newData)
-      callback(err, newData);
-    })
+    getFilter(filter, limit, offset,
+      function (err, data) {
+        if (err)
+          callback(err, null);
+        //console.log("newData")
+        //console.log(newData)
+        callback(err, data);
+      })
 
   }
 
@@ -256,7 +380,7 @@ module.exports = function (Item) {
    */
 
   Item.countFilter = function (filter, callback) {
-    getFilter(filter, function (err, data) {
+    getFilter(filter, null, null, function (err, data) {
       if (err)
         callback(err, null);
       callback(err, {
@@ -611,6 +735,13 @@ module.exports = function (Item) {
 
     };
 
+    var offset = filter['offset'];
+    var limit = filter['limit'];
+    if (offset == null)
+      offset = 0;
+    if (limit == null)
+      limit = 10;
+
     if (filter && filter.from) {
       ownerMatch['startAt'] = {
         '$gt': new Date(filter.from)
@@ -746,9 +877,10 @@ module.exports = function (Item) {
       ]);
       cursor.get(function (err, ownerData) {
         if (err) return callback(err);
+        var newData = ownerData.slice(offset, offset + limit);
 
         return callback(null,
-          ownerData
+          newData
         );
       })
     })
@@ -935,6 +1067,13 @@ module.exports = function (Item) {
 
     };
 
+    var offset = filter['offset'];
+    var limit = filter['limit'];
+    if (offset == null)
+      offset = 0;
+    if (limit == null)
+      limit = 10;
+
     if (filter && filter.from) {
       relatedUserMatch['startAt'] = {
         '$gt': new Date(filter.from)
@@ -1069,6 +1208,7 @@ module.exports = function (Item) {
 
       cursor.get(function (err, relatedUserData) {
         if (err) return callback(err);
+        var newData = relatedUserData.slice(offset, offset + limit);
         return callback(null,
           relatedUserData
         );
@@ -1833,6 +1973,42 @@ module.exports = function (Item) {
                   ]
                 }
               },
+              "unlockChatArray": {
+                "$addToSet": {
+                  "$cond": [{
+                      "$eq": ["$type", "Unlock Chat"]
+                    },
+                    {
+                      startAt: "$startAt",
+                      name_en: "$product.name_en",
+                      name_ar: "$product.name_ar",
+                      username: "$owner.username",
+                      ownerId: "$ownerId",
+                    },
+                    null
+                  ]
+                }
+              },
+              "countUnlockChat": {
+                "$sum": {
+                  "$cond": [{
+                      "$eq": ["$type", "Unlock Chat"]
+                    },
+                    1,
+                    0
+                  ]
+                }
+              },
+              "totalUnlockChat": {
+                "$sum": {
+                  "$cond": [{
+                      "$eq": ["$type", "Unlock Chat"]
+                    },
+                    "$price",
+                    0
+                  ]
+                }
+              },
               "filterByCountryArray": {
                 "$addToSet": {
                   "$cond": [{
@@ -1863,6 +2039,42 @@ module.exports = function (Item) {
                 "$sum": {
                   "$cond": [{
                       "$eq": ["$product.typeGoods.name_en", "Filter By Country"]
+                    },
+                    1,
+                    0
+                  ]
+                }
+              },
+              "filterByTypeArray": {
+                "$addToSet": {
+                  "$cond": [{
+                      "$eq": ["$product.typeGoods.name_en", "Filter By Type"]
+                    },
+                    {
+                      startAt: "$startAt",
+                      name_en: "$product.name_en",
+                      name_ar: "$product.name_ar",
+                      username: "$owner.username",
+                      ownerId: "$ownerId",
+                    },
+                    null
+                  ]
+                }
+              },
+              "totalFilterByType": {
+                "$sum": {
+                  "$cond": [{
+                      "$eq": ["$product.typeGoods.name_en", "Filter By Type"]
+                    },
+                    "$price",
+                    0
+                  ]
+                }
+              },
+              "countFilterByType": {
+                "$sum": {
+                  "$cond": [{
+                      "$eq": ["$product.typeGoods.name_en", "Filter By Type"]
                     },
                     1,
                     0
@@ -1994,10 +2206,16 @@ module.exports = function (Item) {
               countFilterByGender: 1,
               totalFilterByGender: 1,
               countFilterByCountry: 1,
+              filterByTypeArray: 1,
+              totalFilterByType: 1,
+              countFilterByType: 1,
               totalFilterByCountry: 1,
               totalExtendChat: 1,
               countExtendChat: 1,
               extendChatArray: 1,
+              totalUnlockChat: 1,
+              countUnlockChat: 1,
+              unlockChatArray: 1,
               filterByCountryArray: 1,
               filterByGenderArray: 1,
               repliesArray: 1,
@@ -2758,6 +2976,7 @@ module.exports = function (Item) {
       });
       if (existing.length == 0) {
         value.coinsArray = [];
+        value.unlockChatArray = [];
         value.extendChatArray = [];
         value.filterByCountryArray = [];
         value.filterByGenderArray = [];
@@ -2765,10 +2984,15 @@ module.exports = function (Item) {
         value.bottleArray = [];
         value.countCoins = 0;
         value.totalCoins = 0;
+        value.countUnlockChat = 0;
+        value.totalUnlockChat = 0;
         value.countExtendChat = 0;
         value.totalExtendChat = 0;
         value.totalFilterByCountry = 0;
         value.countFilterByCountry = 0;
+        value.filterByTypeArray= [],
+        value.totalFilterByType= 0,
+        value.countFilterByType= 0;
         value.totalFilterByGender = 0;
         value.countFilterByGender = 0;
         value.totalReply = 0;
