@@ -192,10 +192,11 @@ module.exports = function (Item) {
               $options: 'i'
             }
           })
-        } else if (element['product.typeGoodsId'] != null) {
-          where['$and'].push({
-            "product.typeGoodsId": ObjectId(element['product.typeGoodsId'])
-          })
+        // } else if (element['product.typeGoodsId'] != null) {
+        //   console.log("SSSSSSSSSSSS");
+        //   where['$and'].push({
+        //     "product.typeGoodsId": ObjectId(element['product.typeGoodsId'])
+        //   })
         } else if (element['startAt'] != null) {
           if (element['startAt']['gt'] != null) {
             // startDate = new Date(element['createdAt']['gte']).toISOString()
@@ -335,7 +336,7 @@ module.exports = function (Item) {
       aggregate.push(skip)
     }
     console.log(where["$and"])
-    console.log(aggregate)
+    // console.log(aggregate)
     Item.getDataSource().connector.connect(function (err, db) {
       var collection = db.collection('item');
       var items = collection.aggregate(aggregate);
@@ -350,7 +351,7 @@ module.exports = function (Item) {
 
 
   Item.getFilterItem = function (filter, callback) {
-    var offset = filter['offset'];
+    var offset = filter['skip'];
     var limit = filter['limit'];
     if (offset == null)
       offset = 0;
@@ -1210,7 +1211,7 @@ module.exports = function (Item) {
         if (err) return callback(err);
         var newData = relatedUserData.slice(offset, offset + limit);
         return callback(null,
-          relatedUserData
+          newData
         );
       })
     })
