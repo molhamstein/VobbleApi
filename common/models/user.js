@@ -1934,16 +1934,16 @@ module.exports = function (User) {
                 "$lte": new Date(element['createdAt']['lte'])
               }
             })
-          }else {
-            mainFilter["$and"].push(element)
           }
+        } else {
+          mainFilter["$and"].push(element)
         }
       }
     }
 
 
     console.log(mainFilter['$and'])
-    
+
     User.getDataSource().connector.connect(function (err, db) {
 
       var callLogCollection = db.collection('callLog');
@@ -2142,8 +2142,8 @@ module.exports = function (User) {
                 "giftTotalCost": 0,
                 "itemTotalCost": 0,
                 "total": element.callTotalCost,
-                "start":startDate,
-                "end":endDate,
+                "start": startDate,
+                "end": endDate,
               }
             });
             chatItem.forEach(element => {
@@ -2159,8 +2159,8 @@ module.exports = function (User) {
                   "giftTotalCost": element.giftTotalCost,
                   "itemTotalCost": 0,
                   "total": 0,
-                  "start":startDate,
-                  "end":endDate,  
+                  "start": startDate,
+                  "end": endDate,
                 }
               } else {
                 hashData[element._id]["giftTotalCost"] += element.giftTotalCost
@@ -2180,8 +2180,8 @@ module.exports = function (User) {
                   "giftTotalCost": 0,
                   "itemTotalCost": element.itemTotalCost,
                   "total": 0,
-                  "start":startDate,
-                  "end":endDate  
+                  "start": startDate,
+                  "end": endDate
                 }
               } else {
                 hashData[element._id]["itemTotalCost"] += element.itemTotalCost
