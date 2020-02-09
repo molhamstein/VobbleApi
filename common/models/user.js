@@ -1906,6 +1906,10 @@ module.exports = function (User) {
       "$and": []
     }
 
+    var mainFilterWhere = {
+      "$and": []
+    }
+
     var startDate = new Date().toISOString()
     var endDate = new Date().toISOString()
     if (filter.where.and != null) {
@@ -1915,8 +1919,14 @@ module.exports = function (User) {
           mainFilter["$and"].push({
             'relatedUser.agencyId': ObjectId(element['relatedUser.agencyId'])
           })
+          mainFilterWhere["$and"].push({
+            'relatedUser.agencyId': ObjectId(element['relatedUser.agencyId'])
+          })
         } else if (element['relatedUserId'] != null) {
           mainFilter["$and"].push({
+            'relatedUserId': ObjectId(element['relatedUserId'])
+          })
+          mainFilterWhere["$and"].push({
             'relatedUserId': ObjectId(element['relatedUserId'])
           })
         } else if (element['createdAt'] != null) {
@@ -1927,6 +1937,11 @@ module.exports = function (User) {
                 "$gte": new Date(element['createdAt']['gte'])
               }
             })
+            mainFilterWhere["$and"].push({
+              'startAt': {
+                "$gte": new Date(element['createdAt']['gte'])
+              }
+            })
           } else if (element['createdAt']['lte'] != null) {
             endDate = new Date(element['createdAt']['lte']).toISOString()
             mainFilter["$and"].push({
@@ -1934,15 +1949,20 @@ module.exports = function (User) {
                 "$lte": new Date(element['createdAt']['lte'])
               }
             })
+            mainFilterWhere["$and"].push({
+              'startAt': {
+                "$lte": new Date(element['createdAt']['lte'])
+              }
+            })
           }
         } else {
           mainFilter["$and"].push(element)
+          mainFilterWhere["$and"].push(element)
         }
       }
     }
 
 
-    console.log(mainFilter['$and'])
 
     User.getDataSource().connector.connect(function (err, db) {
 
@@ -2083,7 +2103,7 @@ module.exports = function (User) {
           $unwind: "$relatedUser"
         },
         {
-          $match: mainFilter
+          $match: mainFilterWhere
         },
         {
           $group: {
