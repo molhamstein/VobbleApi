@@ -21,6 +21,7 @@ module.exports = function (Conversation) {
 
   var cron = require('node-schedule');
 
+  
   cron.scheduleJob('00 00 * * * *', function () {
 
     admin.initializeApp({

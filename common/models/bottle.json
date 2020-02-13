@@ -62,6 +62,10 @@
     "bottleType": {
       "type": "string",
       "default": "video"
+    },
+    "viewStatus": {
+      "type": "string",
+      "default": "deactive"
     }
   },
   "validations": [],
@@ -542,6 +546,26 @@
         "path": "/typeStateReport",
         "verb": "get"
       }]
+    },
+    "makeBottleViewStatus": {
+      "accepts": [{
+        "arg": "bottles",
+        "type": ["string"],
+        "required": true,
+        "description": ""
+      }],
+      "returns": [{
+        "arg": "result",
+        "type": "object",
+        "root": true,
+        "description": ""
+      }],
+      "description": "",
+      "http": [{
+        "path": "/makeBottleViewStatus",
+        "verb": "put"
+      }]
     }
+
   }
 }

@@ -1797,6 +1797,29 @@ module.exports = function (User) {
     var result;
     // TODO
 
+    let usersArray = []
+    User.app.models.Bottle.find({
+      "where": {
+        "status": "active"
+      },
+      "order": "createdAt DESC"
+    }, function (err, data) {
+      data.forEach(element => {
+        let weight = parseInt(Date.parse(element.createdAt)) / (1000 * 60 * 60)
+        let objectUpdate = {
+          "viewStatus": "deactive",
+          "totalWeight": weight,
+          "weight": weight
+        }
+        if (usersArray[element.ownerId] == null) {
+          objectUpdate['viewStatus'] = "active";
+          usersArray[element.ownerId] = true
+          console.log(objectUpdate)
+        }
+        element.updateAttributes(objectUpdate)
+      });
+    })
+    callback()
     // User.app.models.AccessToken.find({}, function (err, data) {
     //   if (err)
     //     callback(err, null);
@@ -1804,13 +1827,6 @@ module.exports = function (User) {
     //   callback(null, data);
     // })
 
-    User.updateAll({}, {
-      'isHost': false,
-    }, function (err, res) {
-      if (err)
-        console.log(err);
-      callback(res)
-    });
 
 
     // User.app.models.Item.destroyAll({

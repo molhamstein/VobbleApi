@@ -192,11 +192,11 @@ module.exports = function (Item) {
               $options: 'i'
             }
           })
-        // } else if (element['product.typeGoodsId'] != null) {
-        //   console.log("SSSSSSSSSSSS");
-        //   where['$and'].push({
-        //     "product.typeGoodsId": ObjectId(element['product.typeGoodsId'])
-        //   })
+          // } else if (element['product.typeGoodsId'] != null) {
+          //   console.log("SSSSSSSSSSSS");
+          //   where['$and'].push({
+          //     "product.typeGoodsId": ObjectId(element['product.typeGoodsId'])
+          //   })
         } else if (element['startAt'] != null) {
           if (element['startAt']['gt'] != null) {
             // startDate = new Date(element['createdAt']['gte']).toISOString()
@@ -2252,6 +2252,101 @@ module.exports = function (Item) {
     })
   }
 
+  function getCall(filter) {
+    return new Promise(function (resolve, reject) {
+
+      Item.getDataSource().connector.connect(function (err, db) {
+        var collection = db.collection('callLog');
+        var users = collection.aggregate([{
+            $match: filter
+          },
+          {
+            $lookup: {
+              from: "user",
+              localField: "ownerId",
+              foreignField: "_id",
+              as: "owner"
+            }
+          },
+          {
+            $unwind: "$owner"
+          },
+          {
+            $lookup: {
+              from: "user",
+              localField: "relatedUserId",
+              foreignField: "_id",
+              as: "relatedUser"
+            }
+          },
+          {
+            $unwind: "$relatedUser"
+          },
+          {
+            $group: {
+              "_id": {
+                month: {
+                  $month: "$createdAt"
+                },
+                day: {
+                  $dayOfMonth: "$createdAt"
+                },
+                year: {
+                  $year: "$createdAt"
+                }
+              },
+              "totalSpentCoins": {
+                "$sum": "$cost"
+              },
+              "callArray": {
+                "$addToSet": {
+
+                  startAt: "$createdAt",
+                  relatedUsername: "$relatedUser.username",
+                  relatedUserId: "$relatedUserId",
+                  username: "$owner.username",
+                  ownerId: "$ownerId",
+
+                }
+              },
+              countCall: {
+                $sum: 1
+              }
+            }
+          },
+          {
+            $project: {
+              _id: 0,
+              callArray: 1,
+              countCall: 1,
+              totalSpentCoins: 1,
+              date: {
+                $concat: [{
+                  $toString: "$_id.year"
+                }, "/", {
+                  $toString: "$_id.month"
+                }, "/", {
+                  $toString: "$_id.day"
+                }]
+              }
+            }
+          }
+        ])
+        users.get(function (err, data) {
+          // //console.log(data);
+          if (err) reject(err);
+          data = data.sort(function (a, b) {
+            var aDate = new Date(a.date).getTime();
+            var bDate = new Date(b.date).getTime();
+            return bDate - aDate
+          })
+          resolve(data)
+        })
+      })
+    })
+
+  }
+
   function getGift(filter) {
     return new Promise(function (resolve, reject) {
 
@@ -2952,9 +3047,13 @@ module.exports = function (Item) {
     if (ownerId)
       filterGift['ownerId'] = ObjectId(ownerId)
     var itemGift = await getGift(filterGift);
+    var itemCall = await getCall(filterGift);
     var resultArray = []
     itemData.forEach(function (value) {
       var existing = itemGift.filter(function (v, i) {
+        return (v.date == value.date);
+      });
+      var existingCall = itemCall.filter(function (v, i) {
         return (v.date == value.date);
       });
       if (existing.length) {
@@ -2963,16 +3062,29 @@ module.exports = function (Item) {
         value.giftArray = existing[0].giftArray;
         value.countGift = existing[0].countGift;
 
-        resultArray.push(value)
       } else {
         value.giftArray = [];
         value.countGift = 0;
         value.totalGift = 0;
-        resultArray.push(value);
       }
+      if (existingCall.length) {
+        value.totalSpentCoins += existingCall[0].totalSpentCoins;
+        value.totalCall = existingCall[0].totalSpentCoins;
+        value.callArray = existingCall[0].callArray;
+        value.countCall = existingCall[0].countCall;
+      } else {
+        value.callArray = [];
+        value.countCall = 0;
+        value.totalCall = 0;
+      }
+      resultArray.push(value);
+
     });
     itemGift.forEach(function (value) {
       var existing = itemData.filter(function (v, i) {
+        return (v.date == value.date);
+      });
+      var existingCall = itemCall.filter(function (v, i) {
         return (v.date == value.date);
       });
       if (existing.length == 0) {
@@ -2991,9 +3103,9 @@ module.exports = function (Item) {
         value.totalExtendChat = 0;
         value.totalFilterByCountry = 0;
         value.countFilterByCountry = 0;
-        value.filterByTypeArray= [],
-        value.totalFilterByType= 0,
-        value.countFilterByType= 0;
+        value.filterByTypeArray = [];
+        value.totalFilterByType = 0;
+        value.countFilterByType = 0;
         value.totalFilterByGender = 0;
         value.countFilterByGender = 0;
         value.totalReply = 0;
@@ -3001,6 +3113,62 @@ module.exports = function (Item) {
         value.totalBottle = 0;
         value.countBottle = 0;
         value.totalGift = value.totalSpentCoins
+        // resultArray.push(value);
+      }
+      if (existingCall.length == 0) {
+        value.callArray = [];
+        value.countCall = 0;
+        value.totalCall = 0;
+      } else {
+        value.totalSpentCoins += existingCall[0].totalSpentCoins;
+        value.totalCall = existingCall[0].totalSpentCoins;
+        value.callArray = existingCall[0].callArray;
+        value.countCall = existingCall[0].countCall;
+      }
+
+      if (existing.length == 0) {
+        resultArray.push(value);
+      }
+
+
+    })
+
+    itemCall.forEach(function (value) {
+      var existing = itemData.filter(function (v, i) {
+        return (v.date == value.date);
+      });
+      var existingGift = itemGift.filter(function (v, i) {
+        return (v.date == value.date);
+      });
+      if (existing.length == 0 && existingGift.length == 0) {
+        value.coinsArray = [];
+        value.unlockChatArray = [];
+        value.extendChatArray = [];
+        value.filterByCountryArray = [];
+        value.filterByGenderArray = [];
+        value.repliesArray = [];
+        value.bottleArray = [];
+        value.countCoins = 0;
+        value.totalCoins = 0;
+        value.countUnlockChat = 0;
+        value.totalUnlockChat = 0;
+        value.countExtendChat = 0;
+        value.totalExtendChat = 0;
+        value.totalFilterByCountry = 0;
+        value.countFilterByCountry = 0;
+        value.filterByTypeArray = [];
+        value.totalFilterByType = 0;
+        value.countFilterByType = 0;
+        value.totalFilterByGender = 0;
+        value.countFilterByGender = 0;
+        value.totalReply = 0;
+        value.countReply = 0;
+        value.totalBottle = 0;
+        value.countBottle = 0;
+        value.giftArray = [];
+        value.countGift = 0;
+        value.totalGift = 0;
+        value.totalCall = value.totalSpentCoins
         resultArray.push(value);
       }
     })

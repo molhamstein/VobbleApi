@@ -64,6 +64,7 @@ module.exports = function (Bottle) {
     if (context.req.body.ownerId == null)
       context.req.body.ownerId = context.req.accessToken.userId;
     let weight = 0
+    let totalWeight = 0
     Bottle.app.models.User.findById(context.req.body.ownerId, function (err, user) {
       if (err) {
         //console.log(err);
@@ -79,9 +80,10 @@ module.exports = function (Bottle) {
 
         shore.bottleCount++;
         shore.save();
-        weight += Date.parse(new Date()) * 3;
-        weight += Date.parse(user.createdAt) * 4;
+        weight = parseInt(Date.parse(new Date())) / (1000 * 60 * 60)
+        totalWeight = weight
         context.req.body.weight = weight;
+        context.req.body.totalWeight = totalWeight;
         next();
       })
 
@@ -172,7 +174,7 @@ module.exports = function (Bottle) {
         if (element['owner.username'] == null) {
           where['$and'].push(element)
         } else {
-          var value=element['owner.username']
+          var value = element['owner.username']
           where['$and'].push({
             "owner.username": {
               $regex: value,
@@ -239,6 +241,8 @@ module.exports = function (Bottle) {
         createdAt: 1,
         thumbnail: 1,
         ownerId: 1,
+        viewStatus: 1,
+        totalWeight: 1,
         repliesUserCount: 1,
         bottleViewCount: 1,
         bottleCompleteCount: 1,
@@ -280,7 +284,7 @@ module.exports = function (Bottle) {
       limit = 10;
     delete filter['offset']
     delete filter['limit']
-    console.log(limit)
+    // console.log(limit)
     getFilter(filter, limit, offset, function (err, data) {
       if (err)
         callback(err, null);
@@ -341,18 +345,6 @@ module.exports = function (Bottle) {
   }
 
   Bottle.getBottle = function (gender, ISOCode, shoreId, bottleType, offsets = 0, limit = 5, seen = [], complete = [], req, callback) {
-    //console.log("gender")
-    //console.log(gender)
-    //console.log("ISOCode")
-    //console.log(ISOCode)
-    //console.log("shoreId")
-    //console.log(shoreId)
-    //console.log("offsets")
-    //console.log(offsets)
-    //console.log("seen")
-    //console.log(seen)
-    //console.log("complete")
-    //console.log(complete)
     var now = new Date().getTime();
     var userId = req.accessToken.userId;
     var filter = {
@@ -362,6 +354,7 @@ module.exports = function (Bottle) {
       }
     }
     filter['owner.status'] = "active"
+    filter['viewStatus'] = "active"
 
     if (shoreId) {
       filter['shoreId'] = ObjectId(shoreId)
@@ -452,8 +445,6 @@ module.exports = function (Bottle) {
         blockList.push(ObjectId(userId))
         var getBlock = (new Date().getTime() - now) / 1000
 
-        //console.log("blockList")
-        //console.log(blockList)
         filter['ownerId'] = {
           $nin: blockList
         }
@@ -468,21 +459,70 @@ module.exports = function (Bottle) {
         //   }
         // }, function (err, bottles) {
         // seenBottle = getFrequency(bottles, filter)
+
         Bottle.getFrequency(userId, filter, function (err, seenBottle) {
 
 
           var getSeen = (new Date().getTime() - now) / 1000
-
-
-          //console.log("seenBottle.length")
-          //console.log(seenBottle)
-
+          var maleLimit = 0
+          var femaleLimit = 0
+          var newUser = false;
+          console.log("seenBottle")
+          console.log(seenBottle.length)
           console.log(filter)
-          Bottle.getDataSource().connector.connect(function (err, db) {
 
+          if (oneUser.gender == "male") {
+
+
+            if (new Date().getTime() - oneUser.createdAt.getTime() < 24 * 60 * 60 * 1000) {
+              maleLimit = 300
+              femaleLimit = 700
+              newUser = true;
+            } else {
+              maleLimit = 700
+              femaleLimit = 300
+
+            }
+          } else {
+            if (new Date().getTime() - oneUser.createdAt.getTime() < 24 * 60 * 60 * 1000) {
+              maleLimit = 700
+              femaleLimit = 300
+              newUser = true;
+            } else {
+              maleLimit = 300
+              femaleLimit = 700
+            }
+          }
+          var maleFilter = Object.assign({}, filter)
+          var femaleFilter = Object.assign({}, filter)
+          if (filter['owner.gender'] == null) {
+            maleFilter['owner.gender'] = "male"
+            femaleFilter['owner.gender'] = "female"
+          } else {
+            maleLimit = 1000
+            femaleLimit = 1000
+          }
+
+          console.log("maleLimit")
+          console.log(maleFilter)
+          console.log("femaleLimit")
+          console.log(femaleFilter)
+
+          Bottle.getDataSource().connector.connect(function (err, db) {
             var collection = db.collection('bottle');
-            var cursor = collection.aggregate([{
-                $match: filter
+            var maleAggregation = collection.aggregate([{
+                $lookup: {
+                  from: "user",
+                  localField: "ownerId",
+                  foreignField: "_id",
+                  as: "owner"
+                }
+              },
+              {
+                $unwind: "$owner"
+              },
+              {
+                $match: maleFilter
               },
               {
                 $sort: {
@@ -490,59 +530,201 @@ module.exports = function (Bottle) {
                 }
               },
               {
-                $limit: 900
+                $limit: maleLimit
               }
             ])
-            cursor.get(function (err, data) {
-              // console.log(data)
+            var femaleAggregation = collection.aggregate([{
+                $lookup: {
+                  from: "user",
+                  localField: "ownerId",
+                  foreignField: "_id",
+                  as: "owner"
+                }
+              },
+              {
+                $unwind: "$owner"
+              }, {
+                $match: femaleFilter
+              },
+              {
+                $sort: {
+                  totalWeight: -1
+                }
+              },
+              {
+                $limit: femaleLimit
+              }
+            ])
+            femaleAggregation.get(function (err, femaleData) {
               if (err) return callback(err);
-              var arrayBottle = []
-              console.log("data.length")
-              console.log(data.length)
-              if (data.length == 0) {
-                oneUser.updateAttributes({
-                  "stackBottleUser": arrayBottle
-                }, function (err, data) {
-                  return callback()
-                })
-              } else {
-                for (var i = data.length - 1; i >= 0; i--) {
-                  var element = data[i]
-                  // if (seenBottle.indexOf(element._id.toString()) != -1) {
-                  //   data.splice(i, 1);
-                  // } else {
-                  //   arrayBottle.unshift(element._id)
-                  // }
-                  if (seenBottle.indexOf(element._id.toString()) == -1) {
-                    arrayBottle.unshift(element._id)
-                  }
-                  //console.log(arrayBottle)
-                  if (i == 0) {
-                    arrayBottle = arrayBottle.concat(seenBottle)
-                    var getDataTime = (new Date().getTime() - now) / 1000
-                    // console.log(arrayBottle)
-                    oneUser.updateAttribute(
-                      "stackBottleUser", arrayBottle,
-                      function (err, data) {
-                        if (err) console.log(err)
-                        console.log(data)
-                        var updateUserTime = (new Date().getTime() - now) / 1000
 
-                        return callback({
-                          "updateUserTime": updateUserTime,
-                          "getDataTime": getDataTime,
-                          "getSeen": getSeen,
-                          "getBlock": getBlock,
+              maleAggregation.get(function (err, maleData) {
+                if (err) return callback(err);
+                var arrayBottle = []
+                var data = []
+                console.log("maleData")
+                console.log(maleData.length)
+                console.log("femaleData")
+                console.log(femaleData.length)
+
+                if (maleLimit != 1000) {
+                  data = margeData(maleData, femaleData, maleLimit / 100, femaleLimit / 100) // maleData.concat(femaleData)
+                } else {
+                  if (filter['owner.gender'] == "male")
+                    data = maleData
+                  else
+                    data = femaleData
+                }
+                if (data.length == 0) {
+                  oneUser.updateAttributes({
+                    "stackBottleUser": arrayBottle
+                  }, function (err, data) {
+                    return callback()
+                  })
+                } else {
+                  for (var i = data.length - 1; i >= 0; i--) {
+                    var element = data[i]
+                    // if (seenBottle.indexOf(element._id.toString()) != -1) {
+                    //   data.splice(i, 1);
+                    // } else {
+                    //   arrayBottle.unshift(element._id)
+                    // }
+                    if (seenBottle.indexOf(element._id.toString()) == -1) {
+                      arrayBottle.unshift(element._id)
+                    }
+                    if (i == 0) {
+                      arrayBottle = arrayBottle.concat(seenBottle)
+                      var getDataTime = (new Date().getTime() - now) / 1000
+                      oneUser.updateAttribute(
+                        "stackBottleUser", arrayBottle,
+                        function (err, data) {
+                          if (err) console.log(err)
+                          var updateUserTime = (new Date().getTime() - now) / 1000
+
+                          return callback({
+                            "updateUserTime": updateUserTime,
+                            "getDataTime": getDataTime,
+                            "getSeen": getSeen,
+                            "newUser": newUser,
+                            "getBlock": getBlock,
+                          })
                         })
-                      })
+                    }
                   }
                 }
-              }
+              })
             })
           })
+
+          // Bottle.getDataSource().connector.connect(function (err, db) {
+
+          //   var collection = db.collection('bottle');
+          //   var cursor = collection.aggregate([{
+          //       $match: filter
+          //     },
+          //     {
+          //       $sort: {
+          //         totalWeight: -1
+          //       }
+          //     },
+          //     {
+          //       $limit: 900
+          //     }
+          //   ])
+          //   cursor.get(function (err, data) {
+          //     // console.log(data)
+          //     if (err) return callback(err);
+          //     var arrayBottle = []
+          //     console.log("data.length")
+          //     console.log(data.length)
+          //     if (data.length == 0) {
+          //       oneUser.updateAttributes({
+          //         "stackBottleUser": arrayBottle
+          //       }, function (err, data) {
+          //         return callback()
+          //       })
+          //     } else {
+          //       for (var i = data.length - 1; i >= 0; i--) {
+          //         var element = data[i]
+          //         // if (seenBottle.indexOf(element._id.toString()) != -1) {
+          //         //   data.splice(i, 1);
+          //         // } else {
+          //         //   arrayBottle.unshift(element._id)
+          //         // }
+          //         if (seenBottle.indexOf(element._id.toString()) == -1) {
+          //           arrayBottle.unshift(element._id)
+          //         }
+          //         //console.log(arrayBottle)
+          //         if (i == 0) {
+          //           arrayBottle = arrayBottle.concat(seenBottle)
+          //           var getDataTime = (new Date().getTime() - now) / 1000
+          //           // console.log(arrayBottle)
+          //           oneUser.updateAttribute(
+          //             "stackBottleUser", arrayBottle,
+          //             function (err, data) {
+          //               if (err) console.log(err)
+          //               console.log(data)
+          //               var updateUserTime = (new Date().getTime() - now) / 1000
+
+          //               return callback({
+          //                 "updateUserTime": updateUserTime,
+          //                 "getDataTime": getDataTime,
+          //                 "getSeen": getSeen,
+          //                 "getBlock": getBlock,
+          //               })
+          //             })
+          //         }
+          //       }
+          //     }
+          //   })
+          // })
         })
       })
     })
+  }
+
+  function shuffle(array) {
+    var currentIndex = array.length,
+      temporaryValue, randomIndex;
+
+    // While there remain elements to shuffle...
+    while (0 !== currentIndex) {
+
+      // Pick a remaining element...
+      randomIndex = Math.floor(Math.random() * currentIndex);
+      currentIndex -= 1;
+
+      // And swap it with the current element.
+      temporaryValue = array[currentIndex];
+      array[currentIndex] = array[randomIndex];
+      array[randomIndex] = temporaryValue;
+    }
+
+    return array;
+  }
+
+  function margeData(maleData, femaleData, maleLimit, femaleLimit) {
+    let data = []
+    let index = 0
+    while (maleData[index * maleLimit] != null && femaleData[index * femaleLimit] != null) {
+      let maleTempData = maleData.slice(index * maleLimit, (index * maleLimit) + maleLimit)
+      let femaleTempData = femaleData.slice(index * femaleLimit, (index * femaleLimit) + femaleLimit)
+      let tempData = maleTempData.concat(femaleTempData);
+      tempData = shuffle(tempData)
+      data = data.concat(tempData);
+      index++
+    }
+
+    if (maleData[index * maleLimit] != null) {
+      let maleTempData = maleData.slice(index * maleLimit, maleData.length)
+      data = data.concat(maleTempData);
+    }
+    if (femaleData[index * femaleLimit] != null) {
+      let femaleTempData = femaleData.slice(index * femaleLimit, femaleData.length)
+      data = data.concat(femaleTempData);
+    }
+    return data;
+
   }
 
   function getFromStack(userId, offsets, limit, callback) {
@@ -623,6 +805,7 @@ module.exports = function (Bottle) {
     var filter = Object.assign({}, mainfilter);
 
     filter["owner.status"] = "active"
+    filter["bottle.viewStatus"] = "active"
     filter["userId"] = ObjectId(userId)
     if (filter.createdAt) {
       delete filter.createdAt
@@ -645,6 +828,12 @@ module.exports = function (Bottle) {
       filter["bottle.shoreId"] = ObjectId(filter.shoreId)
       delete filter.shoreId
     }
+    if (filter.viewStatus != null) {
+      filter["bottle.viewStatus"] = filter.viewStatus
+      delete filter.viewStatus
+    }
+
+    console.log("filter")
     console.log(filter)
     Bottle.getDataSource().connector.connect(function (err, db) {
 
@@ -684,8 +873,10 @@ module.exports = function (Bottle) {
         }
       ])
       seen.get(function (err, seens) {
-        console.log(seens)
         var data = [];
+        console.log("seens")
+        console.log(seens.length)
+    
         seens.forEach(element => {
           data[element._id] = element.count
         });
@@ -698,6 +889,36 @@ module.exports = function (Bottle) {
     })
   }
 
+  Bottle.makeBottleViewStatus = function (bottles, callback) {
+    if (bottles[0] == null)
+      return callback(null, {})
+    Bottle.findById(bottles[0], function (err, bottle) {
+      if (err)
+        return callback(err)
+      if (bottle == null)
+        return callback(null, {})
+      let ownerId = bottle.ownerId
+      Bottle.updateAll({
+        "ownerId": ownerId
+      }, {
+        "viewStatus": "deactive"
+      }, function (err, data) {
+        if (err)
+          return callback(err)
+        Bottle.updateAll({
+          "id": {
+            "inq": bottles
+          }
+        }, {
+          "viewStatus": "active"
+        }, function (err, data) {
+          if (err)
+            return callback(err)
+          return callback(null, {})
+        })
+      })
+    })
+  }
   Bottle.getOneBottle = function (gender, ISOCode, shoreId, req, callback) {
     var result;
     var secFilter = {};
@@ -1059,148 +1280,148 @@ module.exports = function (Bottle) {
 
 
   rule.minute = 2;
-  cron.scheduleJob('*/5 * * * *', function () {
-    Bottle.updateAll({
-      totalWeight: '-99999999999999999999999'
-    }, function (err, info) {
+  // cron.scheduleJob('*/5 * * * *', function () {
+  //   Bottle.updateAll({
+  //     totalWeight: '-99999999999999999999999'
+  //   }, function (err, info) {
 
-      var maxHourse = 7 * 24;
+  //     var maxHourse = 7 * 24;
 
-      var replyCountAvr = 0;
-      var paidAvr = 0;
-      Bottle.find({
-        order: 'createdAt DESC',
-        limit: 2000,
-        where: {
-          "status": "active",
-          "createdAt": {
-            "gt": "2019-06-01T13:39:44.419Z"
-          }
-        },
-        include: {
-          relation: 'owner',
-        }
-      }, function (err, data) {
-        for (let index = 0; index < data.length; index++) {
-          const element = data[index];
-          replyCountAvr += element.repliesUserCount;
-          paidAvr += JSON.parse(JSON.stringify(element.owner())).totalPaid;
+  //     var replyCountAvr = 0;
+  //     var paidAvr = 0;
+  //     Bottle.find({
+  //       order: 'createdAt DESC',
+  //       limit: 2000,
+  //       where: {
+  //         "status": "active",
+  //         "createdAt": {
+  //           "gt": "2019-06-01T13:39:44.419Z"
+  //         }
+  //       },
+  //       include: {
+  //         relation: 'owner',
+  //       }
+  //     }, function (err, data) {
+  //       for (let index = 0; index < data.length; index++) {
+  //         const element = data[index];
+  //         replyCountAvr += element.repliesUserCount;
+  //         paidAvr += JSON.parse(JSON.stringify(element.owner())).totalPaid;
 
-          if (index == data.length - 1) {
-            replyCountAvr = replyCountAvr / data.length;
-            paidAvr = paidAvr / data.length;
-            var repliesCountWieght = 200 / replyCountAvr;
-            var paidWieght = 60 / paidAvr;
+  //         if (index == data.length - 1) {
+  //           replyCountAvr = replyCountAvr / data.length;
+  //           paidAvr = paidAvr / data.length;
+  //           var repliesCountWieght = 200 / replyCountAvr;
+  //           var paidWieght = 60 / paidAvr;
 
-            async.forEachOf(data, function (element, index, callback) {
-              var gender = element.owner().gender;
-              var totalPaid = element.owner().totalPaid;
-              var username = element.owner().username;
-              // var tempProject = {
-              //   "paidWieght": paidWieght,
-              //   "repliesCountWieght": repliesCountWieght,
-              //   "replyCountAvr": replyCountAvr,
-              //   "paidAvr": paidAvr,
-              //   "createdAt": element.createdAt,
-              //   "numDay": diffdays(element.createdAt),
-              //   "numHours": diffHourse(element.createdAt),
-              //   "repliesUserCount": element.repliesUserCount,
-              //   "totalPaid": totalPaid,
-              //   "gender": gender,
-              //   "username": username,
-              //   "time score": ((maxHourse - diffHourse(element.createdAt)) * 10),
-              //   "reply score": element.repliesUserCount * repliesCountWieght,
-              //   "totalPaid score": totalPaid * paidWieght,
-              //   "score": (totalPaid * paidWieght) + ((maxHourse - diffHourse(element.createdAt)) * 10) + (element.repliesUserCount * repliesCountWieght)
-              // }
-              element.totalWeight = (totalPaid * paidWieght) + ((maxHourse - diffHourse(element.createdAt)) * 10) + (element.repliesUserCount * repliesCountWieght);
-              if (gender == "female") {
-                // tempProject['score'] = tempProject['score'] * 0.6
-                element.totalWeight = element.totalWeight * 0.6
-              }
-              // result.push(tempProject);
-              element.save(callback);
-            }, function () {
-              //console.log("Finish loop")
-              // result.sort(tempCompare);
-              // return mainCallback(null, result);
-            })
-          }
-        }
-      })
-    })
-  });
-  Bottle.recommendationTest = function (mainCallback) {
-    var result = []
-    Bottle.updateAll({
-      totalWeight: '-99999999999999999999999'
-    }, function (err, info) {
+  //           async.forEachOf(data, function (element, index, callback) {
+  //             var gender = element.owner().gender;
+  //             var totalPaid = element.owner().totalPaid;
+  //             var username = element.owner().username;
+  //             // var tempProject = {
+  //             //   "paidWieght": paidWieght,
+  //             //   "repliesCountWieght": repliesCountWieght,
+  //             //   "replyCountAvr": replyCountAvr,
+  //             //   "paidAvr": paidAvr,
+  //             //   "createdAt": element.createdAt,
+  //             //   "numDay": diffdays(element.createdAt),
+  //             //   "numHours": diffHourse(element.createdAt),
+  //             //   "repliesUserCount": element.repliesUserCount,
+  //             //   "totalPaid": totalPaid,
+  //             //   "gender": gender,
+  //             //   "username": username,
+  //             //   "time score": ((maxHourse - diffHourse(element.createdAt)) * 10),
+  //             //   "reply score": element.repliesUserCount * repliesCountWieght,
+  //             //   "totalPaid score": totalPaid * paidWieght,
+  //             //   "score": (totalPaid * paidWieght) + ((maxHourse - diffHourse(element.createdAt)) * 10) + (element.repliesUserCount * repliesCountWieght)
+  //             // }
+  //             element.totalWeight = (totalPaid * paidWieght) + ((maxHourse - diffHourse(element.createdAt)) * 10) + (element.repliesUserCount * repliesCountWieght);
+  //             if (gender == "female") {
+  //               // tempProject['score'] = tempProject['score'] * 0.6
+  //               element.totalWeight = element.totalWeight * 0.6
+  //             }
+  //             // result.push(tempProject);
+  //             element.save(callback);
+  //           }, function () {
+  //             //console.log("Finish loop")
+  //             // result.sort(tempCompare);
+  //             // return mainCallback(null, result);
+  //           })
+  //         }
+  //       }
+  //     })
+  //   })
+  // });
+  // Bottle.recommendationTest = function (mainCallback) {
+  //   var result = []
+  //   Bottle.updateAll({
+  //     totalWeight: '-99999999999999999999999'
+  //   }, function (err, info) {
 
-      var maxHourse = 7 * 24;
+  //     var maxHourse = 7 * 24;
 
-      var replyCountAvr = 0;
-      var paidAvr = 0;
-      Bottle.find({
-        order: 'createdAt DESC',
-        limit: 2000,
-        where: {
-          "status": "active"
-        },
-        include: {
-          relation: 'owner',
-        }
-      }, function (err, data) {
-        for (let index = 0; index < data.length; index++) {
-          const element = data[index];
-          replyCountAvr += element.repliesUserCount;
-          paidAvr += JSON.parse(JSON.stringify(element.owner())).totalPaid;
+  //     var replyCountAvr = 0;
+  //     var paidAvr = 0;
+  //     Bottle.find({
+  //       order: 'createdAt DESC',
+  //       limit: 2000,
+  //       where: {
+  //         "status": "active"
+  //       },
+  //       include: {
+  //         relation: 'owner',
+  //       }
+  //     }, function (err, data) {
+  //       for (let index = 0; index < data.length; index++) {
+  //         const element = data[index];
+  //         replyCountAvr += element.repliesUserCount;
+  //         paidAvr += JSON.parse(JSON.stringify(element.owner())).totalPaid;
 
-          if (index == data.length - 1) {
-            replyCountAvr = replyCountAvr / data.length;
-            paidAvr = paidAvr / data.length;
-            var repliesCountWieght = 200 / replyCountAvr;
-            var paidWieght = 60 / paidAvr;
+  //         if (index == data.length - 1) {
+  //           replyCountAvr = replyCountAvr / data.length;
+  //           paidAvr = paidAvr / data.length;
+  //           var repliesCountWieght = 200 / replyCountAvr;
+  //           var paidWieght = 60 / paidAvr;
 
-            async.forEachOf(data, function (element, index, callback) {
-              var gender = element.owner().gender;
-              var totalPaid = element.owner().totalPaid;
-              var username = element.owner().username;
-              var tempProject = {
-                "paidWieght": paidWieght,
-                "repliesCountWieght": repliesCountWieght,
-                "replyCountAvr": replyCountAvr,
-                "paidAvr": paidAvr,
-                "createdAt": element.createdAt,
-                "numDay": diffdays(element.createdAt),
-                "numHours": diffHourse(element.createdAt),
-                "repliesUserCount": element.repliesUserCount,
-                "totalPaid": totalPaid,
-                "gender": gender,
-                "username": username,
-                "time score": ((maxHourse - diffHourse(element.createdAt)) * 10),
-                "reply score": element.repliesUserCount * repliesCountWieght,
-                "totalPaid score": totalPaid * paidWieght,
-                "score": (totalPaid * paidWieght) + ((maxHourse - diffHourse(element.createdAt)) * 10) + (element.repliesUserCount * repliesCountWieght)
-              }
+  //           async.forEachOf(data, function (element, index, callback) {
+  //             var gender = element.owner().gender;
+  //             var totalPaid = element.owner().totalPaid;
+  //             var username = element.owner().username;
+  //             var tempProject = {
+  //               "paidWieght": paidWieght,
+  //               "repliesCountWieght": repliesCountWieght,
+  //               "replyCountAvr": replyCountAvr,
+  //               "paidAvr": paidAvr,
+  //               "createdAt": element.createdAt,
+  //               "numDay": diffdays(element.createdAt),
+  //               "numHours": diffHourse(element.createdAt),
+  //               "repliesUserCount": element.repliesUserCount,
+  //               "totalPaid": totalPaid,
+  //               "gender": gender,
+  //               "username": username,
+  //               "time score": ((maxHourse - diffHourse(element.createdAt)) * 10),
+  //               "reply score": element.repliesUserCount * repliesCountWieght,
+  //               "totalPaid score": totalPaid * paidWieght,
+  //               "score": (totalPaid * paidWieght) + ((maxHourse - diffHourse(element.createdAt)) * 10) + (element.repliesUserCount * repliesCountWieght)
+  //             }
 
-              tempProject.score = (totalPaid * paidWieght) + ((maxHourse - diffHourse(element.createdAt)) * 10) + (element.repliesUserCount * repliesCountWieght);
-              element.totalWeight = (totalPaid * paidWieght) + ((maxHourse - diffHourse(element.createdAt)) * 10) + (element.repliesUserCount * repliesCountWieght);
-              if (gender == "female") {
-                tempProject['score'] = tempProject['score'] * 0.6
-                element.totalWeight = element.totalWeight * 0.6
-              }
-              result.push(tempProject);
-              element.save(callback);
-            }, function () {
-              //console.log("Finish loop")
-              result.sort(tempCompare);
-              return mainCallback(null, result);
-            })
-          }
-        }
-      })
-    })
-  }
+  //             tempProject.score = (totalPaid * paidWieght) + ((maxHourse - diffHourse(element.createdAt)) * 10) + (element.repliesUserCount * repliesCountWieght);
+  //             element.totalWeight = (totalPaid * paidWieght) + ((maxHourse - diffHourse(element.createdAt)) * 10) + (element.repliesUserCount * repliesCountWieght);
+  //             if (gender == "female") {
+  //               tempProject['score'] = tempProject['score'] * 0.6
+  //               element.totalWeight = element.totalWeight * 0.6
+  //             }
+  //             result.push(tempProject);
+  //             element.save(callback);
+  //           }, function () {
+  //             //console.log("Finish loop")
+  //             result.sort(tempCompare);
+  //             return mainCallback(null, result);
+  //           })
+  //         }
+  //       }
+  //     })
+  //   })
+  // }
 
   function tempCompare(a, b) {
     if (a.score > b.score)
