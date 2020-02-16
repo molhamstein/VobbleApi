@@ -54,7 +54,7 @@ module.exports = function (Replies) {
       else {
         oneUser.replysCount--;
         if (oneUser.replysCount == 0) {
-          oneUser.dateRechargeReplies = addHours(new Date(), 24)
+          oneUser.dateRechargeReplies = addHours(new Date(), 12)
         }
       }
       oneUser.save();
@@ -63,7 +63,6 @@ module.exports = function (Replies) {
   });
 
   cron.scheduleJob('0 5 * * * *', function () {
-    //console.log("Ruuuuuuuuuuuuuuuuuuuuun")
     var dataNotification = []
     Replies.app.models.User.find({
       where: {
@@ -71,67 +70,56 @@ module.exports = function (Replies) {
             "replysCount": 0,
           },
           {
-            "or": [{
-                "dateRechargeReplies": undefined
-              },
-              {
-                "dateRechargeReplies": {
-                  "lt": new Date()
-                }
-              }
-            ]
+            "dateRechargeReplies": {
+              "lt": new Date()
+            }
           }
         ]
 
       }
     }, function (err, data) {
-      dataNotification = data;
-    })
-    var tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
+      // dataNotification = data;
+      var tomorrow = addHours(new Date(), 24)
+      console.log("Ruuuuuuuuuuuuuuuuuuuuun")
+      console.log(data.length)
 
-    Replies.app.models.User.updateAll({
-      "or": [{
-          "dateRechargeReplies": undefined
-        },
-        {
-          "dateRechargeReplies": {
-            "lt": new Date()
-          }
+      Replies.app.models.User.updateAll({
+        "dateRechargeReplies": {
+          "lt": new Date()
         }
-      ]
-    }, {
-      'dateRechargeReplies': tomorrow,
-      'replysCount': 10,
-    }, function (err, res) {
-      if (err) {
-        //console.log(err);
-      } else {
-        //console.log('done');
-        for (let index = 0; index < dataNotification.length; index++) {
-          const element = dataNotification[index];
-          var message = {
-            "app_id": "e8a91e90-a766-4f1b-a47e-e3b3f569dbef",
-            "included_segments ": ["Active Users", "Inactive Users"],
-            "contents": {
-              "ar": "صار فيك تعلق عالفيديوهات يلي بتحبها",
-              "en": "Now, you can reply to video "
-            },
-            "filters": [{
-              "field": "tag",
-              "key": "user_id",
-              "relation": "=",
-              "value": element.id
-            }],
-            "headings": {
-              "en": "Go back and reply",
-              "ar": "رجاع علق عالفيديوهات"
+      }, {
+        'dateRechargeReplies': tomorrow,
+        'replysCount': 9,
+      }, function (err, res) {
+        if (err) {
+          //console.log(err);
+        } else {
+          //console.log('done');
+          for (let index = 0; index < dataNotification.length; index++) {
+            const element = dataNotification[index];
+            var message = {
+              "app_id": "e8a91e90-a766-4f1b-a47e-e3b3f569dbef",
+              "included_segments ": ["Active Users", "Inactive Users"],
+              "contents": {
+                "ar": "صار فيك تعلق عالفيديوهات يلي بتحبها",
+                "en": "Now, you can reply to video "
+              },
+              "filters": [{
+                "field": "tag",
+                "key": "user_id",
+                "relation": "=",
+                "value": element.id
+              }],
+              "headings": {
+                "en": "Go back and reply",
+                "ar": "رجاع علق عالفيديوهات"
+              }
             }
+            //console.log(message);
+            sendNewNotification(message)
           }
-          //console.log(message);
-          sendNewNotification(message)
         }
-      }
+      })
 
     });
   });

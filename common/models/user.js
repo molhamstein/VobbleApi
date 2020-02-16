@@ -1161,6 +1161,11 @@ module.exports = function (User) {
    * @param {Function(Error, object)} callback
    */
 
+
+  function addHours(date, h) {
+    date.setTime(date.getTime() + (h * 60 * 60 * 1000));
+    return date;
+  }
   User.me = function (context, deviceName, callback) {
     var result;
     var deviceId = null
@@ -1178,6 +1183,9 @@ module.exports = function (User) {
       User.findById(userId, function (err, oneUser) {
         if (err)
           return callback(err, null);
+        if (oneUser.dateRechargeReplies == null) {
+          oneUser.dateRechargeReplies = addHours(new Date(),24)
+        }
         if (oneUser.status != 'active') {
           return callback(errors.account.notActive());
         } else {
