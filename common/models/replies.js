@@ -78,7 +78,7 @@ module.exports = function (Replies) {
 
       }
     }, function (err, data) {
-      // dataNotification = data;
+      dataNotification = data;
       var tomorrow = addHours(new Date(), 24)
       console.log("Ruuuuuuuuuuuuuuuuuuuuun")
       console.log(data.length)
