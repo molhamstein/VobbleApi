@@ -75,7 +75,7 @@
     },
     "replysCount": {
       "type": "number",
-      "default": 10
+      "default": 9
     },
     "extraReplysCount": {
       "type": "number",
