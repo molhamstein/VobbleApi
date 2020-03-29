@@ -37,6 +37,10 @@ module.exports = function (Calllog) {
       if (user.pushkitToken == null) {
         return next(errors.account.userCanNotRinging())
       }
+      if (user.allowedCall == false) {
+        return next(errors.account.userNotAllowedRinging())
+      }
+      allowedCall
       var callId = context.req.body.callId;
       delete context.req.body.callId
       let deviceToken = user.pushkitToken
@@ -216,92 +220,92 @@ module.exports = function (Calllog) {
 
       var collection = db.collection('callLog');
       var callLogs = collection.aggregate([{
-          $lookup: {
-            from: "user",
-            let: {
-              ownerId: {
-                $convert: {
-                  input: "$ownerId",
-                  to: "objectId"
-                }
+        $lookup: {
+          from: "user",
+          let: {
+            ownerId: {
+              $convert: {
+                input: "$ownerId",
+                to: "objectId"
               }
-            },
-            pipeline: [{
-                $match: {
-                  $expr: {
-                    $eq: ["$_id", "$$ownerId"]
-                  }
-                }
-              },
-              {
-                $project: {
-                  stackBottleUser: 0
-                }
+            }
+          },
+          pipeline: [{
+            $match: {
+              $expr: {
+                $eq: ["$_id", "$$ownerId"]
               }
+            }
+          },
+          {
+            $project: {
+              stackBottleUser: 0
+            }
+          }
 
-            ],
-            as: "owner"
-          }
-        },
-        {
-          $unwind: "$owner"
-        },
-        {
-          $lookup: {
-            from: "user",
-            let: {
-              relatedUserId: {
-                $convert: {
-                  input: "$relatedUserId",
-                  to: "objectId"
-                }
-              }
-            },
-            pipeline: [{
-                $match: {
-                  $expr: {
-                    $eq: ["$_id", "$$relatedUserId"]
-                  }
-                }
-              },
-              {
-                $project: {
-                  stackBottleUser: 0
-                }
-              }
-
-            ],
-            as: "relatedUser"
-          }
-        },
-        {
-          $unwind: "$relatedUser"
-        },
-        {
-          $match: filter['where']
-        },
-        {
-          $project: {
-            _id: 0,
-            id: '$_id',
-            conversationId: 1,
-            status: 1,
-            createdAt: 1,
-            relatedUserId: 1,
-            ownerId: 1,
-            startAt: 1,
-            endAt: 1,
-            duration: 1,
-            cost: 1,
-            relatedUser: 1,
-            owner: 1
-          }
-        },
-        {
-          $sort: {
-            createdAt: -1
-          }
+          ],
+          as: "owner"
         }
+      },
+      {
+        $unwind: "$owner"
+      },
+      {
+        $lookup: {
+          from: "user",
+          let: {
+            relatedUserId: {
+              $convert: {
+                input: "$relatedUserId",
+                to: "objectId"
+              }
+            }
+          },
+          pipeline: [{
+            $match: {
+              $expr: {
+                $eq: ["$_id", "$$relatedUserId"]
+              }
+            }
+          },
+          {
+            $project: {
+              stackBottleUser: 0
+            }
+          }
+
+          ],
+          as: "relatedUser"
+        }
+      },
+      {
+        $unwind: "$relatedUser"
+      },
+      {
+        $match: filter['where']
+      },
+      {
+        $project: {
+          _id: 0,
+          id: '$_id',
+          conversationId: 1,
+          status: 1,
+          createdAt: 1,
+          relatedUserId: 1,
+          ownerId: 1,
+          startAt: 1,
+          endAt: 1,
+          duration: 1,
+          cost: 1,
+          relatedUser: 1,
+          owner: 1
+        }
+      },
+      {
+        $sort: {
+          createdAt: -1
+        }
+      }
       ]);
       callLogs.get(function (err, data) {
         if (err) return callback(err);

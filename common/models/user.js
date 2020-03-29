@@ -198,18 +198,18 @@ module.exports = function (User) {
         where: {
           "and": [{
             "or": [{
-                socialId: socialId
-              },
-              {
-                "and": [{
-                  username: {
-                    like: name,
-                    options: "i"
-                  }
-                }, {
-                  email: email
-                }]
-              }
+              socialId: socialId
+            },
+            {
+              "and": [{
+                username: {
+                  like: name,
+                  options: "i"
+                }
+              }, {
+                email: email
+              }]
+            }
             ]
           }, {
             typeLogIn: "facebook"
@@ -1184,7 +1184,7 @@ module.exports = function (User) {
         if (err)
           return callback(err, null);
         if (oneUser.dateRechargeReplies == null) {
-          oneUser.dateRechargeReplies = addHours(new Date(),24)
+          oneUser.dateRechargeReplies = addHours(new Date(), 24)
         }
         if (oneUser.status != 'active') {
           return callback(errors.account.notActive());
@@ -1371,11 +1371,11 @@ module.exports = function (User) {
                 Client.app.models.pendingClient.find({
                   where: {
                     "and": [{
-                        location_id: credentials.location_id
-                      },
-                      {
-                        client_id: token.userId
-                      },
+                      location_id: credentials.location_id
+                    },
+                    {
+                      client_id: token.userId
+                    },
                     ]
                   }
                 }, function (err, clinet) {
@@ -1494,36 +1494,36 @@ module.exports = function (User) {
 
       var collection = db.collection('user');
       var cursor = collection.aggregate([{
-          $match: filter
-        },
-        {
-          $project: {
-            male: {
-              $cond: [{
-                $eq: ["$gender", "male"]
-              }, 1, 0]
-            },
-            female: {
-              $cond: [{
-                $eq: ["$gender", "female"]
-              }, 1, 0]
-            },
-          }
-        },
-        {
-          $group: {
-            _id: null,
-            male: {
-              $sum: "$male"
-            },
-            female: {
-              $sum: "$female"
-            },
-            total: {
-              $sum: 1
-            },
-          }
-        },
+        $match: filter
+      },
+      {
+        $project: {
+          male: {
+            $cond: [{
+              $eq: ["$gender", "male"]
+            }, 1, 0]
+          },
+          female: {
+            $cond: [{
+              $eq: ["$gender", "female"]
+            }, 1, 0]
+          },
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          male: {
+            $sum: "$male"
+          },
+          female: {
+            $sum: "$female"
+          },
+          total: {
+            $sum: 1
+          },
+        }
+      },
       ]);
       cursor.get(function (err, data) {
         //console.log(data);
@@ -1692,13 +1692,53 @@ module.exports = function (User) {
 
         var collection = db.collection('item');
         var cursor = collection.aggregate([{
+          $match: {
+            "ownerId": ObjectId(userId)
+          }
+        },
+        {
+          $group: {
+            _id: '$productId',
+            count: {
+              $sum: 1
+            },
+            totalRevenue: {
+              $sum: "$price"
+            }
+          }
+        },
+        {
+          $lookup: {
+            from: "product",
+            localField: "_id",
+            foreignField: "_id",
+            as: "product"
+          }
+        },
+        {
+          $unwind: "$product"
+        },
+        {
+          $project: {
+            _id: 0,
+            product: 1,
+            count: 1,
+            totalRevenue: 1,
+          }
+        }
+        ]);
+        cursor.get(function (err, data) {
+          if (err) reject(err)
+
+          var collectionChatItem = db.collection('chatItem');
+          var cursorChatItem = collectionChatItem.aggregate([{
             $match: {
               "ownerId": ObjectId(userId)
             }
           },
           {
             $group: {
-              _id: '$productId',
+              _id: '$chatProductId',
               count: {
                 $sum: 1
               },
@@ -1709,7 +1749,7 @@ module.exports = function (User) {
           },
           {
             $lookup: {
-              from: "product",
+              from: "chatProduct",
               localField: "_id",
               foreignField: "_id",
               as: "product"
@@ -1726,46 +1766,6 @@ module.exports = function (User) {
               totalRevenue: 1,
             }
           }
-        ]);
-        cursor.get(function (err, data) {
-          if (err) reject(err)
-
-          var collectionChatItem = db.collection('chatItem');
-          var cursorChatItem = collectionChatItem.aggregate([{
-              $match: {
-                "ownerId": ObjectId(userId)
-              }
-            },
-            {
-              $group: {
-                _id: '$chatProductId',
-                count: {
-                  $sum: 1
-                },
-                totalRevenue: {
-                  $sum: "$price"
-                }
-              }
-            },
-            {
-              $lookup: {
-                from: "chatProduct",
-                localField: "_id",
-                foreignField: "_id",
-                as: "product"
-              }
-            },
-            {
-              $unwind: "$product"
-            },
-            {
-              $project: {
-                _id: 0,
-                product: 1,
-                count: 1,
-                totalRevenue: 1,
-              }
-            }
           ]);
           cursorChatItem.get(function (err, dataChatItem) {
             if (err) reject(err)
@@ -1972,183 +1972,183 @@ module.exports = function (User) {
 
       var callLogCollection = db.collection('callLog');
       var callLogs = callLogCollection.aggregate([{
-          $lookup: {
-            from: "user",
-            localField: "relatedUserId",
-            foreignField: "_id",
-            as: "relatedUser"
-          }
-        },
-        {
-          $unwind: "$relatedUser"
-        },
-        {
-          $match: mainFilter
-        },
-        {
-          $group: {
-            _id: '$relatedUserId',
-            callTotalCost: {
-              $sum: "$cost"
-            },
-            callTotalDuration: {
-              $sum: {
-                $ceil: {
-                  $divide: ["$duration", 60]
-                }
+        $lookup: {
+          from: "user",
+          localField: "relatedUserId",
+          foreignField: "_id",
+          as: "relatedUser"
+        }
+      },
+      {
+        $unwind: "$relatedUser"
+      },
+      {
+        $match: mainFilter
+      },
+      {
+        $group: {
+          _id: '$relatedUserId',
+          callTotalCost: {
+            $sum: "$cost"
+          },
+          callTotalDuration: {
+            $sum: {
+              $ceil: {
+                $divide: ["$duration", 60]
               }
-            },
-            callCount: {
-              $sum: 1
             }
-          }
-        },
-        {
-          $lookup: {
-            from: "user",
-            localField: "_id",
-            foreignField: "_id",
-            as: "relatedUser"
-          }
-        },
-        {
-          $unwind: "$relatedUser"
-        },
-        {
-          $lookup: {
-            from: "agency",
-            localField: "relatedUser.agencyId",
-            foreignField: "_id",
-            as: "agency"
-          }
-        },
-        {
-          $unwind: {
-            path: "$agency",
-            preserveNullAndEmptyArrays: true
-          }
-        },
-        {
-          $project: {
-            relatedUser: 1,
-            callTotalCost: 1,
-            callCount: 1,
-            agency: 1,
-            callTotalDuration: 1
+          },
+          callCount: {
+            $sum: 1
           }
         }
+      },
+      {
+        $lookup: {
+          from: "user",
+          localField: "_id",
+          foreignField: "_id",
+          as: "relatedUser"
+        }
+      },
+      {
+        $unwind: "$relatedUser"
+      },
+      {
+        $lookup: {
+          from: "agency",
+          localField: "relatedUser.agencyId",
+          foreignField: "_id",
+          as: "agency"
+        }
+      },
+      {
+        $unwind: {
+          path: "$agency",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $project: {
+          relatedUser: 1,
+          callTotalCost: 1,
+          callCount: 1,
+          agency: 1,
+          callTotalDuration: 1
+        }
+      }
       ])
       var chatItemCollection = db.collection('chatItem');
       var chatItems = chatItemCollection.aggregate([{
-          $lookup: {
-            from: "user",
-            localField: "relatedUserId",
-            foreignField: "_id",
-            as: "relatedUser"
-          }
-        },
-        {
-          $unwind: "$relatedUser"
-        },
-        {
-          $match: mainFilter
-        },
-        {
-          $group: {
-            _id: '$relatedUserId',
-            giftTotalCost: {
-              $sum: "$price"
-            }
-          }
-        },
-        {
-          $lookup: {
-            from: "user",
-            localField: "_id",
-            foreignField: "_id",
-            as: "relatedUser"
-          }
-        },
-        {
-          $unwind: "$relatedUser"
-        },
-        {
-          $lookup: {
-            from: "agency",
-            localField: "relatedUser.agencyId",
-            foreignField: "_id",
-            as: "agency"
-          }
-        },
-        {
-          $unwind: {
-            path: "$agency",
-            preserveNullAndEmptyArrays: true
-          }
-        },
-        {
-          $project: {
-            relatedUser: 1,
-            giftTotalCost: 1,
-            agency: 1
+        $lookup: {
+          from: "user",
+          localField: "relatedUserId",
+          foreignField: "_id",
+          as: "relatedUser"
+        }
+      },
+      {
+        $unwind: "$relatedUser"
+      },
+      {
+        $match: mainFilter
+      },
+      {
+        $group: {
+          _id: '$relatedUserId',
+          giftTotalCost: {
+            $sum: "$price"
           }
         }
+      },
+      {
+        $lookup: {
+          from: "user",
+          localField: "_id",
+          foreignField: "_id",
+          as: "relatedUser"
+        }
+      },
+      {
+        $unwind: "$relatedUser"
+      },
+      {
+        $lookup: {
+          from: "agency",
+          localField: "relatedUser.agencyId",
+          foreignField: "_id",
+          as: "agency"
+        }
+      },
+      {
+        $unwind: {
+          path: "$agency",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $project: {
+          relatedUser: 1,
+          giftTotalCost: 1,
+          agency: 1
+        }
+      }
       ])
       var itemCollection = db.collection('item');
       var items = itemCollection.aggregate([{
-          $lookup: {
-            from: "user",
-            localField: "relatedUserId",
-            foreignField: "_id",
-            as: "relatedUser"
-          }
-        },
-        {
-          $unwind: "$relatedUser"
-        },
-        {
-          $match: mainFilterWhere
-        },
-        {
-          $group: {
-            _id: '$relatedUserId',
-            itemTotalCost: {
-              $sum: "$price"
-            }
-          }
-        },
-        {
-          $lookup: {
-            from: "user",
-            localField: "_id",
-            foreignField: "_id",
-            as: "relatedUser"
-          }
-        },
-        {
-          $unwind: "$relatedUser"
-        },
-        {
-          $lookup: {
-            from: "agency",
-            localField: "relatedUser.agencyId",
-            foreignField: "_id",
-            as: "agency"
-          }
-        },
-        {
-          $unwind: {
-            path: "$agency",
-            preserveNullAndEmptyArrays: true
-          }
-        },
-        {
-          $project: {
-            relatedUser: 1,
-            itemTotalCost: 1,
-            agency: 1
+        $lookup: {
+          from: "user",
+          localField: "relatedUserId",
+          foreignField: "_id",
+          as: "relatedUser"
+        }
+      },
+      {
+        $unwind: "$relatedUser"
+      },
+      {
+        $match: mainFilterWhere
+      },
+      {
+        $group: {
+          _id: '$relatedUserId',
+          itemTotalCost: {
+            $sum: "$price"
           }
         }
+      },
+      {
+        $lookup: {
+          from: "user",
+          localField: "_id",
+          foreignField: "_id",
+          as: "relatedUser"
+        }
+      },
+      {
+        $unwind: "$relatedUser"
+      },
+      {
+        $lookup: {
+          from: "agency",
+          localField: "relatedUser.agencyId",
+          foreignField: "_id",
+          as: "agency"
+        }
+      },
+      {
+        $unwind: {
+          path: "$agency",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $project: {
+          relatedUser: 1,
+          itemTotalCost: 1,
+          agency: 1
+        }
+      }
       ])
       callLogs.get(function (err, call) {
         chatItems.get(function (err, chatItem) {
@@ -2503,23 +2503,23 @@ module.exports = function (User) {
       var item = await User.app.models.Item.find({
         "where": {
           "and": [{
-              "ownerId": ObjectId(userId),
-            },
-            {
-              "type": {
-                "neq": "coins"
-              }
-            },
-            {
-              "startAt": {
-                "gt": startDate
-              }
-            },
-            {
-              "startAt": {
-                "lt": endDate
-              }
+            "ownerId": ObjectId(userId),
+          },
+          {
+            "type": {
+              "neq": "coins"
             }
+          },
+          {
+            "startAt": {
+              "gt": startDate
+            }
+          },
+          {
+            "startAt": {
+              "lt": endDate
+            }
+          }
           ]
 
         },
@@ -2528,18 +2528,18 @@ module.exports = function (User) {
       var chatItem = await User.app.models.ChatItem.find({
         "where": {
           "and": [{
-              "ownerId": ObjectId(userId),
-            },
-            {
-              "createdAt": {
-                "gt": startDate
-              }
-            },
-            {
-              "createdAt": {
-                "lt": endDate
-              }
+            "ownerId": ObjectId(userId),
+          },
+          {
+            "createdAt": {
+              "gt": startDate
             }
+          },
+          {
+            "createdAt": {
+              "lt": endDate
+            }
+          }
           ]
         },
         "order": "createdAt DESC"
@@ -2600,5 +2600,17 @@ module.exports = function (User) {
     req.write(JSON.stringify(data));
     req.end();
   };
+
+  User.deleteMyVideos = function (req, callback) {
+    let userId = req.accessToken.userId
+    User.app.models.Bottle.updateAll({ "ownerId": userId }, {
+      'status': "deactive",
+      'deleted': true
+    }, function (err, data) {
+      if (err)
+        return callback(err)
+      callback(null, data)
+    })
+  }
 
 };

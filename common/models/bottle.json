@@ -64,6 +64,10 @@
       "type": "string",
       "default": "video"
     },
+    "deleted": {
+      "type": "boolean",
+      "default": false
+    },
     "viewStatus": {
       "type": "string",
       "default": "deactive"

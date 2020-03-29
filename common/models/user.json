@@ -15,9 +15,11 @@
     "stackBottleUser"
   ],
   "scope": {
-    "include": [{
+    "include": [
+      {
         "relation": "country"
-      }, {
+      },
+      {
         "relation": "device"
       },
       {
@@ -148,12 +150,20 @@
       "type": "boolean",
       "default": false
     },
+    "allowedCall": {
+      "type": "boolean",
+      "default": true
+    },
     "logBootleOwner": {
-      "type": ["string"],
+      "type": [
+        "string"
+      ],
       "default": []
     },
     "stackBottleUser": {
-      "type": ["string"],
+      "type": [
+        "string"
+      ],
       "default": []
     },
     "canEditUsername": {
@@ -234,7 +244,8 @@
       "foreignKey": "ownerId"
     }
   },
-  "acls": [{
+  "acls": [
+    {
       "principalType": "ROLE",
       "principalId": "$everyone",
       "permission": "DENY"
@@ -385,206 +396,255 @@
       "permission": "ALLOW",
       "property": "exportReportHost"
     },
-    
     {
       "principalType": "ROLE",
       "principalId": "$unauthenticated",
       "permission": "ALLOW",
       "property": "loginByPhone"
     }
-
   ],
   "methods": {
     "export": {
-      "accepts": [{
-        "arg": "filter",
-        "type": "object",
-        "required": false,
-        "description": "filter Item"
-      }],
-      "returns": [{
-        "arg": "result",
-        "type": "object",
-        "root": true,
-        "description": ""
-      }],
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object",
+          "required": false,
+          "description": "filter Item"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "result",
+          "type": "object",
+          "root": true,
+          "description": ""
+        }
+      ],
       "description": "Export To Excel",
-      "http": [{
-        "path": "/export",
-        "verb": "get"
-      }]
+      "http": [
+        {
+          "path": "/export",
+          "verb": "get"
+        }
+      ]
     },
     "loginFacebook": {
-      "accepts": [{
-        "arg": "data",
-        "type": "object",
-        "required": true,
-        "description": "",
-        "http": {
-          "source": "body"
+      "accepts": [
+        {
+          "arg": "data",
+          "type": "object",
+          "required": true,
+          "description": "",
+          "http": {
+            "source": "body"
+          }
         }
-      }],
-      "returns": [{
-        "arg": "result",
-        "type": "object",
-        "root": true,
-        "description": ""
-      }],
+      ],
+      "returns": [
+        {
+          "arg": "result",
+          "type": "object",
+          "root": true,
+          "description": ""
+        }
+      ],
       "description": "",
-      "http": [{
-        "path": "/facebookLogin",
-        "verb": "post"
-      }]
+      "http": [
+        {
+          "path": "/facebookLogin",
+          "verb": "post"
+        }
+      ]
     },
     "loginInstegram": {
-      "accepts": [{
-        "arg": "data",
-        "type": "object",
-        "required": true,
-        "description": "",
-        "http": {
-          "source": "body"
+      "accepts": [
+        {
+          "arg": "data",
+          "type": "object",
+          "required": true,
+          "description": "",
+          "http": {
+            "source": "body"
+          }
         }
-      }],
-      "returns": [{
-        "arg": "result",
-        "type": "object",
-        "root": true,
-        "description": ""
-      }],
+      ],
+      "returns": [
+        {
+          "arg": "result",
+          "type": "object",
+          "root": true,
+          "description": ""
+        }
+      ],
       "description": "login by instegram account",
-      "http": [{
-        "path": "/instegramLogin",
-        "verb": "post"
-      }]
+      "http": [
+        {
+          "path": "/instegramLogin",
+          "verb": "post"
+        }
+      ]
     },
     "loginGoogle": {
-      "accepts": [{
-        "arg": "data",
-        "type": "object",
-        "required": true,
-        "description": "",
-        "http": {
-          "source": "body"
+      "accepts": [
+        {
+          "arg": "data",
+          "type": "object",
+          "required": true,
+          "description": "",
+          "http": {
+            "source": "body"
+          }
         }
-      }],
-      "returns": [{
-        "arg": "result",
-        "type": "object",
-        "root": true,
-        "description": ""
-      }],
+      ],
+      "returns": [
+        {
+          "arg": "result",
+          "type": "object",
+          "root": true,
+          "description": ""
+        }
+      ],
       "description": "login by google account",
-      "http": [{
-        "path": "/googleLogin",
-        "verb": "post"
-      }]
+      "http": [
+        {
+          "path": "/googleLogin",
+          "verb": "post"
+        }
+      ]
     },
     "loginTwitter": {
-      "accepts": [{
-        "arg": "data",
-        "type": "object",
-        "required": true,
-        "description": "",
-        "http": {
-          "source": "body"
+      "accepts": [
+        {
+          "arg": "data",
+          "type": "object",
+          "required": true,
+          "description": "",
+          "http": {
+            "source": "body"
+          }
         }
-      }],
-      "returns": [{
-        "arg": "result",
-        "type": "object",
-        "root": true,
-        "description": ""
-      }],
+      ],
+      "returns": [
+        {
+          "arg": "result",
+          "type": "object",
+          "root": true,
+          "description": ""
+        }
+      ],
       "description": "login by twitter account",
-      "http": [{
-        "path": "/twitterLogin",
-        "verb": "post"
-      }]
+      "http": [
+        {
+          "path": "/twitterLogin",
+          "verb": "post"
+        }
+      ]
     },
     "checkUsername": {
-      "accepts": [{
-        "arg": "newUsername",
-        "type": "string",
-        "required": true,
-        "description": "",
-        "http": {
-          "source": "form"
+      "accepts": [
+        {
+          "arg": "newUsername",
+          "type": "string",
+          "required": true,
+          "description": "",
+          "http": {
+            "source": "form"
+          }
         }
-      }],
-      "returns": [{
-        "arg": "result",
-        "type": "boolean",
-        "root": true,
-        "description": ""
-      }],
+      ],
+      "returns": [
+        {
+          "arg": "result",
+          "type": "boolean",
+          "root": true,
+          "description": ""
+        }
+      ],
       "description": "check username is unique",
-      "http": [{
-        "path": "/checkUsername",
-        "verb": "post"
-      }]
+      "http": [
+        {
+          "path": "/checkUsername",
+          "verb": "post"
+        }
+      ]
     },
     "signupByPhone": {
-      "accepts": [{
-        "arg": "phonenumber",
-        "type": "string",
-        "required": true,
-        "description": "",
-        "http": {
-          "source": "form"
+      "accepts": [
+        {
+          "arg": "phonenumber",
+          "type": "string",
+          "required": true,
+          "description": "",
+          "http": {
+            "source": "form"
+          }
+        },
+        {
+          "arg": "deviceName",
+          "type": "string",
+          "required": false,
+          "http": {
+            "source": "form"
+          }
         }
-      }, {
-        "arg": "deviceName",
-        "type": "string",
-        "required": false,
-        "http": {
-          "source": "form"
+      ],
+      "returns": [
+        {
+          "arg": "result",
+          "type": "object",
+          "root": true,
+          "description": ""
         }
-      }],
-      "returns": [{
-        "arg": "result",
-        "type": "object",
-        "root": true,
-        "description": ""
-      }],
+      ],
       "description": "signup by phonenumber",
-      "http": [{
-        "path": "/signupByPhone",
-        "verb": "post"
-      }]
+      "http": [
+        {
+          "path": "/signupByPhone",
+          "verb": "post"
+        }
+      ]
     },
     "loginByPhone": {
-      "accepts": [{
-        "arg": "phonenumber",
-        "type": "string",
-        "required": true,
-        "description": "",
-        "http": {
-          "source": "form"
+      "accepts": [
+        {
+          "arg": "phonenumber",
+          "type": "string",
+          "required": true,
+          "description": "",
+          "http": {
+            "source": "form"
+          }
+        },
+        {
+          "arg": "code",
+          "type": "number",
+          "required": true,
+          "description": "",
+          "http": {
+            "source": "form"
+          }
         }
-      }, {
-        "arg": "code",
-        "type": "number",
-        "required": true,
-        "description": "",
-        "http": {
-          "source": "form"
+      ],
+      "returns": [
+        {
+          "arg": "result",
+          "type": "object",
+          "root": true,
+          "description": ""
         }
-      }],
-      "returns": [{
-        "arg": "result",
-        "type": "object",
-        "root": true,
-        "description": ""
-      }],
+      ],
       "description": "login by phonenumber",
-      "http": [{
-        "path": "/loginByPhone",
-        "verb": "post"
-      }]
+      "http": [
+        {
+          "path": "/loginByPhone",
+          "verb": "post"
+        }
+      ]
     },
     "block": {
-      "accepts": [{
+      "accepts": [
+        {
           "arg": "userId",
           "type": "string",
           "required": true,
@@ -598,20 +658,25 @@
           }
         }
       ],
-      "returns": [{
-        "arg": "result",
-        "type": "object",
-        "root": true,
-        "description": ""
-      }],
+      "returns": [
+        {
+          "arg": "result",
+          "type": "object",
+          "root": true,
+          "description": ""
+        }
+      ],
       "description": "block user",
-      "http": [{
-        "path": "/block",
-        "verb": "post"
-      }]
+      "http": [
+        {
+          "path": "/block",
+          "verb": "post"
+        }
+      ]
     },
     "unBlock": {
-      "accepts": [{
+      "accepts": [
+        {
           "arg": "userId",
           "type": "string",
           "required": true,
@@ -625,40 +690,51 @@
           }
         }
       ],
-      "returns": [{
-        "arg": "result",
-        "type": "boolean",
-        "root": true,
-        "description": ""
-      }],
+      "returns": [
+        {
+          "arg": "result",
+          "type": "boolean",
+          "root": true,
+          "description": ""
+        }
+      ],
       "description": "unblock user",
-      "http": [{
-        "path": "/unblock",
-        "verb": "delete"
-      }]
+      "http": [
+        {
+          "path": "/unblock",
+          "verb": "delete"
+        }
+      ]
     },
     "myListBlock": {
-      "accepts": [{
-        "arg": "context",
-        "type": "object",
-        "http": {
-          "source": "context"
+      "accepts": [
+        {
+          "arg": "context",
+          "type": "object",
+          "http": {
+            "source": "context"
+          }
         }
-      }],
-      "returns": [{
-        "arg": "result",
-        "type": "array",
-        "root": true,
-        "description": ""
-      }],
+      ],
+      "returns": [
+        {
+          "arg": "result",
+          "type": "array",
+          "root": true,
+          "description": ""
+        }
+      ],
       "description": "",
-      "http": [{
-        "path": "/blockList",
-        "verb": "get"
-      }]
+      "http": [
+        {
+          "path": "/blockList",
+          "verb": "get"
+        }
+      ]
     },
     "me": {
-      "accepts": [{
+      "accepts": [
+        {
           "arg": "context",
           "type": "object",
           "http": {
@@ -671,46 +747,58 @@
           "required": false
         }
       ],
-      "returns": [{
-        "arg": "result",
-        "type": "object",
-        "root": true,
-        "description": ""
-      }],
+      "returns": [
+        {
+          "arg": "result",
+          "type": "object",
+          "root": true,
+          "description": ""
+        }
+      ],
       "description": "get my info",
-      "http": [{
-        "path": "/me",
-        "verb": "get"
-      }]
+      "http": [
+        {
+          "path": "/me",
+          "verb": "get"
+        }
+      ]
     },
     "getStackBottleUser": {
-      "accepts": [{
-        "arg": "userId",
-        "type": "string",
-        "http": {
-          "source": "path"
+      "accepts": [
+        {
+          "arg": "userId",
+          "type": "string",
+          "http": {
+            "source": "path"
+          }
+        },
+        {
+          "arg": "context",
+          "type": "object",
+          "http": {
+            "source": "context"
+          }
         }
-      }, {
-        "arg": "context",
-        "type": "object",
-        "http": {
-          "source": "context"
+      ],
+      "returns": [
+        {
+          "arg": "result",
+          "type": "object",
+          "root": true,
+          "description": ""
         }
-      }],
-      "returns": [{
-        "arg": "result",
-        "type": "object",
-        "root": true,
-        "description": ""
-      }],
+      ],
       "description": "get my Stack Bottle User",
-      "http": [{
-        "path": "/:userId/getStackBottleUser",
-        "verb": "get"
-      }]
+      "http": [
+        {
+          "path": "/:userId/getStackBottleUser",
+          "verb": "get"
+        }
+      ]
     },
     "editUsername": {
-      "accepts": [{
+      "accepts": [
+        {
           "arg": "context",
           "type": "object",
           "http": {
@@ -723,20 +811,25 @@
           "required": true
         }
       ],
-      "returns": [{
-        "arg": "result",
-        "type": "object",
-        "root": true,
-        "description": ""
-      }],
+      "returns": [
+        {
+          "arg": "result",
+          "type": "object",
+          "root": true,
+          "description": ""
+        }
+      ],
       "description": "edit username",
-      "http": [{
-        "path": "/editUsername",
-        "verb": "put"
-      }]
+      "http": [
+        {
+          "path": "/editUsername",
+          "verb": "put"
+        }
+      ]
     },
     "editPushkitToken": {
-      "accepts": [{
+      "accepts": [
+        {
           "arg": "context",
           "type": "object",
           "http": {
@@ -754,35 +847,43 @@
           "required": true
         }
       ],
-      "returns": [{
-        "arg": "result",
-        "type": "object",
-        "root": true,
-        "description": ""
-      }],
+      "returns": [
+        {
+          "arg": "result",
+          "type": "object",
+          "root": true,
+          "description": ""
+        }
+      ],
       "description": "edit Pushkit Token",
-      "http": [{
-        "path": "/editPushkitToken",
-        "verb": "put"
-      }]
+      "http": [
+        {
+          "path": "/editPushkitToken",
+          "verb": "put"
+        }
+      ]
     },
-
     "deactiveUser": {
-      "accepts": [{
-        "arg": "id",
-        "type": "string",
-        "required": true,
-        "description": ""
-      }],
+      "accepts": [
+        {
+          "arg": "id",
+          "type": "string",
+          "required": true,
+          "description": ""
+        }
+      ],
       "returns": [],
       "description": "",
-      "http": [{
-        "path": "/deactiveUser",
-        "verb": "delete"
-      }]
+      "http": [
+        {
+          "path": "/deactiveUser",
+          "verb": "delete"
+        }
+      ]
     },
     "genderStateReport": {
-      "accepts": [{
+      "accepts": [
+        {
           "arg": "from",
           "type": "date",
           "required": false,
@@ -795,54 +896,69 @@
           "description": ""
         }
       ],
-      "returns": [{
-        "arg": "result",
-        "type": "object",
-        "root": true,
-        "description": ""
-      }],
+      "returns": [
+        {
+          "arg": "result",
+          "type": "object",
+          "root": true,
+          "description": ""
+        }
+      ],
       "description": "",
-      "http": [{
-        "path": "/genderStateReport",
-        "verb": "get"
-      }]
+      "http": [
+        {
+          "path": "/genderStateReport",
+          "verb": "get"
+        }
+      ]
     },
     "accesstoken": {
       "accepts": [],
-      "returns": [{
-        "arg": "result",
-        "type": "array",
-        "root": true,
-        "description": ""
-      }],
+      "returns": [
+        {
+          "arg": "result",
+          "type": "array",
+          "root": true,
+          "description": ""
+        }
+      ],
       "description": "",
-      "http": [{
-        "path": "/accessToken",
-        "verb": "get"
-      }]
+      "http": [
+        {
+          "path": "/accessToken",
+          "verb": "get"
+        }
+      ]
     },
     "getTransaction": {
-      "accepts": [{
-        "arg": "userId",
-        "type": "string",
-        "http": {
-          "source": "path"
+      "accepts": [
+        {
+          "arg": "userId",
+          "type": "string",
+          "http": {
+            "source": "path"
+          }
         }
-      }],
-      "returns": [{
-        "arg": "result",
-        "type": "array",
-        "root": true,
-        "description": ""
-      }],
+      ],
+      "returns": [
+        {
+          "arg": "result",
+          "type": "array",
+          "root": true,
+          "description": ""
+        }
+      ],
       "description": "",
-      "http": [{
-        "path": "/:userId/getTransaction",
-        "verb": "get"
-      }]
+      "http": [
+        {
+          "path": "/:userId/getTransaction",
+          "verb": "get"
+        }
+      ]
     },
     "getItemsByUser": {
-      "accepts": [{
+      "accepts": [
+        {
           "arg": "userId",
           "type": "string",
           "http": {
@@ -858,20 +974,25 @@
           "type": "date"
         }
       ],
-      "returns": [{
-        "arg": "result",
-        "type": "array",
-        "root": true,
-        "description": ""
-      }],
+      "returns": [
+        {
+          "arg": "result",
+          "type": "array",
+          "root": true,
+          "description": ""
+        }
+      ],
       "description": "",
-      "http": [{
-        "path": "/:userId/getItemsByUser",
-        "verb": "get"
-      }]
+      "http": [
+        {
+          "path": "/:userId/getItemsByUser",
+          "verb": "get"
+        }
+      ]
     },
     "loginByPhonenumber": {
-      "accepts": [{
+      "accepts": [
+        {
           "arg": "credentials",
           "type": "Object",
           "required": true,
@@ -884,51 +1005,95 @@
           "description": ""
         }
       ],
-      "returns": [{
-        "arg": "result",
-        "type": "array",
-        "root": true,
-        "description": ""
-      }],
+      "returns": [
+        {
+          "arg": "result",
+          "type": "array",
+          "root": true,
+          "description": ""
+        }
+      ],
       "description": "",
-      "http": [{
-        "path": "/loginByPhonenumber",
-        "verb": "post"
-      }]
+      "http": [
+        {
+          "path": "/loginByPhonenumber",
+          "verb": "post"
+        }
+      ]
     },
     "getReportHost": {
-      "accepts": [{
-        "arg": "filter",
-        "type": "object"
-      }],
-      "returns": [{
-        "arg": "result",
-        "type": "array",
-        "root": true,
-        "description": ""
-      }],
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "result",
+          "type": "array",
+          "root": true,
+          "description": ""
+        }
+      ],
       "description": "",
-      "http": [{
-        "path": "/getReportHost",
-        "verb": "get"
-      }]
+      "http": [
+        {
+          "path": "/getReportHost",
+          "verb": "get"
+        }
+      ]
     },
     "exportReportHost": {
-      "accepts": [{
-        "arg": "filter",
-        "type": "object"
-      }],
-      "returns": [{
-        "arg": "result",
-        "type": "array",
-        "root": true,
-        "description": ""
-      }],
+      "accepts": [
+        {
+          "arg": "filter",
+          "type": "object"
+        }
+      ],
+      "returns": [
+        {
+          "arg": "result",
+          "type": "array",
+          "root": true,
+          "description": ""
+        }
+      ],
       "description": "",
-      "http": [{
-        "path": "/exportReportHost",
-        "verb": "get"
-      }]
+      "http": [
+        {
+          "path": "/exportReportHost",
+          "verb": "get"
+        }
+      ]
+    },
+    "deleteMyVideos": {
+      "accepts": [
+        {
+          "arg": "req",
+          "type": "object",
+          "required": true,
+          "description": "",
+          "http": {
+            "source": "req"
+          }
+        }
+      ],
+      "returns": [
+        {
+          "arg": "result",
+          "type": "object",
+          "root": true,
+          "description": ""
+        }
+      ],
+      "description": "",
+      "http": [
+        {
+          "path": "/deleteMyVideos",
+          "verb": "put"
+        }
+      ]
     }
   }
 }

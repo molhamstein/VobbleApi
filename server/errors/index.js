@@ -43,6 +43,9 @@ module.exports.account = {
   userCanNotRinging: function () {
     return new cError("USER_CAN_NOT_RINGING", 425, "user can't ringing", 425);
   },
+  userNotAllowedRinging: function () {
+    return new cError("USER_NOT_ALLOWED_RINGING", 427, "user not allowed ringing", 427);
+  },
 
 
 };
