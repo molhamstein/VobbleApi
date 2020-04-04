@@ -40,7 +40,6 @@ module.exports = function (Calllog) {
       if (user.allowedCall == false) {
         return next(errors.account.userNotAllowedRinging())
       }
-      allowedCall
       var callId = context.req.body.callId;
       delete context.req.body.callId
       let deviceToken = user.pushkitToken

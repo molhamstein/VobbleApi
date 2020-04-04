@@ -409,7 +409,7 @@ module.exports = async function (app) {
           principalType: RoleMapping.USER,
           principalId: appAdmin.id
         }).then(principal => {
-          //console.log('Created principal:', principal);
+          console.log('Created principal:', principal);
         });
       });
 
