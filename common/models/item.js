@@ -221,81 +221,81 @@ module.exports = function (Item) {
     }
 
     var aggregate = [{
-        $lookup: {
-          from: "user",
-          let: {
-            ownerId: {
-              $convert: {
-                input: "$ownerId",
-                to: "objectId"
-              }
+      $lookup: {
+        from: "user",
+        let: {
+          ownerId: {
+            $convert: {
+              input: "$ownerId",
+              to: "objectId"
             }
-          },
-          pipeline: [{
-              $match: {
-                $expr: {
-                  $eq: ["$_id", "$$ownerId"]
-                }
-              }
-            },
-            {
-              $project: {
-                stackBottleUser: 0
-              }
+          }
+        },
+        pipeline: [{
+          $match: {
+            $expr: {
+              $eq: ["$_id", "$$ownerId"]
             }
+          }
+        },
+        {
+          $project: {
+            stackBottleUser: 0
+          }
+        }
 
-          ],
-          as: "owner"
-        }
-      },
-      {
-        $unwind: "$owner"
-      },
-      {
-        $lookup: {
-          from: "user",
-          let: {
-            relatedUserId: {
-              $convert: {
-                input: "$relatedUserId",
-                to: "objectId"
-              }
-            }
-          },
-          pipeline: [{
-              $match: {
-                $expr: {
-                  $eq: ["$_id", "$$relatedUserId"]
-                }
-              }
-            },
-            {
-              $project: {
-                stackBottleUser: 0
-              }
-            }
-
-          ],
-          as: "relatedUser"
-        }
-      },
-      {
-        $unwind: {
-          "path": "$relatedUser",
-          "preserveNullAndEmptyArrays": true
-        }
-      },
-      {
-        $lookup: {
-          from: "product",
-          localField: "productId",
-          foreignField: "_id",
-          as: "product"
-        }
-      },
-      {
-        $unwind: "$product"
+        ],
+        as: "owner"
       }
+    },
+    {
+      $unwind: "$owner"
+    },
+    {
+      $lookup: {
+        from: "user",
+        let: {
+          relatedUserId: {
+            $convert: {
+              input: "$relatedUserId",
+              to: "objectId"
+            }
+          }
+        },
+        pipeline: [{
+          $match: {
+            $expr: {
+              $eq: ["$_id", "$$relatedUserId"]
+            }
+          }
+        },
+        {
+          $project: {
+            stackBottleUser: 0
+          }
+        }
+
+        ],
+        as: "relatedUser"
+      }
+    },
+    {
+      $unwind: {
+        "path": "$relatedUser",
+        "preserveNullAndEmptyArrays": true
+      }
+    },
+    {
+      $lookup: {
+        from: "product",
+        localField: "productId",
+        foreignField: "_id",
+        as: "product"
+      }
+    },
+    {
+      $unwind: "$product"
+    }
     ]
 
 
@@ -390,68 +390,67 @@ module.exports = function (Item) {
     })
   };
 
-
-  Item.buyProductByCoins = function (productId, relatedUserId, context, callback) {
-    var body = {
-      "productId": productId,
-      "ownerId": context.req.accessToken.userId,
-      "typePurchasing": "coins"
-    }
-    if (relatedUserId) {
-      body['relatedUserId'] = relatedUserId
-    }
-    Item.app.models.User.findById(context.req.accessToken.userId, function (err, user) {
-      if (err)
-        return callback(err, null);
-      if (user.status != 'active') {
-        return callback(errors.account.notActive());
+  Item.buyProductByCoins = async function (productId, relatedUserId, context, callback) {
+    try {
+      var body = {
+        "productId": productId,
+        "ownerId": context.req.accessToken.userId,
+        "typePurchasing": "coins"
       }
-      Item.app.models.product.findById(productId, function (err, product) {
-        if (err) {
-          return callback(err);
-        }
-        if (product == null) {
-          return callback(errors.product.productNotFound());
-        }
-        if (user.pocketCoins - product.price_coins < 0) {
-          return callback(errors.product.youDonotHaveCoins());
-        }
-        product.productSold++;
-        body['type'] = product.type;
-        body['price'] = product.price_coins
-        Item.create(body, function (err, item) {
-          if (err)
-            return callback(err, null)
-          product.save();
-          if (product.bottleCount > 0) {
-            user.extraBottlesCount += product.bottleCount;
-            user.pocketCoins -= product.price_coins;
-            user.totalPaidCoins += product.price_coins;
-            user.save();
-            callback(null, item)
-          } else if (product.replyCount > 0) {
-            user.extraReplysCount += 99999999999;
-            user.unlimitedReplysOpenDate = addHours(new Date(), 12)
-            user.pocketCoins -= product.price_coins;
-            user.totalPaidCoins += product.price_coins;
-            user.save();
-            callback(null, item);
-          } else {
-            var date = new Date().getTime();
-            date += (product.validity * 60 * 60 * 1000);
-            item.endAt = new Date(date);
-            item.save();
-            user.pocketCoins -= product.price_coins;
-            user.totalPaidCoins += product.price_coins;
-            console.log("user.pocketCoins")
-            console.log(user.pocketCoins)
-            user.save();
-            callback(null, item)
-          }
-        })
-      })
-    })
+      if (relatedUserId) {
+        body['relatedUserId'] = relatedUserId
+      }
+      let user = await Item.app.models.User.findById(context.req.accessToken.userId)
+      if (user.status != 'active') {
+        throw errors.account.notActive()
+      }
+
+      let product = await Item.app.models.product.findById(productId)
+      if (product == null) {
+        throw errors.product.productNotFound()
+      }
+
+      if (user.pocketCoins - product.price_coins < 0) {
+        throw errors.product.youDonotHaveCoins()
+      }
+
+      product.productSold++;
+      body['type'] = product.type;
+      body['price'] = product.price_coins
+
+      let item = await Item.create(body)
+      await product.save();
+
+      if (product.bottleCount > 0) {
+        user.extraBottlesCount += product.bottleCount;
+        user.pocketCoins -= product.price_coins;
+        user.totalPaidCoins += product.price_coins;
+        await user.save();
+        callback(null, item)
+      } else if (product.replyCount > 0) {
+        user.extraReplysCount += 99999999999;
+        user.unlimitedReplysOpenDate = addHours(new Date(), 12)
+        user.pocketCoins -= product.price_coins;
+        user.totalPaidCoins += product.price_coins;
+        await user.save();
+        callback(null, item);
+      } else {
+        var date = new Date().getTime();
+        date += (product.validity * 60 * 60 * 1000);
+        item.endAt = new Date(date);
+        item = await item.save();
+        user.pocketCoins -= product.price_coins;
+        user.totalPaidCoins += product.price_coins;
+        console.log("user.pocketCoins")
+        console.log(user.pocketCoins)
+        await user.save();
+        callback(null, item)
+      }
+    } catch (error) {
+      callback(error)
+    }
   }
+
 
   /**
    *
@@ -475,37 +474,37 @@ module.exports = function (Item) {
 
       var collection = db.collection('item');
       var cursor = collection.aggregate([{
-          $match: filter
-        }, {
-          $lookup: {
-            from: "user",
-            localField: "ownerId",
-            foreignField: "_id",
-            as: "owner"
-          }
-        },
-        {
-          $group: {
-            _id: '$owner.country.name',
-            count: {
-              $sum: 1
-            },
-            totalRevenue: {
-              $sum: "$price"
-            }
-          }
-        },
-        {
-          $project: {
-            _id: 0,
-            country: {
-              $arrayElemAt: ["$_id", 0]
-            },
-            count: 1,
-            totalRevenue: 1,
-
+        $match: filter
+      }, {
+        $lookup: {
+          from: "user",
+          localField: "ownerId",
+          foreignField: "_id",
+          as: "owner"
+        }
+      },
+      {
+        $group: {
+          _id: '$owner.country.name',
+          count: {
+            $sum: 1
+          },
+          totalRevenue: {
+            $sum: "$price"
           }
         }
+      },
+      {
+        $project: {
+          _id: 0,
+          country: {
+            $arrayElemAt: ["$_id", 0]
+          },
+          count: 1,
+          totalRevenue: 1,
+
+        }
+      }
       ]);
       cursor.get(function (err, data) {
         // //console.log(data);
@@ -767,116 +766,116 @@ module.exports = function (Item) {
 
       var collection = db.collection('item');
       var cursor = collection.aggregate([{
-          $match: ownerMatch
-        },
-        {
-          $group: {
-            "_id": {
-              "ownerId": "$ownerId",
-              "productId": "$productId"
-            },
-            count: {
-              $sum: 1
-            },
-            cost: {
-              $sum: "$price"
-            },
-          }
-        },
-        {
-          $lookup: {
-            from: "user",
-            localField: "_id.ownerId",
-            foreignField: "_id",
-            as: "owner"
-          }
-        },
-        {
-          $unwind: "$owner"
-        },
-        {
-          "$addFields": {
-            "owner.id": "$owner._id"
-          }
-        },
+        $match: ownerMatch
+      },
+      {
+        $group: {
+          "_id": {
+            "ownerId": "$ownerId",
+            "productId": "$productId"
+          },
+          count: {
+            $sum: 1
+          },
+          cost: {
+            $sum: "$price"
+          },
+        }
+      },
+      {
+        $lookup: {
+          from: "user",
+          localField: "_id.ownerId",
+          foreignField: "_id",
+          as: "owner"
+        }
+      },
+      {
+        $unwind: "$owner"
+      },
+      {
+        "$addFields": {
+          "owner.id": "$owner._id"
+        }
+      },
 
 
-        {
-          $lookup: {
-            from: "product",
-            localField: "_id.productId",
-            foreignField: "_id",
-            as: "product"
-          }
-        },
-        {
-          $unwind: "$product"
-        },
-        {
-          "$addFields": {
-            "product.id": "$product._id"
-          }
-        },
-        {
-          "$addFields": {
-            "product.count": "$count"
-          }
-        },
-        {
-          "$addFields": {
-            "product.cost": "$cost"
-          }
-        },
+      {
+        $lookup: {
+          from: "product",
+          localField: "_id.productId",
+          foreignField: "_id",
+          as: "product"
+        }
+      },
+      {
+        $unwind: "$product"
+      },
+      {
+        "$addFields": {
+          "product.id": "$product._id"
+        }
+      },
+      {
+        "$addFields": {
+          "product.count": "$count"
+        }
+      },
+      {
+        "$addFields": {
+          "product.cost": "$cost"
+        }
+      },
 
-        {
-          $project: {
-            count: 1,
-            cost: 1,
-            product: 1,
-            _id: 1
+      {
+        $project: {
+          count: 1,
+          cost: 1,
+          product: 1,
+          _id: 1
+        }
+      },
+      {
+        $group: {
+          "_id": {
+            "ownerId": "$_id.ownerId",
+          },
+          products: {
+            $addToSet: "$product"
+          },
+          totalCount: {
+            $sum: "$count"
+          },
+          totalCost: {
+            $sum: "$cost"
           }
-        },
-        {
-          $group: {
-            "_id": {
-              "ownerId": "$_id.ownerId",
-            },
-            products: {
-              $addToSet: "$product"
-            },
-            totalCount: {
-              $sum: "$count"
-            },
-            totalCost: {
-              $sum: "$cost"
-            }
-          }
-        },
-        {
-          $lookup: {
-            from: "user",
-            localField: "_id.ownerId",
-            foreignField: "_id",
-            as: "owner"
-          }
-        },
-        {
-          $unwind: "$owner"
-        },
-        {
-          "$addFields": {
-            "owner.id": "$owner._id"
-          }
-        },
-        {
-          $project: {
-            owner: 1,
-            products: 1,
-            totalCost: 1,
-            totalCount: 1,
-            _id: 0
-          }
-        },
+        }
+      },
+      {
+        $lookup: {
+          from: "user",
+          localField: "_id.ownerId",
+          foreignField: "_id",
+          as: "owner"
+        }
+      },
+      {
+        $unwind: "$owner"
+      },
+      {
+        "$addFields": {
+          "owner.id": "$owner._id"
+        }
+      },
+      {
+        $project: {
+          owner: 1,
+          products: 1,
+          totalCost: 1,
+          totalCount: 1,
+          _id: 0
+        }
+      },
       ]);
       cursor.get(function (err, ownerData) {
         if (err) return callback(err);
@@ -918,116 +917,116 @@ module.exports = function (Item) {
 
       var collection = db.collection('item');
       var cursor = collection.aggregate([{
-          $match: ownerMatch
-        },
-        {
-          $group: {
-            "_id": {
-              "ownerId": "$ownerId",
-              "productId": "$productId"
-            },
-            count: {
-              $sum: 1
-            },
-            cost: {
-              $sum: "$price"
-            },
-          }
-        },
-        {
-          $lookup: {
-            from: "user",
-            localField: "_id.ownerId",
-            foreignField: "_id",
-            as: "owner"
-          }
-        },
-        {
-          $unwind: "$owner"
-        },
-        {
-          "$addFields": {
-            "owner.id": "$owner._id"
-          }
-        },
+        $match: ownerMatch
+      },
+      {
+        $group: {
+          "_id": {
+            "ownerId": "$ownerId",
+            "productId": "$productId"
+          },
+          count: {
+            $sum: 1
+          },
+          cost: {
+            $sum: "$price"
+          },
+        }
+      },
+      {
+        $lookup: {
+          from: "user",
+          localField: "_id.ownerId",
+          foreignField: "_id",
+          as: "owner"
+        }
+      },
+      {
+        $unwind: "$owner"
+      },
+      {
+        "$addFields": {
+          "owner.id": "$owner._id"
+        }
+      },
 
 
-        {
-          $lookup: {
-            from: "product",
-            localField: "_id.productId",
-            foreignField: "_id",
-            as: "product"
-          }
-        },
-        {
-          $unwind: "$product"
-        },
-        {
-          "$addFields": {
-            "product.id": "$product._id"
-          }
-        },
-        {
-          "$addFields": {
-            "product.count": "$count"
-          }
-        },
-        {
-          "$addFields": {
-            "product.cost": "$cost"
-          }
-        },
+      {
+        $lookup: {
+          from: "product",
+          localField: "_id.productId",
+          foreignField: "_id",
+          as: "product"
+        }
+      },
+      {
+        $unwind: "$product"
+      },
+      {
+        "$addFields": {
+          "product.id": "$product._id"
+        }
+      },
+      {
+        "$addFields": {
+          "product.count": "$count"
+        }
+      },
+      {
+        "$addFields": {
+          "product.cost": "$cost"
+        }
+      },
 
-        {
-          $project: {
-            count: 1,
-            cost: 1,
-            product: 1,
-            _id: 1
+      {
+        $project: {
+          count: 1,
+          cost: 1,
+          product: 1,
+          _id: 1
+        }
+      },
+      {
+        $group: {
+          "_id": {
+            "ownerId": "$_id.ownerId",
+          },
+          products: {
+            $addToSet: "$product"
+          },
+          totalCount: {
+            $sum: "$count"
+          },
+          totalCost: {
+            $sum: "$cost"
           }
-        },
-        {
-          $group: {
-            "_id": {
-              "ownerId": "$_id.ownerId",
-            },
-            products: {
-              $addToSet: "$product"
-            },
-            totalCount: {
-              $sum: "$count"
-            },
-            totalCost: {
-              $sum: "$cost"
-            }
-          }
-        },
-        {
-          $lookup: {
-            from: "user",
-            localField: "_id.ownerId",
-            foreignField: "_id",
-            as: "owner"
-          }
-        },
-        {
-          $unwind: "$owner"
-        },
-        {
-          "$addFields": {
-            "owner.id": "$owner._id"
-          }
-        },
-        {
-          $project: {
-            owner: 1,
-            products: 1,
-            totalCost: 1,
-            totalCount: 1,
-            _id: 0
-          }
-        },
+        }
+      },
+      {
+        $lookup: {
+          from: "user",
+          localField: "_id.ownerId",
+          foreignField: "_id",
+          as: "owner"
+        }
+      },
+      {
+        $unwind: "$owner"
+      },
+      {
+        "$addFields": {
+          "owner.id": "$owner._id"
+        }
+      },
+      {
+        $project: {
+          owner: 1,
+          products: 1,
+          totalCost: 1,
+          totalCount: 1,
+          _id: 0
+        }
+      },
       ]);
       cursor.get(function (err, ownerData) {
         if (err) return callback(err);
@@ -1099,113 +1098,113 @@ module.exports = function (Item) {
       var collection = db.collection('item');
 
       var cursor = collection.aggregate([{
-          $match: relatedUserMatch
-        },
-        {
-          $group: {
-            "_id": {
-              "relatedUserId": "$relatedUserId",
-              "productId": "$productId"
-            },
-            count: {
-              $sum: 1
-            },
-            cost: {
-              $sum: "$price"
-            },
+        $match: relatedUserMatch
+      },
+      {
+        $group: {
+          "_id": {
+            "relatedUserId": "$relatedUserId",
+            "productId": "$productId"
+          },
+          count: {
+            $sum: 1
+          },
+          cost: {
+            $sum: "$price"
+          },
+        }
+      },
+      {
+        $lookup: {
+          from: "user",
+          localField: "_id.relatedUserId",
+          foreignField: "_id",
+          as: "relatedUser"
+        }
+      },
+      {
+        $unwind: "$relatedUser"
+      },
+      {
+        "$addFields": {
+          "relatedUser.id": "$relatedUser._id"
+        }
+      },
+      {
+        $lookup: {
+          from: "product",
+          localField: "_id.productId",
+          foreignField: "_id",
+          as: "product"
+        }
+      },
+      {
+        $unwind: "$product"
+      },
+      {
+        "$addFields": {
+          "product.id": "$product._id"
+        }
+      },
+      {
+        "$addFields": {
+          "product.count": "$count"
+        }
+      },
+      {
+        "$addFields": {
+          "product.cost": "$cost"
+        }
+      },
+      {
+        $project: {
+          count: 1,
+          cost: 1,
+          product: 1,
+          _id: 1
+        }
+      },
+      {
+        $group: {
+          "_id": {
+            "relatedUserId": "$_id.relatedUserId",
+          },
+          products: {
+            $addToSet: "$product"
+          },
+          totalCount: {
+            $sum: "$count"
+          },
+          totalCost: {
+            $sum: "$cost"
           }
-        },
-        {
-          $lookup: {
-            from: "user",
-            localField: "_id.relatedUserId",
-            foreignField: "_id",
-            as: "relatedUser"
-          }
-        },
-        {
-          $unwind: "$relatedUser"
-        },
-        {
-          "$addFields": {
-            "relatedUser.id": "$relatedUser._id"
-          }
-        },
-        {
-          $lookup: {
-            from: "product",
-            localField: "_id.productId",
-            foreignField: "_id",
-            as: "product"
-          }
-        },
-        {
-          $unwind: "$product"
-        },
-        {
-          "$addFields": {
-            "product.id": "$product._id"
-          }
-        },
-        {
-          "$addFields": {
-            "product.count": "$count"
-          }
-        },
-        {
-          "$addFields": {
-            "product.cost": "$cost"
-          }
-        },
-        {
-          $project: {
-            count: 1,
-            cost: 1,
-            product: 1,
-            _id: 1
-          }
-        },
-        {
-          $group: {
-            "_id": {
-              "relatedUserId": "$_id.relatedUserId",
-            },
-            products: {
-              $addToSet: "$product"
-            },
-            totalCount: {
-              $sum: "$count"
-            },
-            totalCost: {
-              $sum: "$cost"
-            }
-          }
-        },
-        {
-          $lookup: {
-            from: "user",
-            localField: "_id.relatedUserId",
-            foreignField: "_id",
-            as: "relatedUser"
-          }
-        },
-        {
-          $unwind: "$relatedUser"
-        },
-        {
-          "$addFields": {
-            "relatedUser.id": "$relatedUser._id"
-          }
-        },
-        {
-          $project: {
-            relatedUser: 1,
-            products: 1,
-            totalCost: 1,
-            totalCount: 1,
-            _id: 0
-          }
-        },
+        }
+      },
+      {
+        $lookup: {
+          from: "user",
+          localField: "_id.relatedUserId",
+          foreignField: "_id",
+          as: "relatedUser"
+        }
+      },
+      {
+        $unwind: "$relatedUser"
+      },
+      {
+        "$addFields": {
+          "relatedUser.id": "$relatedUser._id"
+        }
+      },
+      {
+        $project: {
+          relatedUser: 1,
+          products: 1,
+          totalCost: 1,
+          totalCount: 1,
+          _id: 0
+        }
+      },
       ]);
 
 
@@ -1248,113 +1247,113 @@ module.exports = function (Item) {
       var collection = db.collection('item');
 
       var cursor = collection.aggregate([{
-          $match: relatedUserMatch
-        },
-        {
-          $group: {
-            "_id": {
-              "relatedUserId": "$relatedUserId",
-              "productId": "$productId"
-            },
-            count: {
-              $sum: 1
-            },
-            cost: {
-              $sum: "$price"
-            },
+        $match: relatedUserMatch
+      },
+      {
+        $group: {
+          "_id": {
+            "relatedUserId": "$relatedUserId",
+            "productId": "$productId"
+          },
+          count: {
+            $sum: 1
+          },
+          cost: {
+            $sum: "$price"
+          },
+        }
+      },
+      {
+        $lookup: {
+          from: "user",
+          localField: "_id.relatedUserId",
+          foreignField: "_id",
+          as: "relatedUser"
+        }
+      },
+      {
+        $unwind: "$relatedUser"
+      },
+      {
+        "$addFields": {
+          "relatedUser.id": "$relatedUser._id"
+        }
+      },
+      {
+        $lookup: {
+          from: "product",
+          localField: "_id.productId",
+          foreignField: "_id",
+          as: "product"
+        }
+      },
+      {
+        $unwind: "$product"
+      },
+      {
+        "$addFields": {
+          "product.id": "$product._id"
+        }
+      },
+      {
+        "$addFields": {
+          "product.count": "$count"
+        }
+      },
+      {
+        "$addFields": {
+          "product.cost": "$cost"
+        }
+      },
+      {
+        $project: {
+          count: 1,
+          cost: 1,
+          product: 1,
+          _id: 1
+        }
+      },
+      {
+        $group: {
+          "_id": {
+            "relatedUserId": "$_id.relatedUserId",
+          },
+          products: {
+            $addToSet: "$product"
+          },
+          totalCount: {
+            $sum: "$count"
+          },
+          totalCost: {
+            $sum: "$cost"
           }
-        },
-        {
-          $lookup: {
-            from: "user",
-            localField: "_id.relatedUserId",
-            foreignField: "_id",
-            as: "relatedUser"
-          }
-        },
-        {
-          $unwind: "$relatedUser"
-        },
-        {
-          "$addFields": {
-            "relatedUser.id": "$relatedUser._id"
-          }
-        },
-        {
-          $lookup: {
-            from: "product",
-            localField: "_id.productId",
-            foreignField: "_id",
-            as: "product"
-          }
-        },
-        {
-          $unwind: "$product"
-        },
-        {
-          "$addFields": {
-            "product.id": "$product._id"
-          }
-        },
-        {
-          "$addFields": {
-            "product.count": "$count"
-          }
-        },
-        {
-          "$addFields": {
-            "product.cost": "$cost"
-          }
-        },
-        {
-          $project: {
-            count: 1,
-            cost: 1,
-            product: 1,
-            _id: 1
-          }
-        },
-        {
-          $group: {
-            "_id": {
-              "relatedUserId": "$_id.relatedUserId",
-            },
-            products: {
-              $addToSet: "$product"
-            },
-            totalCount: {
-              $sum: "$count"
-            },
-            totalCost: {
-              $sum: "$cost"
-            }
-          }
-        },
-        {
-          $lookup: {
-            from: "user",
-            localField: "_id.relatedUserId",
-            foreignField: "_id",
-            as: "relatedUser"
-          }
-        },
-        {
-          $unwind: "$relatedUser"
-        },
-        {
-          "$addFields": {
-            "relatedUser.id": "$relatedUser._id"
-          }
-        },
-        {
-          $project: {
-            relatedUser: 1,
-            products: 1,
-            totalCost: 1,
-            totalCount: 1,
-            _id: 0
-          }
-        },
+        }
+      },
+      {
+        $lookup: {
+          from: "user",
+          localField: "_id.relatedUserId",
+          foreignField: "_id",
+          as: "relatedUser"
+        }
+      },
+      {
+        $unwind: "$relatedUser"
+      },
+      {
+        "$addFields": {
+          "relatedUser.id": "$relatedUser._id"
+        }
+      },
+      {
+        $project: {
+          relatedUser: 1,
+          products: 1,
+          totalCost: 1,
+          totalCount: 1,
+          _id: 0
+        }
+      },
       ]);
 
 
@@ -1421,57 +1420,57 @@ module.exports = function (Item) {
       var collection = db.collection('item');
 
       var cursor = collection.aggregate([{
-          $match: match
-        },
-        {
-          $group: {
-            "_id": {
-              month: {
-                $month: "$startAt"
-              },
-              day: {
-                $dayOfMonth: "$startAt"
-              },
-              year: {
-                $year: "$startAt"
-              },
-              "productId": "$productId"
+        $match: match
+      },
+      {
+        $group: {
+          "_id": {
+            month: {
+              $month: "$startAt"
             },
-            count: {
-              $sum: 1
+            day: {
+              $dayOfMonth: "$startAt"
             },
-            cost: {
-              $sum: "$price"
+            year: {
+              $year: "$startAt"
             },
-          }
-        },
-        {
-          $lookup: {
-            from: "product",
-            localField: "_id.productId",
-            foreignField: "_id",
-            as: "product"
-          }
-        },
-        {
-          $unwind: "$product"
-        },
-        {
-          "$addFields": {
-            "product.id": "$product._id"
-          }
+            "productId": "$productId"
+          },
+          count: {
+            $sum: 1
+          },
+          cost: {
+            $sum: "$price"
+          },
+        }
+      },
+      {
+        $lookup: {
+          from: "product",
+          localField: "_id.productId",
+          foreignField: "_id",
+          as: "product"
+        }
+      },
+      {
+        $unwind: "$product"
+      },
+      {
+        "$addFields": {
+          "product.id": "$product._id"
+        }
 
 
-        },
-        {
-          $project: {
-            count: 1,
-            cost: 1,
-            product: 1,
-            groupe: "$_id",
-            _id: 0
-          }
-        },
+      },
+      {
+        $project: {
+          count: 1,
+          cost: 1,
+          product: 1,
+          groupe: "$_id",
+          _id: 0
+        }
+      },
       ]);
 
 
@@ -1489,55 +1488,55 @@ module.exports = function (Item) {
       var collection = db.collection('chatItem');
 
       var cursor = collection.aggregate([{
-          $match: match
-        },
-        {
-          $group: {
-            "_id": {
-              month: {
-                $month: "$createdAt"
-              },
-              day: {
-                $dayOfMonth: "$createdAt"
-              },
-              year: {
-                $year: "$createdAt"
-              },
-              "chatProductId": "$chatProductId"
+        $match: match
+      },
+      {
+        $group: {
+          "_id": {
+            month: {
+              $month: "$createdAt"
             },
-            count: {
-              $sum: 1
+            day: {
+              $dayOfMonth: "$createdAt"
             },
-            cost: {
-              $sum: "$price"
+            year: {
+              $year: "$createdAt"
             },
-          }
-        },
-        {
-          $lookup: {
-            from: "chatProduct",
-            localField: "_id.chatProductId",
-            foreignField: "_id",
-            as: "product"
-          }
-        },
-        {
-          $unwind: "$product"
-        },
-        {
-          "$addFields": {
-            "product.id": "$product._id"
-          }
-        },
-        {
-          $project: {
-            count: 1,
-            cost: 1,
-            product: 1,
-            groupe: "$_id",
-            _id: 0
-          }
-        },
+            "chatProductId": "$chatProductId"
+          },
+          count: {
+            $sum: 1
+          },
+          cost: {
+            $sum: "$price"
+          },
+        }
+      },
+      {
+        $lookup: {
+          from: "chatProduct",
+          localField: "_id.chatProductId",
+          foreignField: "_id",
+          as: "product"
+        }
+      },
+      {
+        $unwind: "$product"
+      },
+      {
+        "$addFields": {
+          "product.id": "$product._id"
+        }
+      },
+      {
+        $project: {
+          count: 1,
+          cost: 1,
+          product: 1,
+          groupe: "$_id",
+          _id: 0
+        }
+      },
       ]);
 
 
@@ -1763,57 +1762,57 @@ module.exports = function (Item) {
     Item.getDataSource().connector.connect(function (err, db) {
       var collection = db.collection('item');
       var users = collection.aggregate([{
-          $match: filter
-        },
-        {
-          $lookup: {
-            from: "product",
-            localField: "productId",
-            foreignField: "_id",
-            as: "product"
-          }
-        },
-        {
-          $unwind: "$product"
-        },
-        {
-          $group: {
-            "_id": {
-              "ownerId": "$ownerId"
-            },
-            count: {
-              $sum: 1
-            },
-            total: {
-              $sum: "$price"
-            },
-            products: {
-              $addToSet: "$product"
-            }
-          },
-
-        },
-        {
-          $project: {
-            _id: 0,
-            ownerId: "$_id.ownerId",
-            count: 1,
-            total: 1,
-            products: 1
-
-          }
-        },
-        {
-          $lookup: {
-            from: "user",
-            localField: "ownerId",
-            foreignField: "_id",
-            as: "owner"
-          }
-        },
-        {
-          $unwind: "$owner"
+        $match: filter
+      },
+      {
+        $lookup: {
+          from: "product",
+          localField: "productId",
+          foreignField: "_id",
+          as: "product"
         }
+      },
+      {
+        $unwind: "$product"
+      },
+      {
+        $group: {
+          "_id": {
+            "ownerId": "$ownerId"
+          },
+          count: {
+            $sum: 1
+          },
+          total: {
+            $sum: "$price"
+          },
+          products: {
+            $addToSet: "$product"
+          }
+        },
+
+      },
+      {
+        $project: {
+          _id: 0,
+          ownerId: "$_id.ownerId",
+          count: 1,
+          total: 1,
+          products: 1
+
+        }
+      },
+      {
+        $lookup: {
+          from: "user",
+          localField: "ownerId",
+          foreignField: "_id",
+          as: "owner"
+        }
+      },
+      {
+        $unwind: "$owner"
+      }
       ])
       users.get(function (err, data) {
         // //console.log(data);
@@ -1833,412 +1832,412 @@ module.exports = function (Item) {
       Item.getDataSource().connector.connect(function (err, db) {
         var collection = db.collection('item');
         var users = collection.aggregate([{
-            $match: filter
-          },
-          {
-            $lookup: {
-              from: "user",
-              localField: "ownerId",
-              foreignField: "_id",
-              as: "owner"
-            }
-          },
-          {
-            $unwind: "$owner"
-          },
-          {
-            $lookup: {
-              from: "product",
-              localField: "productId",
-              foreignField: "_id",
-              as: "product"
-            }
-          },
-          {
-            $unwind: "$product"
-          },
-          {
-            $lookup: {
-              from: "typeGoods",
-              let: {
-                id: {
-                  $convert: {
-                    input: "$product.typeGoodsId",
-                    to: "objectId"
-                  }
+          $match: filter
+        },
+        {
+          $lookup: {
+            from: "user",
+            localField: "ownerId",
+            foreignField: "_id",
+            as: "owner"
+          }
+        },
+        {
+          $unwind: "$owner"
+        },
+        {
+          $lookup: {
+            from: "product",
+            localField: "productId",
+            foreignField: "_id",
+            as: "product"
+          }
+        },
+        {
+          $unwind: "$product"
+        },
+        {
+          $lookup: {
+            from: "typeGoods",
+            let: {
+              id: {
+                $convert: {
+                  input: "$product.typeGoodsId",
+                  to: "objectId"
                 }
-              },
-              pipeline: [{
-                $match: {
-                  $expr: {
-                    $eq: ["$_id", "$$id"]
-                  }
-                }
-              }],
-              "as": "product.typeGoods"
-            }
-          },
-          {
-            $unwind: "$product.typeGoods"
-          },
-          {
-            $group: {
-              "_id": {
-                month: {
-                  $month: "$startAt"
-                },
-                day: {
-                  $dayOfMonth: "$startAt"
-                },
-                year: {
-                  $year: "$startAt"
-                }
-              },
-              "countCoins": {
-                "$sum": {
-                  "$cond": [{
-                      "$eq": ["$type", "coins"]
-                    },
-                    1,
-                    0
-                  ]
-                }
-              },
-              "coinsArray": {
-                "$addToSet": {
-                  "$cond": [{
-                      "$eq": ["$type", "coins"]
-                    },
-                    {
-                      startAt: "$startAt",
-                      name_en: "$product.name_en",
-                      name_ar: "$product.name_ar",
-                      username: "$owner.username",
-                      ownerId: "$ownerId",
-                    },
-                    null
-                  ]
-                }
-              },
-              "totalCoins": {
-                "$sum": {
-                  "$cond": [{
-                      "$eq": ["$type", "coins"]
-                    },
-                    "$price",
-                    0
-                  ]
-                }
-              },
-              "totalSpentCoins": {
-                "$sum": {
-                  "$cond": [{
-                      "$eq": ["$typePurchasing", "coins"]
-                    },
-                    "$price",
-                    0
-                  ]
-                }
-              },
-              "extendChatArray": {
-                "$addToSet": {
-                  "$cond": [{
-                      "$eq": ["$type", "Chat Extend"]
-                    },
-                    {
-                      startAt: "$startAt",
-                      name_en: "$product.name_en",
-                      name_ar: "$product.name_ar",
-                      username: "$owner.username",
-                      ownerId: "$ownerId",
-                    },
-                    null
-                  ]
-                }
-              },
-              "countExtendChat": {
-                "$sum": {
-                  "$cond": [{
-                      "$eq": ["$type", "Chat Extend"]
-                    },
-                    1,
-                    0
-                  ]
-                }
-              },
-              "totalExtendChat": {
-                "$sum": {
-                  "$cond": [{
-                      "$eq": ["$type", "Chat Extend"]
-                    },
-                    "$price",
-                    0
-                  ]
-                }
-              },
-              "unlockChatArray": {
-                "$addToSet": {
-                  "$cond": [{
-                      "$eq": ["$type", "Unlock Chat"]
-                    },
-                    {
-                      startAt: "$startAt",
-                      name_en: "$product.name_en",
-                      name_ar: "$product.name_ar",
-                      username: "$owner.username",
-                      ownerId: "$ownerId",
-                    },
-                    null
-                  ]
-                }
-              },
-              "countUnlockChat": {
-                "$sum": {
-                  "$cond": [{
-                      "$eq": ["$type", "Unlock Chat"]
-                    },
-                    1,
-                    0
-                  ]
-                }
-              },
-              "totalUnlockChat": {
-                "$sum": {
-                  "$cond": [{
-                      "$eq": ["$type", "Unlock Chat"]
-                    },
-                    "$price",
-                    0
-                  ]
-                }
-              },
-              "filterByCountryArray": {
-                "$addToSet": {
-                  "$cond": [{
-                      "$eq": ["$product.typeGoods.name_en", "Filter By Country"]
-                    },
-                    {
-                      startAt: "$startAt",
-                      name_en: "$product.name_en",
-                      name_ar: "$product.name_ar",
-                      username: "$owner.username",
-                      ownerId: "$ownerId",
-                    },
-                    null
-                  ]
-                }
-              },
-              "totalFilterByCountry": {
-                "$sum": {
-                  "$cond": [{
-                      "$eq": ["$product.typeGoods.name_en", "Filter By Country"]
-                    },
-                    "$price",
-                    0
-                  ]
-                }
-              },
-              "countFilterByCountry": {
-                "$sum": {
-                  "$cond": [{
-                      "$eq": ["$product.typeGoods.name_en", "Filter By Country"]
-                    },
-                    1,
-                    0
-                  ]
-                }
-              },
-              "filterByTypeArray": {
-                "$addToSet": {
-                  "$cond": [{
-                      "$eq": ["$product.typeGoods.name_en", "Filter By Type"]
-                    },
-                    {
-                      startAt: "$startAt",
-                      name_en: "$product.name_en",
-                      name_ar: "$product.name_ar",
-                      username: "$owner.username",
-                      ownerId: "$ownerId",
-                    },
-                    null
-                  ]
-                }
-              },
-              "totalFilterByType": {
-                "$sum": {
-                  "$cond": [{
-                      "$eq": ["$product.typeGoods.name_en", "Filter By Type"]
-                    },
-                    "$price",
-                    0
-                  ]
-                }
-              },
-              "countFilterByType": {
-                "$sum": {
-                  "$cond": [{
-                      "$eq": ["$product.typeGoods.name_en", "Filter By Type"]
-                    },
-                    1,
-                    0
-                  ]
-                }
-              },
-              "filterByGenderArray": {
-                "$addToSet": {
-                  "$cond": [{
-                      "$eq": ["$product.typeGoods.name_en", "Filter By Gender"]
-                    },
-                    {
-                      startAt: "$startAt",
-                      name_en: "$product.name_en",
-                      name_ar: "$product.name_ar",
-                      username: "$owner.username",
-                      ownerId: "$ownerId",
-                    },
-                    null
-                  ]
-                }
-              },
-              "totalFilterByGender": {
-                "$sum": {
-                  "$cond": [{
-                      "$eq": ["$product.typeGoods.name_en", "Filter By Gender"]
-                    },
-                    "$price",
-                    0
-                  ]
-                }
-              },
-              "countFilterByGender": {
-                "$sum": {
-                  "$cond": [{
-                      "$eq": ["$product.typeGoods.name_en", "Filter By Gender"]
-                    },
-                    1,
-                    0
-                  ]
-                }
-              },
-              "repliesArray": {
-                "$addToSet": {
-                  "$cond": [{
-                      "$eq": ["$product.typeGoods.name_en", "replies"]
-                    },
-                    {
-                      startAt: "$startAt",
-                      name_en: "$product.name_en",
-                      name_ar: "$product.name_ar",
-                      username: "$owner.username",
-                      ownerId: "$ownerId",
-                    },
-                    null
-                  ]
-                }
-              },
-              "totalReply": {
-                "$sum": {
-                  "$cond": [{
-                      "$eq": ["$product.typeGoods.name_en", "replies"]
-                    },
-                    "$price",
-                    0
-                  ]
-                }
-              },
-              "countReply": {
-                "$sum": {
-                  "$cond": [{
-                      "$eq": ["$product.typeGoods.name_en", "replies"]
-                    },
-                    1,
-                    0
-                  ]
-                }
-              },
-              "bottleArray": {
-                "$addToSet": {
-                  "$cond": [{
-                      "$eq": ["$product.typeGoods.name_en", "Bottles Packs"]
-                    },
-                    {
-                      startAt: "$startAt",
-                      name_en: "$product.name_en",
-                      name_ar: "$product.name_ar",
-                      username: "$owner.username",
-                      ownerId: "$ownerId",
-                    },
-                    null
-                  ]
-                }
-              },
-              "totalBottle": {
-                "$sum": {
-                  "$cond": [{
-                      "$eq": ["$product.typeGoods.name_en", "Bottles Packs"]
-                    },
-                    "$price",
-                    0
-                  ]
-                }
-              },
-              "countBottle": {
-                "$sum": {
-                  "$cond": [{
-                      "$eq": ["$product.typeGoods.name_en", "Bottles Packs"]
-                    },
-                    1,
-                    0
-                  ]
-                }
-              },
-              total: {
-                $sum: 1
               }
             },
-
-          },
-          {
-            $project: {
-              _id: 0,
-              coinsArray: 1,
-              totalBottle: 1,
-              countBottle: 1,
-              totalReply: 1,
-              countReply: 1,
-              countFilterByGender: 1,
-              totalFilterByGender: 1,
-              countFilterByCountry: 1,
-              filterByTypeArray: 1,
-              totalFilterByType: 1,
-              countFilterByType: 1,
-              totalFilterByCountry: 1,
-              totalExtendChat: 1,
-              countExtendChat: 1,
-              extendChatArray: 1,
-              totalUnlockChat: 1,
-              countUnlockChat: 1,
-              unlockChatArray: 1,
-              filterByCountryArray: 1,
-              filterByGenderArray: 1,
-              repliesArray: 1,
-              bottleArray: 1,
-              countCoins: 1,
-              totalCoins: 1,
-              totalCount: 1,
-              totalSpentCoins: 1,
-              total: 1,
-              date: {
-                $concat: [{
-                  $toString: "$_id.year"
-                }, "/", {
-                  $toString: "$_id.month"
-                }, "/", {
-                  $toString: "$_id.day"
-                }]
+            pipeline: [{
+              $match: {
+                $expr: {
+                  $eq: ["$_id", "$$id"]
+                }
               }
+            }],
+            "as": "product.typeGoods"
+          }
+        },
+        {
+          $unwind: "$product.typeGoods"
+        },
+        {
+          $group: {
+            "_id": {
+              month: {
+                $month: "$startAt"
+              },
+              day: {
+                $dayOfMonth: "$startAt"
+              },
+              year: {
+                $year: "$startAt"
+              }
+            },
+            "countCoins": {
+              "$sum": {
+                "$cond": [{
+                  "$eq": ["$type", "coins"]
+                },
+                  1,
+                  0
+                ]
+              }
+            },
+            "coinsArray": {
+              "$addToSet": {
+                "$cond": [{
+                  "$eq": ["$type", "coins"]
+                },
+                {
+                  startAt: "$startAt",
+                  name_en: "$product.name_en",
+                  name_ar: "$product.name_ar",
+                  username: "$owner.username",
+                  ownerId: "$ownerId",
+                },
+                  null
+                ]
+              }
+            },
+            "totalCoins": {
+              "$sum": {
+                "$cond": [{
+                  "$eq": ["$type", "coins"]
+                },
+                  "$price",
+                  0
+                ]
+              }
+            },
+            "totalSpentCoins": {
+              "$sum": {
+                "$cond": [{
+                  "$eq": ["$typePurchasing", "coins"]
+                },
+                  "$price",
+                  0
+                ]
+              }
+            },
+            "extendChatArray": {
+              "$addToSet": {
+                "$cond": [{
+                  "$eq": ["$type", "Chat Extend"]
+                },
+                {
+                  startAt: "$startAt",
+                  name_en: "$product.name_en",
+                  name_ar: "$product.name_ar",
+                  username: "$owner.username",
+                  ownerId: "$ownerId",
+                },
+                  null
+                ]
+              }
+            },
+            "countExtendChat": {
+              "$sum": {
+                "$cond": [{
+                  "$eq": ["$type", "Chat Extend"]
+                },
+                  1,
+                  0
+                ]
+              }
+            },
+            "totalExtendChat": {
+              "$sum": {
+                "$cond": [{
+                  "$eq": ["$type", "Chat Extend"]
+                },
+                  "$price",
+                  0
+                ]
+              }
+            },
+            "unlockChatArray": {
+              "$addToSet": {
+                "$cond": [{
+                  "$eq": ["$type", "Unlock Chat"]
+                },
+                {
+                  startAt: "$startAt",
+                  name_en: "$product.name_en",
+                  name_ar: "$product.name_ar",
+                  username: "$owner.username",
+                  ownerId: "$ownerId",
+                },
+                  null
+                ]
+              }
+            },
+            "countUnlockChat": {
+              "$sum": {
+                "$cond": [{
+                  "$eq": ["$type", "Unlock Chat"]
+                },
+                  1,
+                  0
+                ]
+              }
+            },
+            "totalUnlockChat": {
+              "$sum": {
+                "$cond": [{
+                  "$eq": ["$type", "Unlock Chat"]
+                },
+                  "$price",
+                  0
+                ]
+              }
+            },
+            "filterByCountryArray": {
+              "$addToSet": {
+                "$cond": [{
+                  "$eq": ["$product.typeGoods.name_en", "Filter By Country"]
+                },
+                {
+                  startAt: "$startAt",
+                  name_en: "$product.name_en",
+                  name_ar: "$product.name_ar",
+                  username: "$owner.username",
+                  ownerId: "$ownerId",
+                },
+                  null
+                ]
+              }
+            },
+            "totalFilterByCountry": {
+              "$sum": {
+                "$cond": [{
+                  "$eq": ["$product.typeGoods.name_en", "Filter By Country"]
+                },
+                  "$price",
+                  0
+                ]
+              }
+            },
+            "countFilterByCountry": {
+              "$sum": {
+                "$cond": [{
+                  "$eq": ["$product.typeGoods.name_en", "Filter By Country"]
+                },
+                  1,
+                  0
+                ]
+              }
+            },
+            "filterByTypeArray": {
+              "$addToSet": {
+                "$cond": [{
+                  "$eq": ["$product.typeGoods.name_en", "Filter By Type"]
+                },
+                {
+                  startAt: "$startAt",
+                  name_en: "$product.name_en",
+                  name_ar: "$product.name_ar",
+                  username: "$owner.username",
+                  ownerId: "$ownerId",
+                },
+                  null
+                ]
+              }
+            },
+            "totalFilterByType": {
+              "$sum": {
+                "$cond": [{
+                  "$eq": ["$product.typeGoods.name_en", "Filter By Type"]
+                },
+                  "$price",
+                  0
+                ]
+              }
+            },
+            "countFilterByType": {
+              "$sum": {
+                "$cond": [{
+                  "$eq": ["$product.typeGoods.name_en", "Filter By Type"]
+                },
+                  1,
+                  0
+                ]
+              }
+            },
+            "filterByGenderArray": {
+              "$addToSet": {
+                "$cond": [{
+                  "$eq": ["$product.typeGoods.name_en", "Filter By Gender"]
+                },
+                {
+                  startAt: "$startAt",
+                  name_en: "$product.name_en",
+                  name_ar: "$product.name_ar",
+                  username: "$owner.username",
+                  ownerId: "$ownerId",
+                },
+                  null
+                ]
+              }
+            },
+            "totalFilterByGender": {
+              "$sum": {
+                "$cond": [{
+                  "$eq": ["$product.typeGoods.name_en", "Filter By Gender"]
+                },
+                  "$price",
+                  0
+                ]
+              }
+            },
+            "countFilterByGender": {
+              "$sum": {
+                "$cond": [{
+                  "$eq": ["$product.typeGoods.name_en", "Filter By Gender"]
+                },
+                  1,
+                  0
+                ]
+              }
+            },
+            "repliesArray": {
+              "$addToSet": {
+                "$cond": [{
+                  "$eq": ["$product.typeGoods.name_en", "replies"]
+                },
+                {
+                  startAt: "$startAt",
+                  name_en: "$product.name_en",
+                  name_ar: "$product.name_ar",
+                  username: "$owner.username",
+                  ownerId: "$ownerId",
+                },
+                  null
+                ]
+              }
+            },
+            "totalReply": {
+              "$sum": {
+                "$cond": [{
+                  "$eq": ["$product.typeGoods.name_en", "replies"]
+                },
+                  "$price",
+                  0
+                ]
+              }
+            },
+            "countReply": {
+              "$sum": {
+                "$cond": [{
+                  "$eq": ["$product.typeGoods.name_en", "replies"]
+                },
+                  1,
+                  0
+                ]
+              }
+            },
+            "bottleArray": {
+              "$addToSet": {
+                "$cond": [{
+                  "$eq": ["$product.typeGoods.name_en", "Bottles Packs"]
+                },
+                {
+                  startAt: "$startAt",
+                  name_en: "$product.name_en",
+                  name_ar: "$product.name_ar",
+                  username: "$owner.username",
+                  ownerId: "$ownerId",
+                },
+                  null
+                ]
+              }
+            },
+            "totalBottle": {
+              "$sum": {
+                "$cond": [{
+                  "$eq": ["$product.typeGoods.name_en", "Bottles Packs"]
+                },
+                  "$price",
+                  0
+                ]
+              }
+            },
+            "countBottle": {
+              "$sum": {
+                "$cond": [{
+                  "$eq": ["$product.typeGoods.name_en", "Bottles Packs"]
+                },
+                  1,
+                  0
+                ]
+              }
+            },
+            total: {
+              $sum: 1
+            }
+          },
+
+        },
+        {
+          $project: {
+            _id: 0,
+            coinsArray: 1,
+            totalBottle: 1,
+            countBottle: 1,
+            totalReply: 1,
+            countReply: 1,
+            countFilterByGender: 1,
+            totalFilterByGender: 1,
+            countFilterByCountry: 1,
+            filterByTypeArray: 1,
+            totalFilterByType: 1,
+            countFilterByType: 1,
+            totalFilterByCountry: 1,
+            totalExtendChat: 1,
+            countExtendChat: 1,
+            extendChatArray: 1,
+            totalUnlockChat: 1,
+            countUnlockChat: 1,
+            unlockChatArray: 1,
+            filterByCountryArray: 1,
+            filterByGenderArray: 1,
+            repliesArray: 1,
+            bottleArray: 1,
+            countCoins: 1,
+            totalCoins: 1,
+            totalCount: 1,
+            totalSpentCoins: 1,
+            total: 1,
+            date: {
+              $concat: [{
+                $toString: "$_id.year"
+              }, "/", {
+                $toString: "$_id.month"
+              }, "/", {
+                $toString: "$_id.day"
+              }]
             }
           }
+        }
         ])
         users.get(function (err, data) {
           // //console.log(data);
@@ -2260,79 +2259,79 @@ module.exports = function (Item) {
       Item.getDataSource().connector.connect(function (err, db) {
         var collection = db.collection('callLog');
         var users = collection.aggregate([{
-            $match: filter
-          },
-          {
-            $lookup: {
-              from: "user",
-              localField: "ownerId",
-              foreignField: "_id",
-              as: "owner"
-            }
-          },
-          {
-            $unwind: "$owner"
-          },
-          {
-            $lookup: {
-              from: "user",
-              localField: "relatedUserId",
-              foreignField: "_id",
-              as: "relatedUser"
-            }
-          },
-          {
-            $unwind: "$relatedUser"
-          },
-          {
-            $group: {
-              "_id": {
-                month: {
-                  $month: "$createdAt"
-                },
-                day: {
-                  $dayOfMonth: "$createdAt"
-                },
-                year: {
-                  $year: "$createdAt"
-                }
+          $match: filter
+        },
+        {
+          $lookup: {
+            from: "user",
+            localField: "ownerId",
+            foreignField: "_id",
+            as: "owner"
+          }
+        },
+        {
+          $unwind: "$owner"
+        },
+        {
+          $lookup: {
+            from: "user",
+            localField: "relatedUserId",
+            foreignField: "_id",
+            as: "relatedUser"
+          }
+        },
+        {
+          $unwind: "$relatedUser"
+        },
+        {
+          $group: {
+            "_id": {
+              month: {
+                $month: "$createdAt"
               },
-              "totalSpentCoins": {
-                "$sum": "$cost"
+              day: {
+                $dayOfMonth: "$createdAt"
               },
-              "callArray": {
-                "$addToSet": {
-
-                  startAt: "$createdAt",
-                  relatedUsername: "$relatedUser.username",
-                  relatedUserId: "$relatedUserId",
-                  username: "$owner.username",
-                  ownerId: "$ownerId",
-
-                }
-              },
-              countCall: {
-                $sum: 1
+              year: {
+                $year: "$createdAt"
               }
-            }
-          },
-          {
-            $project: {
-              _id: 0,
-              callArray: 1,
-              countCall: 1,
-              totalSpentCoins: 1,
-              date: {
-                $concat: [{
-                  $toString: "$_id.year"
-                }, "/", {
-                  $toString: "$_id.month"
-                }, "/", {
-                  $toString: "$_id.day"
-                }]
+            },
+            "totalSpentCoins": {
+              "$sum": "$cost"
+            },
+            "callArray": {
+              "$addToSet": {
+
+                startAt: "$createdAt",
+                relatedUsername: "$relatedUser.username",
+                relatedUserId: "$relatedUserId",
+                username: "$owner.username",
+                ownerId: "$ownerId",
+
               }
+            },
+            countCall: {
+              $sum: 1
             }
           }
+        },
+        {
+          $project: {
+            _id: 0,
+            callArray: 1,
+            countCall: 1,
+            totalSpentCoins: 1,
+            date: {
+              $concat: [{
+                $toString: "$_id.year"
+              }, "/", {
+                $toString: "$_id.month"
+              }, "/", {
+                $toString: "$_id.day"
+              }]
+            }
+          }
+        }
         ])
         users.get(function (err, data) {
           // //console.log(data);
@@ -2355,79 +2354,79 @@ module.exports = function (Item) {
       Item.getDataSource().connector.connect(function (err, db) {
         var collection = db.collection('chatItem');
         var users = collection.aggregate([{
-            $match: filter
-          },
-          {
-            $lookup: {
-              from: "user",
-              localField: "ownerId",
-              foreignField: "_id",
-              as: "owner"
-            }
-          },
-          {
-            $unwind: "$owner"
-          },
-          {
-            $lookup: {
-              from: "chatProduct",
-              localField: "chatProductId",
-              foreignField: "_id",
-              as: "chatProduct"
-            }
-          },
-          {
-            $unwind: "$chatProduct"
-          },
-          {
-            $group: {
-              "_id": {
-                month: {
-                  $month: "$createdAt"
-                },
-                day: {
-                  $dayOfMonth: "$createdAt"
-                },
-                year: {
-                  $year: "$createdAt"
-                }
+          $match: filter
+        },
+        {
+          $lookup: {
+            from: "user",
+            localField: "ownerId",
+            foreignField: "_id",
+            as: "owner"
+          }
+        },
+        {
+          $unwind: "$owner"
+        },
+        {
+          $lookup: {
+            from: "chatProduct",
+            localField: "chatProductId",
+            foreignField: "_id",
+            as: "chatProduct"
+          }
+        },
+        {
+          $unwind: "$chatProduct"
+        },
+        {
+          $group: {
+            "_id": {
+              month: {
+                $month: "$createdAt"
               },
-              "totalSpentCoins": {
-                "$sum": "$price"
+              day: {
+                $dayOfMonth: "$createdAt"
               },
-              "giftArray": {
-                "$addToSet": {
-
-                  startAt: "$createdAt",
-                  name_en: "$chatProduct.name_en",
-                  name_ar: "$chatProduct.name_ar",
-                  username: "$owner.username",
-                  ownerId: "$ownerId",
-
-                }
-              },
-              countGift: {
-                $sum: 1
+              year: {
+                $year: "$createdAt"
               }
-            }
-          },
-          {
-            $project: {
-              _id: 0,
-              giftArray: 1,
-              countGift: 1,
-              totalSpentCoins: 1,
-              date: {
-                $concat: [{
-                  $toString: "$_id.year"
-                }, "/", {
-                  $toString: "$_id.month"
-                }, "/", {
-                  $toString: "$_id.day"
-                }]
+            },
+            "totalSpentCoins": {
+              "$sum": "$price"
+            },
+            "giftArray": {
+              "$addToSet": {
+
+                startAt: "$createdAt",
+                name_en: "$chatProduct.name_en",
+                name_ar: "$chatProduct.name_ar",
+                username: "$owner.username",
+                ownerId: "$ownerId",
+
               }
+            },
+            countGift: {
+              $sum: 1
             }
           }
+        },
+        {
+          $project: {
+            _id: 0,
+            giftArray: 1,
+            countGift: 1,
+            totalSpentCoins: 1,
+            date: {
+              $concat: [{
+                $toString: "$_id.year"
+              }, "/", {
+                $toString: "$_id.month"
+              }, "/", {
+                $toString: "$_id.day"
+              }]
+            }
+          }
+        }
         ])
         users.get(function (err, data) {
           // //console.log(data);
@@ -2448,336 +2447,336 @@ module.exports = function (Item) {
       Item.getDataSource().connector.connect(function (err, db) {
         var collection = db.collection('item');
         var users = collection.aggregate([{
-            $match: filter
-          },
-          {
-            $lookup: {
-              from: "user",
-              localField: "ownerId",
-              foreignField: "_id",
-              as: "owner"
-            }
-          },
-          {
-            $unwind: "$owner"
-          },
-          {
-            $lookup: {
-              from: "product",
-              localField: "productId",
-              foreignField: "_id",
-              as: "product"
-            }
-          },
-          {
-            $unwind: "$product"
-          },
-          {
-            $lookup: {
-              from: "typeGoods",
-              let: {
-                id: {
-                  $convert: {
-                    input: "$product.typeGoodsId",
-                    to: "objectId"
-                  }
+          $match: filter
+        },
+        {
+          $lookup: {
+            from: "user",
+            localField: "ownerId",
+            foreignField: "_id",
+            as: "owner"
+          }
+        },
+        {
+          $unwind: "$owner"
+        },
+        {
+          $lookup: {
+            from: "product",
+            localField: "productId",
+            foreignField: "_id",
+            as: "product"
+          }
+        },
+        {
+          $unwind: "$product"
+        },
+        {
+          $lookup: {
+            from: "typeGoods",
+            let: {
+              id: {
+                $convert: {
+                  input: "$product.typeGoodsId",
+                  to: "objectId"
                 }
-              },
-              pipeline: [{
-                $match: {
-                  $expr: {
-                    $eq: ["$_id", "$$id"]
-                  }
-                }
-              }],
-              "as": "product.typeGoods"
-            }
-          },
-          {
-            $unwind: "$product.typeGoods"
-          },
-          {
-            $group: {
-              "_id": {
-                "ownerId": "$ownerId"
-              },
-              "countCoins": {
-                "$sum": {
-                  "$cond": [{
-                      "$eq": ["$type", "coins"]
-                    },
-                    1,
-                    0
-                  ]
-                }
-              },
-              "coinsArray": {
-                "$addToSet": {
-                  "$cond": [{
-                      "$eq": ["$type", "coins"]
-                    },
-                    {
-                      startAt: "$startAt",
-                      name_en: "$product.name_en",
-                      name_ar: "$product.name_ar",
-                      username: "$owner.username",
-                      ownerId: "$ownerId",
-                    },
-                    null
-                  ]
-                }
-              },
-              "totalCoins": {
-                "$sum": {
-                  "$cond": [{
-                      "$eq": ["$type", "coins"]
-                    },
-                    "$price",
-                    0
-                  ]
-                }
-              },
-              "totalSpentCoins": {
-                "$sum": {
-                  "$cond": [{
-                      "$eq": ["$typePurchasing", "coins"]
-                    },
-                    "$price",
-                    0
-                  ]
-                }
-              },
-              "extendChatArray": {
-                "$addToSet": {
-                  "$cond": [{
-                      "$eq": ["$type", "Chat Extend"]
-                    },
-                    {
-                      startAt: "$startAt",
-                      name_en: "$product.name_en",
-                      name_ar: "$product.name_ar",
-                      price: "$price",
-                      username: "$owner.username",
-                      ownerId: "$ownerId",
-                    },
-                    null
-                  ]
-                }
-              },
-              "countExtendChat": {
-                "$sum": {
-                  "$cond": [{
-                      "$eq": ["$type", "Chat Extend"]
-                    },
-                    1,
-                    0
-                  ]
-                }
-              },
-              "totalExtendChat": {
-                "$sum": {
-                  "$cond": [{
-                      "$eq": ["$type", "Chat Extend"]
-                    },
-                    "$price",
-                    0
-                  ]
-                }
-              },
-              "filterByCountryArray": {
-                "$addToSet": {
-                  "$cond": [{
-                      "$eq": ["$product.typeGoods.name_en", "Filter By Country"]
-                    },
-                    {
-                      startAt: "$startAt",
-                      name_en: "$product.name_en",
-                      name_ar: "$product.name_ar",
-                      username: "$owner.username",
-                      price: "$price",
-                      ownerId: "$ownerId",
-                    },
-                    null
-                  ]
-                }
-              },
-              "totalFilterByCountry": {
-                "$sum": {
-                  "$cond": [{
-                      "$eq": ["$product.typeGoods.name_en", "Filter By Country"]
-                    },
-                    "$price",
-                    0
-                  ]
-                }
-              },
-              "countFilterByCountry": {
-                "$sum": {
-                  "$cond": [{
-                      "$eq": ["$product.typeGoods.name_en", "Filter By Country"]
-                    },
-                    1,
-                    0
-                  ]
-                }
-              },
-              "filterByGenderArray": {
-                "$addToSet": {
-                  "$cond": [{
-                      "$eq": ["$product.typeGoods.name_en", "Filter By Gender"]
-                    },
-                    {
-                      startAt: "$startAt",
-                      name_en: "$product.name_en",
-                      price: "$price",
-                      name_ar: "$product.name_ar",
-                      username: "$owner.username",
-                      ownerId: "$ownerId",
-                    },
-                    null
-                  ]
-                }
-              },
-              "totalFilterByGender": {
-                "$sum": {
-                  "$cond": [{
-                      "$eq": ["$product.typeGoods.name_en", "Filter By Gender"]
-                    },
-                    "$price",
-                    0
-                  ]
-                }
-              },
-              "countFilterByGender": {
-                "$sum": {
-                  "$cond": [{
-                      "$eq": ["$product.typeGoods.name_en", "Filter By Gender"]
-                    },
-                    1,
-                    0
-                  ]
-                }
-              },
-              "repliesArray": {
-                "$addToSet": {
-                  "$cond": [{
-                      "$eq": ["$product.typeGoods.name_en", "replies"]
-                    },
-                    {
-                      startAt: "$startAt",
-                      name_en: "$product.name_en",
-                      name_ar: "$product.name_ar",
-                      price: "$price",
-                      username: "$owner.username",
-                      ownerId: "$ownerId",
-                    },
-                    null
-                  ]
-                }
-              },
-              "totalReply": {
-                "$sum": {
-                  "$cond": [{
-                      "$eq": ["$product.typeGoods.name_en", "replies"]
-                    },
-                    "$price",
-                    0
-                  ]
-                }
-              },
-              "countReply": {
-                "$sum": {
-                  "$cond": [{
-                      "$eq": ["$product.typeGoods.name_en", "replies"]
-                    },
-                    1,
-                    0
-                  ]
-                }
-              },
-              "bottleArray": {
-                "$addToSet": {
-                  "$cond": [{
-                      "$eq": ["$product.typeGoods.name_en", "Bottles Packs"]
-                    },
-                    {
-                      startAt: "$startAt",
-                      name_en: "$product.name_en",
-                      name_ar: "$product.name_ar",
-                      price: "$price",
-                      username: "$owner.username",
-                      ownerId: "$ownerId",
-                    },
-                    null
-                  ]
-                }
-              },
-              "totalBottle": {
-                "$sum": {
-                  "$cond": [{
-                      "$eq": ["$product.typeGoods.name_en", "Bottles Packs"]
-                    },
-                    "$price",
-                    0
-                  ]
-                }
-              },
-              "countBottle": {
-                "$sum": {
-                  "$cond": [{
-                      "$eq": ["$product.typeGoods.name_en", "Bottles Packs"]
-                    },
-                    1,
-                    0
-                  ]
-                }
-              },
-              total: {
-                $sum: 1
               }
             },
-
-          },
-          {
-            $lookup: {
-              from: "user",
-              localField: "_id.ownerId",
-              foreignField: "_id",
-              as: "owner"
-            }
-          },
-          {
-            $unwind: "$owner"
-          },
-          {
-            $project: {
-              _id: 0,
-              coinsArray: 1,
-              totalBottle: 1,
-              countBottle: 1,
-              totalReply: 1,
-              countReply: 1,
-              countFilterByGender: 1,
-              totalFilterByGender: 1,
-              countFilterByCountry: 1,
-              totalFilterByCountry: 1,
-              totalExtendChat: 1,
-              countExtendChat: 1,
-              extendChatArray: 1,
-              filterByCountryArray: 1,
-              filterByGenderArray: 1,
-              repliesArray: 1,
-              bottleArray: 1,
-              countCoins: 1,
-              totalCoins: 1,
-              totalCount: 1,
-              totalSpentCoins: 1,
-              total: 1,
-              owner: 1,
-              ownerId: "$_id.ownerId"
-
-            }
+            pipeline: [{
+              $match: {
+                $expr: {
+                  $eq: ["$_id", "$$id"]
+                }
+              }
+            }],
+            "as": "product.typeGoods"
           }
+        },
+        {
+          $unwind: "$product.typeGoods"
+        },
+        {
+          $group: {
+            "_id": {
+              "ownerId": "$ownerId"
+            },
+            "countCoins": {
+              "$sum": {
+                "$cond": [{
+                  "$eq": ["$type", "coins"]
+                },
+                  1,
+                  0
+                ]
+              }
+            },
+            "coinsArray": {
+              "$addToSet": {
+                "$cond": [{
+                  "$eq": ["$type", "coins"]
+                },
+                {
+                  startAt: "$startAt",
+                  name_en: "$product.name_en",
+                  name_ar: "$product.name_ar",
+                  username: "$owner.username",
+                  ownerId: "$ownerId",
+                },
+                  null
+                ]
+              }
+            },
+            "totalCoins": {
+              "$sum": {
+                "$cond": [{
+                  "$eq": ["$type", "coins"]
+                },
+                  "$price",
+                  0
+                ]
+              }
+            },
+            "totalSpentCoins": {
+              "$sum": {
+                "$cond": [{
+                  "$eq": ["$typePurchasing", "coins"]
+                },
+                  "$price",
+                  0
+                ]
+              }
+            },
+            "extendChatArray": {
+              "$addToSet": {
+                "$cond": [{
+                  "$eq": ["$type", "Chat Extend"]
+                },
+                {
+                  startAt: "$startAt",
+                  name_en: "$product.name_en",
+                  name_ar: "$product.name_ar",
+                  price: "$price",
+                  username: "$owner.username",
+                  ownerId: "$ownerId",
+                },
+                  null
+                ]
+              }
+            },
+            "countExtendChat": {
+              "$sum": {
+                "$cond": [{
+                  "$eq": ["$type", "Chat Extend"]
+                },
+                  1,
+                  0
+                ]
+              }
+            },
+            "totalExtendChat": {
+              "$sum": {
+                "$cond": [{
+                  "$eq": ["$type", "Chat Extend"]
+                },
+                  "$price",
+                  0
+                ]
+              }
+            },
+            "filterByCountryArray": {
+              "$addToSet": {
+                "$cond": [{
+                  "$eq": ["$product.typeGoods.name_en", "Filter By Country"]
+                },
+                {
+                  startAt: "$startAt",
+                  name_en: "$product.name_en",
+                  name_ar: "$product.name_ar",
+                  username: "$owner.username",
+                  price: "$price",
+                  ownerId: "$ownerId",
+                },
+                  null
+                ]
+              }
+            },
+            "totalFilterByCountry": {
+              "$sum": {
+                "$cond": [{
+                  "$eq": ["$product.typeGoods.name_en", "Filter By Country"]
+                },
+                  "$price",
+                  0
+                ]
+              }
+            },
+            "countFilterByCountry": {
+              "$sum": {
+                "$cond": [{
+                  "$eq": ["$product.typeGoods.name_en", "Filter By Country"]
+                },
+                  1,
+                  0
+                ]
+              }
+            },
+            "filterByGenderArray": {
+              "$addToSet": {
+                "$cond": [{
+                  "$eq": ["$product.typeGoods.name_en", "Filter By Gender"]
+                },
+                {
+                  startAt: "$startAt",
+                  name_en: "$product.name_en",
+                  price: "$price",
+                  name_ar: "$product.name_ar",
+                  username: "$owner.username",
+                  ownerId: "$ownerId",
+                },
+                  null
+                ]
+              }
+            },
+            "totalFilterByGender": {
+              "$sum": {
+                "$cond": [{
+                  "$eq": ["$product.typeGoods.name_en", "Filter By Gender"]
+                },
+                  "$price",
+                  0
+                ]
+              }
+            },
+            "countFilterByGender": {
+              "$sum": {
+                "$cond": [{
+                  "$eq": ["$product.typeGoods.name_en", "Filter By Gender"]
+                },
+                  1,
+                  0
+                ]
+              }
+            },
+            "repliesArray": {
+              "$addToSet": {
+                "$cond": [{
+                  "$eq": ["$product.typeGoods.name_en", "replies"]
+                },
+                {
+                  startAt: "$startAt",
+                  name_en: "$product.name_en",
+                  name_ar: "$product.name_ar",
+                  price: "$price",
+                  username: "$owner.username",
+                  ownerId: "$ownerId",
+                },
+                  null
+                ]
+              }
+            },
+            "totalReply": {
+              "$sum": {
+                "$cond": [{
+                  "$eq": ["$product.typeGoods.name_en", "replies"]
+                },
+                  "$price",
+                  0
+                ]
+              }
+            },
+            "countReply": {
+              "$sum": {
+                "$cond": [{
+                  "$eq": ["$product.typeGoods.name_en", "replies"]
+                },
+                  1,
+                  0
+                ]
+              }
+            },
+            "bottleArray": {
+              "$addToSet": {
+                "$cond": [{
+                  "$eq": ["$product.typeGoods.name_en", "Bottles Packs"]
+                },
+                {
+                  startAt: "$startAt",
+                  name_en: "$product.name_en",
+                  name_ar: "$product.name_ar",
+                  price: "$price",
+                  username: "$owner.username",
+                  ownerId: "$ownerId",
+                },
+                  null
+                ]
+              }
+            },
+            "totalBottle": {
+              "$sum": {
+                "$cond": [{
+                  "$eq": ["$product.typeGoods.name_en", "Bottles Packs"]
+                },
+                  "$price",
+                  0
+                ]
+              }
+            },
+            "countBottle": {
+              "$sum": {
+                "$cond": [{
+                  "$eq": ["$product.typeGoods.name_en", "Bottles Packs"]
+                },
+                  1,
+                  0
+                ]
+              }
+            },
+            total: {
+              $sum: 1
+            }
+          },
+
+        },
+        {
+          $lookup: {
+            from: "user",
+            localField: "_id.ownerId",
+            foreignField: "_id",
+            as: "owner"
+          }
+        },
+        {
+          $unwind: "$owner"
+        },
+        {
+          $project: {
+            _id: 0,
+            coinsArray: 1,
+            totalBottle: 1,
+            countBottle: 1,
+            totalReply: 1,
+            countReply: 1,
+            countFilterByGender: 1,
+            totalFilterByGender: 1,
+            countFilterByCountry: 1,
+            totalFilterByCountry: 1,
+            totalExtendChat: 1,
+            countExtendChat: 1,
+            extendChatArray: 1,
+            filterByCountryArray: 1,
+            filterByGenderArray: 1,
+            repliesArray: 1,
+            bottleArray: 1,
+            countCoins: 1,
+            totalCoins: 1,
+            totalCount: 1,
+            totalSpentCoins: 1,
+            total: 1,
+            owner: 1,
+            ownerId: "$_id.ownerId"
+
+          }
+        }
         ])
         users.get(function (err, data) {
           // //console.log(data);
@@ -2794,77 +2793,77 @@ module.exports = function (Item) {
       Item.getDataSource().connector.connect(function (err, db) {
         var collection = db.collection('chatItem');
         var users = collection.aggregate([{
-            $match: filter
-          },
-          {
-            $lookup: {
-              from: "user",
-              localField: "ownerId",
-              foreignField: "_id",
-              as: "owner"
-            }
-          },
-          {
-            $unwind: "$owner"
-          },
-          {
-            $lookup: {
-              from: "chatProduct",
-              localField: "chatProductId",
-              foreignField: "_id",
-              as: "chatProduct"
-            }
-          },
-          {
-            $unwind: "$chatProduct"
-          },
-          {
-            $group: {
-              "_id": {
-                "ownerId": "$ownerId"
-              },
-              "totalSpentCoins": {
-                "$sum": "$price"
-              },
-              "giftArray": {
-                "$addToSet": {
+          $match: filter
+        },
+        {
+          $lookup: {
+            from: "user",
+            localField: "ownerId",
+            foreignField: "_id",
+            as: "owner"
+          }
+        },
+        {
+          $unwind: "$owner"
+        },
+        {
+          $lookup: {
+            from: "chatProduct",
+            localField: "chatProductId",
+            foreignField: "_id",
+            as: "chatProduct"
+          }
+        },
+        {
+          $unwind: "$chatProduct"
+        },
+        {
+          $group: {
+            "_id": {
+              "ownerId": "$ownerId"
+            },
+            "totalSpentCoins": {
+              "$sum": "$price"
+            },
+            "giftArray": {
+              "$addToSet": {
 
-                  startAt: "$createdAt",
-                  name_en: "$chatProduct.name_en",
-                  name_ar: "$chatProduct.name_ar",
-                  price: "$price",
-                  username: "$owner.username",
-                  ownerId: "$ownerId",
+                startAt: "$createdAt",
+                name_en: "$chatProduct.name_en",
+                name_ar: "$chatProduct.name_ar",
+                price: "$price",
+                username: "$owner.username",
+                ownerId: "$ownerId",
 
-                }
-              },
-              countGift: {
-                $sum: 1
               }
-            }
-          },
-          {
-            $lookup: {
-              from: "user",
-              localField: "_id.ownerId",
-              foreignField: "_id",
-              as: "owner"
-            }
-          },
-          {
-            $unwind: "$owner"
-          },
-          {
-            $project: {
-              _id: 0,
-              giftArray: 1,
-              countGift: 1,
-              totalSpentCoins: 1,
-              owner: 1,
-              ownerId: "$_id.ownerId"
-
+            },
+            countGift: {
+              $sum: 1
             }
           }
+        },
+        {
+          $lookup: {
+            from: "user",
+            localField: "_id.ownerId",
+            foreignField: "_id",
+            as: "owner"
+          }
+        },
+        {
+          $unwind: "$owner"
+        },
+        {
+          $project: {
+            _id: 0,
+            giftArray: 1,
+            countGift: 1,
+            totalSpentCoins: 1,
+            owner: 1,
+            ownerId: "$_id.ownerId"
+
+          }
+        }
         ])
         users.get(function (err, data) {
           // //console.log(data);
@@ -3024,7 +3023,7 @@ module.exports = function (Item) {
 
 
     /* Generate Excel */
-    var path = await mongoXlsx.mongoData2Xlsx(data, model, config, function () {})
+    var path = await mongoXlsx.mongoData2Xlsx(data, model, config, function () { })
     return callback(null, {
       'path': urlFileRootexcel + config['fileName']
     });
