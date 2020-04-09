@@ -443,6 +443,8 @@ module.exports = function (Item) {
             item.save();
             user.pocketCoins -= product.price_coins;
             user.totalPaidCoins += product.price_coins;
+            console.log("user.pocketCoins")
+            console.log(user.pocketCoins)
             user.save();
             callback(null, item)
           }
