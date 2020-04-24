@@ -1800,7 +1800,12 @@ module.exports = function (User) {
         else
           fileName = filePath + "audios" + bottle.file.slice(bottle.file.lastIndexOf("/"))
         // console.log(fileName)
-        fs.unlinkSync(fileName)
+        if(fs.existsSync(fileName)) {
+          console.log("The file exists.");
+          fs.unlinkSync(fileName)
+      } else {
+          console.log('The file does not exist.');
+      }
       })
     })
     // let usersArray = []
