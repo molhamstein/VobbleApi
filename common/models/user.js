@@ -1780,33 +1780,51 @@ module.exports = function (User) {
    *
    * @param {Function(Error, array)} callback
    */
+  var fs = require("fs");
 
   User.accesstoken = function (callback) {
     var result;
     // TODO
-
-    let usersArray = []
     User.app.models.Bottle.find({
       "where": {
-        "status": "active"
-      },
-      "order": "createdAt DESC"
+        "status": "deactive"
+      }
     }, function (err, data) {
-      data.forEach(element => {
-        let weight = parseInt(Date.parse(element.createdAt)) / (1000 * 60 * 60)
-        let objectUpdate = {
-          "viewStatus": "deactive",
-          "totalWeight": weight,
-          "weight": weight
-        }
-        if (usersArray[element.ownerId] == null) {
-          objectUpdate['viewStatus'] = "active";
-          usersArray[element.ownerId] = true
-          console.log(objectUpdate)
-        }
-        element.updateAttributes(objectUpdate)
-      });
+      console.log("data.length")
+      console.log(data.length)
+      // data.forEach(bottle => {
+      //   var filePath = config.filePath;
+      //   var fileName = ""
+      //   if (bottle.bottleType = "video")
+      //     fileName = filePath + "videos" + bottle.file.slice(bottle.file.lastIndexOf("/"))
+      //   else
+      //     fileName = filePath + "audios" + bottle.file.slice(bottle.file.lastIndexOf("/"))
+      //   // console.log(fileName)
+      //   fs.unlinkSync(fileName)
+      // })
     })
+    // let usersArray = []
+    // User.app.models.Bottle.find({
+    //   "where": {
+    //     "status": "active"
+    //   },
+    //   "order": "createdAt DESC"
+    // }, function (err, data) {
+    //   data.forEach(element => {
+    //     let weight = parseInt(Date.parse(element.createdAt)) / (1000 * 60 * 60)
+    //     let objectUpdate = {
+    //       "viewStatus": "deactive",
+    //       "totalWeight": weight,
+    //       "weight": weight
+    //     }
+    //     if (usersArray[element.ownerId] == null) {
+    //       objectUpdate['viewStatus'] = "active";
+    //       usersArray[element.ownerId] = true
+    //       console.log(objectUpdate)
+    //     }
+    //     element.updateAttributes(objectUpdate)
+    //   });
+    // })
     callback()
     // User.app.models.AccessToken.find({}, function (err, data) {
     //   if (err)
@@ -2296,15 +2314,15 @@ module.exports = function (User) {
     User.find({
       "where": {
         "and": [{
-            "lastLogin": {
-              "gt": weekDate
-            }
-          },
-          {
-            "lastLogin": {
-              "lt": yesterday
-            }
+          "lastLogin": {
+            "gt": weekDate
           }
+        },
+        {
+          "lastLogin": {
+            "lt": yesterday
+          }
+        }
         ]
       }
     }, function (err, users) {
