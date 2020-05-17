@@ -6,10 +6,12 @@ var loopback = require('loopback');
 var boot = require('loopback-boot');
 var schedule = require('node-schedule');
 var app = module.exports = loopback();
-
 const LoopBackContext = require('loopback-context');
 app.use(LoopBackContext.perRequest());
 app.use(loopback.token());
+
+var fs = require("fs");
+var startDate = new Date()
 
 app.use(function (req, res, next) {
   // console("App Use");
@@ -31,7 +33,13 @@ app.use(function (req, res, next) {
     });
 });
 
-
+function addToLog() {
+  var text = "start at : " + startDate.toString() + "\r\n" + "run at : " + new Date().toString() + "\r\n-----------------------------------------\r\n"
+  fs.writeFile("server/boot/logs/log.txt", text, (err) => {
+    if (err) console.log(err);
+    console.log("Successfully Written to File.");
+  });
+}
 app.start = function () {
   // console.log("SSSSSSSS")
   // start the web server
@@ -39,6 +47,7 @@ app.start = function () {
     app.emit('started');
     var baseUrl = app.get('url').replace(/\/$/, '');
     console.log('Web server listening at: %s', baseUrl);
+    addToLog()
     if (app.get('loopback-component-explorer')) {
       var explorerPath = app.get('loopback-component-explorer').mountPath;
       console.log('Browse your REST API at %s%s', baseUrl, explorerPath);
