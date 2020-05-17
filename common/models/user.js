@@ -2307,7 +2307,7 @@ module.exports = function (User) {
     })
   })
 
-  cron.scheduleJob('* */2 * * *', function () {
+  cron.scheduleJob('0 */2 * * *', function () {
     var todayDate = new Date(),
       weekDate = new Date(),
       yesterday = new Date();
