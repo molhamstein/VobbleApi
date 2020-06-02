@@ -35,10 +35,16 @@ app.use(function (req, res, next) {
 
 function addToLog() {
   var text = "start at : " + startDate.toString() + "\r\n" + "run at : " + new Date().toString() + "\r\n-----------------------------------------\r\n"
-  fs.writeFile("server/boot/logs/log.txt", text, (err) => {
-    if (err) console.log(err);
-    console.log("Successfully Written to File.");
+  // fs.writeFile("server/boot/logs/log.txt", text, (err) => {
+  //   if (err) console.log(err);
+  //   console.log("Successfully Written to File.");
+  // });
+
+  fs.appendFile('server/boot/logs/log.txt', text, function (err) {
+    if (err) throw err;
+    console.log('Saved!');
   });
+  
 }
 app.start = function () {
   // console.log("SSSSSSSS")
