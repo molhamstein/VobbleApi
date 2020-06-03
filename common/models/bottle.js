@@ -56,20 +56,21 @@ module.exports = function (Bottle) {
   // Set owner Id
   Bottle.beforeRemote('create', function (context, result, next) {
     // check user is active 
-    if (context.res.locals.user.status != 'active') {
-      return next(errors.account.notActive());
-    }
-
-
     if (context.req.body.ownerId == null)
       context.req.body.ownerId = context.req.accessToken.userId;
-    let weight = 0
-    let totalWeight = 0
     Bottle.app.models.User.findById(context.req.body.ownerId, function (err, user) {
       if (err) {
         //console.log(err);
         next(err);
       }
+
+      if (user.status != 'active') {
+        return next(errors.account.notActive());
+      }
+
+
+      let weight = 0
+      let totalWeight = 0
       if (user.bottlesCount == 0 && user.extraBottlesCount == 0) {
         return next(errors.bottle.noAvailableBottleToday());
       }
@@ -110,26 +111,33 @@ module.exports = function (Bottle) {
 
   // increment bottlesCount for user
   Bottle.afterRemote('create', function (context, result, next) {
-    const user = context.res.locals.user;
-    user.totalBottlesThrown++;
-    if (user.extraBottlesCount > 0)
-      user.extraBottlesCount--;
-    else
-      user.bottlesCount--;
-    user.save();
-    if (context.req.body.topicId == null)
-      next();
-    else {
-      Bottle.app.models.topics.findById(context.req.body.topicId, function (err, oneTopic) {
-        if (err)
-          return next(err)
-        //console.log("ssss")
-        //console.log(oneTopic)
-        oneTopic.bottleCount++;
-        oneTopic.save();
-        next()
-      })
-    }
+    // const user = context.res.locals.user;
+    Bottle.app.models.User.findById(context.req.body.ownerId, function (err, user) {
+      if (err) {
+        //console.log(err);
+        next(err);
+      }
+      console.log(user)
+      user.totalBottlesThrown++;
+      if (user.extraBottlesCount > 0)
+        user.extraBottlesCount--;
+      else
+        user.bottlesCount--;
+      user.save();
+      if (context.req.body.topicId == null)
+        next();
+      else {
+        Bottle.app.models.topics.findById(context.req.body.topicId, function (err, oneTopic) {
+          if (err)
+            return next(err)
+          //console.log("ssss")
+          //console.log(oneTopic)
+          oneTopic.bottleCount++;
+          oneTopic.save();
+          next()
+        })
+      }
+    });
   });
 
 
@@ -186,47 +194,47 @@ module.exports = function (Bottle) {
       });
     }
     var aggregate = [{
-        $lookup: {
-          from: "user",
-          let: {
-            ownerId: {
-              $convert: {
-                input: "$ownerId",
-                to: "objectId"
-              }
+      $lookup: {
+        from: "user",
+        let: {
+          ownerId: {
+            $convert: {
+              input: "$ownerId",
+              to: "objectId"
             }
-          },
-          pipeline: [{
-              $match: {
-                $expr: {
-                  $eq: ["$_id", "$$ownerId"]
-                }
-              }
-            },
-            {
-              $project: {
-                stackBottleUser: 0
-              }
+          }
+        },
+        pipeline: [{
+          $match: {
+            $expr: {
+              $eq: ["$_id", "$$ownerId"]
             }
+          }
+        },
+        {
+          $project: {
+            stackBottleUser: 0
+          }
+        }
 
-          ],
-          as: "owner"
-        }
-      },
-      {
-        $unwind: "$owner"
-      },
-      {
-        $lookup: {
-          from: "shore",
-          localField: "shoreId",
-          foreignField: "_id",
-          as: "shore"
-        }
-      },
-      {
-        $unwind: "$shore"
+        ],
+        as: "owner"
       }
+    },
+    {
+      $unwind: "$owner"
+    },
+    {
+      $lookup: {
+        from: "shore",
+        localField: "shoreId",
+        foreignField: "_id",
+        as: "shore"
+      }
+    },
+    {
+      $unwind: "$shore"
+    }
     ]
     if (where["$and"].length != 0)
       aggregate.push({
@@ -427,11 +435,11 @@ module.exports = function (Bottle) {
       Bottle.app.models.block.find({
         where: {
           or: [{
-              "ownerId": ObjectId(userId)
-            },
-            {
-              "userId": ObjectId(userId)
-            },
+            "ownerId": ObjectId(userId)
+          },
+          {
+            "userId": ObjectId(userId)
+          },
           ]
         }
       }, function (err, blocksList) {
@@ -511,49 +519,49 @@ module.exports = function (Bottle) {
           Bottle.getDataSource().connector.connect(function (err, db) {
             var collection = db.collection('bottle');
             var maleAggregation = collection.aggregate([{
-                $lookup: {
-                  from: "user",
-                  localField: "ownerId",
-                  foreignField: "_id",
-                  as: "owner"
-                }
-              },
-              {
-                $unwind: "$owner"
-              },
-              {
-                $match: maleFilter
-              },
-              {
-                $sort: {
-                  totalWeight: -1
-                }
-              },
-              {
-                $limit: maleLimit
+              $lookup: {
+                from: "user",
+                localField: "ownerId",
+                foreignField: "_id",
+                as: "owner"
               }
+            },
+            {
+              $unwind: "$owner"
+            },
+            {
+              $match: maleFilter
+            },
+            {
+              $sort: {
+                totalWeight: -1
+              }
+            },
+            {
+              $limit: maleLimit
+            }
             ])
             var femaleAggregation = collection.aggregate([{
-                $lookup: {
-                  from: "user",
-                  localField: "ownerId",
-                  foreignField: "_id",
-                  as: "owner"
-                }
-              },
-              {
-                $unwind: "$owner"
-              }, {
-                $match: femaleFilter
-              },
-              {
-                $sort: {
-                  totalWeight: -1
-                }
-              },
-              {
-                $limit: femaleLimit
+              $lookup: {
+                from: "user",
+                localField: "ownerId",
+                foreignField: "_id",
+                as: "owner"
               }
+            },
+            {
+              $unwind: "$owner"
+            }, {
+              $match: femaleFilter
+            },
+            {
+              $sort: {
+                totalWeight: -1
+              }
+            },
+            {
+              $limit: femaleLimit
+            }
             ])
             femaleAggregation.get(function (err, femaleData) {
               if (err) return callback(err);
@@ -839,44 +847,44 @@ module.exports = function (Bottle) {
 
       var collection = db.collection('bottleUserseen');
       var seen = collection.aggregate([{
-          $lookup: {
-            from: "user",
-            localField: "userId",
-            foreignField: "_id",
-            as: "owner"
-          }
-        },
-        {
-          $unwind: "$owner"
-        },
-        {
-          $lookup: {
-            from: "bottle",
-            localField: "bottleId",
-            foreignField: "_id",
-            as: "bottle"
-          }
-        },
-        {
-          $unwind: "$bottle"
-        },
-        {
-          $match: filter
-        },
-        {
-          $group: {
-            _id: '$bottleId',
-            count: {
-              $sum: 1
-            }
+        $lookup: {
+          from: "user",
+          localField: "userId",
+          foreignField: "_id",
+          as: "owner"
+        }
+      },
+      {
+        $unwind: "$owner"
+      },
+      {
+        $lookup: {
+          from: "bottle",
+          localField: "bottleId",
+          foreignField: "_id",
+          as: "bottle"
+        }
+      },
+      {
+        $unwind: "$bottle"
+      },
+      {
+        $match: filter
+      },
+      {
+        $group: {
+          _id: '$bottleId',
+          count: {
+            $sum: 1
           }
         }
+      }
       ])
       seen.get(function (err, seens) {
         var data = [];
         // console.log("seens")
         // console.log(seens.length)
-    
+
         seens.forEach(element => {
           data[element._id] = element.count
         });
@@ -951,11 +959,11 @@ module.exports = function (Bottle) {
         Bottle.app.models.block.find({
           where: {
             or: [{
-                "ownerId": req.accessToken.userId
-              },
-              {
-                "userId": req.accessToken.userId
-              },
+              "ownerId": req.accessToken.userId
+            },
+            {
+              "userId": req.accessToken.userId
+            },
             ]
           }
         }, function (err, blocksList) {
@@ -1201,11 +1209,11 @@ module.exports = function (Bottle) {
         Bottle.app.models.block.find({
           where: {
             or: [{
-                "ownerId": oneUser['id']
-              },
-              {
-                "userId": oneUser['id']
-              },
+              "ownerId": oneUser['id']
+            },
+            {
+              "userId": oneUser['id']
+            },
             ]
           }
         }, function (err, blocksList) {
@@ -1441,7 +1449,7 @@ module.exports = function (Bottle) {
       element.owner(function (err, owner) {
         element.shore(function (err, shore) {
           var numberOfSeenThisBottle = findInSeenUser(seenBottle, userId, element.id);
-          if (owner == undefined) {}
+          if (owner == undefined) { }
           var isBlocked = true
           if (owner != null)
             isBlocked = isInBlockList(blockList, owner.id)
@@ -1557,40 +1565,40 @@ module.exports = function (Bottle) {
 
       var collection = db.collection('user');
       var cursor = collection.aggregate([{
-          $match: filter
-        },
-        {
-          $group: {
-            _id: {
-              month: {
-                $month: "$createdAt"
-              },
-              day: {
-                $dayOfMonth: "$createdAt"
-              },
-              year: {
-                $year: "$createdAt"
-              }
+        $match: filter
+      },
+      {
+        $group: {
+          _id: {
+            month: {
+              $month: "$createdAt"
             },
-            total: {
-              $sum: 1
+            day: {
+              $dayOfMonth: "$createdAt"
+            },
+            year: {
+              $year: "$createdAt"
             }
-          }
-        },
-        {
-          $sort: {
-            "_id.year": 1,
-            "_id.month": 1,
-            "_id.day": 1,
-          }
-        },
-        {
-          $project: {
-            _id: 0,
-            date: "$_id",
-            count: "$total",
+          },
+          total: {
+            $sum: 1
           }
         }
+      },
+      {
+        $sort: {
+          "_id.year": 1,
+          "_id.month": 1,
+          "_id.day": 1,
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          date: "$_id",
+          count: "$total",
+        }
+      }
       ]);
       cursor.get(function (err, data) {
         if (err) return callback(err);
@@ -1608,48 +1616,48 @@ module.exports = function (Bottle) {
 
       var collection = db.collection('bottle');
       var cursor = collection.aggregate([{
-          $lookup: {
-            from: "user",
-            localField: "ownerId",
-            foreignField: "_id",
-            as: "owner"
-          }
-        },
-        {
-          $match: filter
-        },
-        {
-          $group: {
-            _id: {
-              month: {
-                $month: "$createdAt"
-              },
-              day: {
-                $dayOfMonth: "$createdAt"
-              },
-              year: {
-                $year: "$createdAt"
-              }
+        $lookup: {
+          from: "user",
+          localField: "ownerId",
+          foreignField: "_id",
+          as: "owner"
+        }
+      },
+      {
+        $match: filter
+      },
+      {
+        $group: {
+          _id: {
+            month: {
+              $month: "$createdAt"
             },
-            total: {
-              $sum: 1
+            day: {
+              $dayOfMonth: "$createdAt"
+            },
+            year: {
+              $year: "$createdAt"
             }
-          }
-        },
-        {
-          $sort: {
-            "_id.year": 1,
-            "_id.month": 1,
-            "_id.day": 1,
-          }
-        },
-        {
-          $project: {
-            _id: 0,
-            date: "$_id",
-            count: "$total",
+          },
+          total: {
+            $sum: 1
           }
         }
+      },
+      {
+        $sort: {
+          "_id.year": 1,
+          "_id.month": 1,
+          "_id.day": 1,
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          date: "$_id",
+          count: "$total",
+        }
+      }
       ]);
       cursor.get(function (err, data) {
         if (err) return callback(err);
@@ -1669,47 +1677,47 @@ module.exports = function (Bottle) {
 
       var collection = db.collection('userActivate');
       var cursor = collection.aggregate([{
-          $lookup: {
-            from: "user",
-            localField: "ownerId",
-            foreignField: "_id",
-            as: "owner"
-          }
-        }, {
-          $match: filter
-        },
-        {
-          $group: {
-            _id: {
-              month: {
-                $month: "$createdAt"
-              },
-              day: {
-                $dayOfMonth: "$createdAt"
-              },
-              year: {
-                $year: "$createdAt"
-              }
-            },
-            total: {
-              $sum: 1
-            },
-          }
-        },
-        {
-          $sort: {
-            "_id.year": 1,
-            "_id.month": 1,
-            "_id.day": 1,
-          }
-        },
-        {
-          $project: {
-            _id: 0,
-            date: "$_id",
-            count: "$total",
-          }
+        $lookup: {
+          from: "user",
+          localField: "ownerId",
+          foreignField: "_id",
+          as: "owner"
         }
+      }, {
+        $match: filter
+      },
+      {
+        $group: {
+          _id: {
+            month: {
+              $month: "$createdAt"
+            },
+            day: {
+              $dayOfMonth: "$createdAt"
+            },
+            year: {
+              $year: "$createdAt"
+            }
+          },
+          total: {
+            $sum: 1
+          },
+        }
+      },
+      {
+        $sort: {
+          "_id.year": 1,
+          "_id.month": 1,
+          "_id.day": 1,
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          date: "$_id",
+          count: "$total",
+        }
+      }
       ]);
       cursor.get(function (err, data) {
         if (err) return callback(err);
@@ -2029,36 +2037,36 @@ module.exports = function (Bottle) {
 
       var collection = db.collection('bottle');
       var cursor = collection.aggregate([{
-          $match: filter
-        },
-        {
-          $project: {
-            audio: {
-              $cond: [{
-                $eq: ["$bottleType", "audio"]
-              }, 1, 0]
-            },
-            video: {
-              $cond: [{
-                $eq: ["$bottleType", "video"]
-              }, 1, 0]
-            },
-          }
-        },
-        {
-          $group: {
-            _id: null,
-            audio: {
-              $sum: "$audio"
-            },
-            video: {
-              $sum: "$video"
-            },
-            total: {
-              $sum: 1
-            },
-          }
-        },
+        $match: filter
+      },
+      {
+        $project: {
+          audio: {
+            $cond: [{
+              $eq: ["$bottleType", "audio"]
+            }, 1, 0]
+          },
+          video: {
+            $cond: [{
+              $eq: ["$bottleType", "video"]
+            }, 1, 0]
+          },
+        }
+      },
+      {
+        $group: {
+          _id: null,
+          audio: {
+            $sum: "$audio"
+          },
+          video: {
+            $sum: "$video"
+          },
+          total: {
+            $sum: 1
+          },
+        }
+      },
       ]);
       cursor.get(function (err, data) {
         //console.log(data);
