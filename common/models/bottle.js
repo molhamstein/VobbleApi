@@ -467,9 +467,9 @@ module.exports = function (Bottle) {
           var maleLimit = 0
           var femaleLimit = 0
           var newUser = false;
-          console.log("seenBottle")
-          console.log(seenBottle.length)
-          console.log(filter)
+          // console.log("seenBottle")
+          // console.log(seenBottle.length)
+          // console.log(filter)
 
           if (oneUser.gender == "male") {
 
@@ -503,10 +503,10 @@ module.exports = function (Bottle) {
             femaleLimit = 1000
           }
 
-          console.log("maleLimit")
-          console.log(maleFilter)
-          console.log("femaleLimit")
-          console.log(femaleFilter)
+          // console.log("maleLimit")
+          // console.log(maleFilter)
+          // console.log("femaleLimit")
+          // console.log(femaleFilter)
 
           Bottle.getDataSource().connector.connect(function (err, db) {
             var collection = db.collection('bottle');
@@ -562,10 +562,10 @@ module.exports = function (Bottle) {
                 if (err) return callback(err);
                 var arrayBottle = []
                 var data = []
-                console.log("maleData")
-                console.log(maleData.length)
-                console.log("femaleData")
-                console.log(femaleData.length)
+                // console.log("maleData")
+                // console.log(maleData.length)
+                // console.log("femaleData")
+                // console.log(femaleData.length)
 
                 if (maleLimit != 1000) {
                   data = margeData(maleData, femaleData, maleLimit / 100, femaleLimit / 100) // maleData.concat(femaleData)
@@ -833,8 +833,8 @@ module.exports = function (Bottle) {
       delete filter.viewStatus
     }
 
-    console.log("filter")
-    console.log(filter)
+    // console.log("filter")
+    // console.log(filter)
     Bottle.getDataSource().connector.connect(function (err, db) {
 
       var collection = db.collection('bottleUserseen');
@@ -874,8 +874,8 @@ module.exports = function (Bottle) {
       ])
       seen.get(function (err, seens) {
         var data = [];
-        console.log("seens")
-        console.log(seens.length)
+        // console.log("seens")
+        // console.log(seens.length)
     
         seens.forEach(element => {
           data[element._id] = element.count

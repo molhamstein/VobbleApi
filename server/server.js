@@ -7,11 +7,14 @@ var boot = require('loopback-boot');
 var schedule = require('node-schedule');
 var app = module.exports = loopback();
 const LoopBackContext = require('loopback-context');
-app.use(LoopBackContext.perRequest());
-app.use(loopback.token());
+// app.use(LoopBackContext.perRequest());
+// app.use(loopback.token());
 
 var fs = require("fs");
 var startDate = new Date()
+console.log("startDate")
+console.log(startDate)
+
 
 app.use(function (req, res, next) {
   // console("App Use");
@@ -47,8 +50,7 @@ function addToLog() {
   
 }
 app.start = function () {
-  // console.log("SSSSSSSS")
-  // start the web server
+    // start the web server
   return app.listen(function () {
     app.emit('started');
     var baseUrl = app.get('url').replace(/\/$/, '');
@@ -84,7 +86,6 @@ var timer = schedule.scheduleJob('0 1 0 * * *', function () {
 // Sub-apps like REST API are mounted via boot scripts.
 boot(app, __dirname, function (err) {
   if (err) throw err;
-
   // start the server if `$ node server.js`
   if (require.main === module)
     app.start();

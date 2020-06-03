@@ -335,7 +335,7 @@ module.exports = function (Item) {
     if (offset) {
       aggregate.push(skip)
     }
-    console.log(where["$and"])
+    // console.log(where["$and"])
     // console.log(aggregate)
     Item.getDataSource().connector.connect(function (err, db) {
       var collection = db.collection('item');
@@ -441,8 +441,8 @@ module.exports = function (Item) {
         item = await item.save();
         user.pocketCoins -= product.price_coins;
         user.totalPaidCoins += product.price_coins;
-        console.log("user.pocketCoins")
-        console.log(user.pocketCoins)
+        // console.log("user.pocketCoins")
+        // console.log(user.pocketCoins)
         await user.save();
         callback(null, item)
       }
