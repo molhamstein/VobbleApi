@@ -19,15 +19,17 @@ module.exports = function (Conversation) {
 
   var admin = require("firebase-admin");
 
-  var cron = require('node-schedule');
-
-  
-  cron.scheduleJob('00 00 * * * *', function () {
 
     admin.initializeApp({
       credential: admin.credential.cert(serviceAccount),
       databaseURL: "https://vobble-1521577974841.firebaseio.com"
     });
+
+  var cron = require('node-schedule');
+
+
+  cron.scheduleJob('00 00 * * * *', function () {
+
 
     var db = admin.database();
     var ref = db.ref("conversations");
@@ -134,5 +136,5 @@ module.exports = function (Conversation) {
     })
 
   }
-  Conversation.testUser = function (userId, cb) {}
+  Conversation.testUser = function (userId, cb) { }
 };
