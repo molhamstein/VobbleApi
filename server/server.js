@@ -64,7 +64,7 @@ app.start = function () {
 };
 
 
-var timer = schedule.scheduleJob('0 1 0 * * *', function () {
+var timer = schedule.scheduleJob('45 21 * * *', function () {
   // var date = new Date();
   // date = new Date(date.setTime(date.getTime() + 1 * 86400000));
   var date = new Date();
