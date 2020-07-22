@@ -47,10 +47,10 @@ function addToLog() {
     if (err) throw err;
     console.log('Saved!');
   });
-  
+
 }
 app.start = function () {
-    // start the web server
+  // start the web server
   return app.listen(function () {
     app.emit('started');
     var baseUrl = app.get('url').replace(/\/$/, '');
@@ -64,21 +64,35 @@ app.start = function () {
 };
 
 
-var timer = schedule.scheduleJob('1 22 * * *', function () {
+var timer = schedule.scheduleJob('1 12 * * *', function () {
   // var date = new Date();
   // date = new Date(date.setTime(date.getTime() + 1 * 86400000));
   var date = new Date();
   //console.log(date);
   date.setHours(date.getHours() + 24);
   //console.log(date);
-  app.models.User.updateAll({}, {
-    'bottlesCount': 1,
-    'nextRefill': date
-  }, function (err, res) {
-    if (err)
-      console.log(err);
+  console.log('ssss')
+  app.models.User.getDataSource().connector.connect(function (err, db) {
+    var collection = db.collection('user');
+    collection.updateMany(
+      {},
+      {
+        $set: {
+          'bottlesCount': 1,
+          'nextRefill': date
+        }
+      }
 
-  });
+    )
+  })
+  // app.models.User.updateAll({}, {
+  //   'bottlesCount': 1,
+  //   'nextRefill': date
+  // }, function (err, res) {
+  //   if (err)
+  //     console.log(err);
+
+  // });
 });
 
 
