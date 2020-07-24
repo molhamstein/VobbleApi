@@ -18,132 +18,139 @@ module.exports = function (Calllog) {
 
   const minCost = 50
   Calllog.beforeRemote('create', function (context, result, next) {
-    if (context.res.locals.user.status != 'active') {
-      return next(errors.account.notActive());
-    }
-
-    var isReview = context.req.body.isReview;
-    delete context.req.body.isReview
-    if (context.res.locals.user.pocketCoins < minCost && isReview == false) {
-      return next(errors.product.youDonotHaveCoins())
-    }
-    var apn = require('node-apn-http2');
-    if (context.req.body.ownerId == null)
-      context.req.body.ownerId = context.req.accessToken.userId;
-
-    Calllog.app.models.User.findById(context.req.body.relatedUserId, function (err, user) {
-      if (err)
-        return next(err)
-      if (user.pushkitToken == null) {
-        return next(errors.account.userCanNotRinging())
+    let userId = context.args.options.accessToken.userId;
+    Calllog.app.models.User.findById(userId, function (err, user) {
+      if (err) return next(err);
+      if (user.status != 'active') {
+        return next(errors.account.notActive());
       }
-      if (user.allowedCall == false) {
-        return next(errors.account.userNotAllowedRinging())
+
+
+
+      var isReview = context.req.body.isReview;
+      delete context.req.body.isReview
+      if (user.pocketCoins < minCost && isReview == false) {
+        return next(errors.product.youDonotHaveCoins())
       }
-      var callId = context.req.body.callId;
-      delete context.req.body.callId
-      let deviceToken = user.pushkitToken
-      if (user.phoneType == "IPHONE") {
-        var options = {
-          token: {
-            key: "server/boot/AuthKey_SC8495N9AY.p8",
-            keyId: "SC8495N9AY",
-            teamId: "U2DR46FA6M"
-          },
-          production: true,
-          hideExperimentalHttp2Warning: true // the http2 module in node is experimental and will log 
-        };
+      var apn = require('node-apn-http2');
+      if (context.req.body.ownerId == null)
+        context.req.body.ownerId = userId;
 
-        var apnProvider = new apn.Provider(options);
-
-        var note = new apn.Notification();
-        note.expiry = Math.floor(Date.now() / 1000) + 30; // Expires 1 hour from now.
-        note.badge = 3;
-        note.sound = "ping.aiff";
-        note.alert = "\uD83D\uDCE7 \u2709 You have a new message";
-        note.payload = {
-          'conversationId': context.req.body.conversationId,
-          'owner': context.res.locals.user,
-          'callId': callId
-        };
-        note.topic = "com.yallavideo.Vibo.voip";
-
-        apnProvider.send(note, deviceToken).then((result) => {
-          // console.log("result")
-          // console.log(result)
-          if (result['failed'].length > 0) {
-            console.log(result['failed'][0]['response'])
-          }
-          apnProvider.shutdown()
-        });
-      } else {
-        const data = JSON.stringify({
-          "priority": "high",
-          "data": {
-            "click_action": "FLUTTER_NOTIFICATION_CLICK",
-            'conversationId': context.req.body.conversationId,
-            'username': context.res.locals.user.username,
-            'callId': callId
-
-          },
-          "android": {
-            "ttl": "86400s",
-          },
-          "to": deviceToken
-        })
-        // const tempData = JSON.stringify({
-        //   "priority": "high",
-        //   "notification": {
-        //     "title": "Incoming Call"
-        //   },
-        //   "android": {
-        //     "ttl": "86400s",
-        //   },
-        //   "to": deviceToken
-        // })
-
-        const options = {
-          hostname: 'fcm.googleapis.com',
-          path: '/fcm/send',
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': serviceAccount.androidCallToken
-          }
+      Calllog.app.models.User.findById(context.req.body.relatedUserId, function (err, user) {
+        if (err)
+          return next(err)
+        if (user.pushkitToken == null) {
+          return next(errors.account.userCanNotRinging())
         }
+        if (user.allowedCall == false) {
+          return next(errors.account.userNotAllowedRinging())
+        }
+        var callId = context.req.body.callId;
+        delete context.req.body.callId
+        let deviceToken = user.pushkitToken
+        if (user.phoneType == "IPHONE") {
+          var options = {
+            token: {
+              key: "server/boot/AuthKey_SC8495N9AY.p8",
+              keyId: "SC8495N9AY",
+              teamId: "U2DR46FA6M"
+            },
+            production: true,
+            hideExperimentalHttp2Warning: true // the http2 module in node is experimental and will log 
+          };
 
-        // const tempReq = https.request(options, res => {
-        //   console.log(`statusCode: ${res.statusCode}`)
+          var apnProvider = new apn.Provider(options);
 
-        //   res.on('data', d => {
-        //     process.stdout.write(d)
-        //   })
-        // })
+          var note = new apn.Notification();
+          note.expiry = Math.floor(Date.now() / 1000) + 30; // Expires 1 hour from now.
+          note.badge = 3;
+          note.sound = "ping.aiff";
+          note.alert = "\uD83D\uDCE7 \u2709 You have a new message";
+          note.payload = {
+            'conversationId': context.req.body.conversationId,
+            'owner': user,
+            'callId': callId
+          };
+          note.topic = "com.yallavideo.Vibo.voip";
 
-        // tempReq.on('error', error => {
-        //   console.error(error)
-        // })
+          apnProvider.send(note, deviceToken).then((result) => {
+            // console.log("result")
+            // console.log(result)
+            if (result['failed'].length > 0) {
+              console.log(result['failed'][0]['response'])
+            }
+            apnProvider.shutdown()
+          });
+        } else {
+          const data = JSON.stringify({
+            "priority": "high",
+            "data": {
+              "click_action": "FLUTTER_NOTIFICATION_CLICK",
+              'conversationId': context.req.body.conversationId,
+              'username': user.username,
+              'callId': callId
 
-        // tempReq.write(tempData)
-        // tempReq.end()
-
-
-        const req = https.request(options, res => {
-          console.log(`statusCode: ${res.statusCode}`)
-
-          res.on('data', d => {
-            process.stdout.write(d)
+            },
+            "android": {
+              "ttl": "86400s",
+            },
+            "to": deviceToken
           })
-        })
+          // const tempData = JSON.stringify({
+          //   "priority": "high",
+          //   "notification": {
+          //     "title": "Incoming Call"
+          //   },
+          //   "android": {
+          //     "ttl": "86400s",
+          //   },
+          //   "to": deviceToken
+          // })
 
-        req.on('error', error => {
-          console.error(error)
-        })
+          const options = {
+            hostname: 'fcm.googleapis.com',
+            path: '/fcm/send',
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': serviceAccount.androidCallToken
+            }
+          }
 
-        req.write(data)
-        req.end()
-      }
-      next()
+          // const tempReq = https.request(options, res => {
+          //   console.log(`statusCode: ${res.statusCode}`)
+
+          //   res.on('data', d => {
+          //     process.stdout.write(d)
+          //   })
+          // })
+
+          // tempReq.on('error', error => {
+          //   console.error(error)
+          // })
+
+          // tempReq.write(tempData)
+          // tempReq.end()
+
+
+          const req = https.request(options, res => {
+            console.log(`statusCode: ${res.statusCode}`)
+
+            res.on('data', d => {
+              process.stdout.write(d)
+            })
+          })
+
+          req.on('error', error => {
+            console.error(error)
+          })
+
+          req.write(data)
+          req.end()
+        }
+        next()
+      })
+
     })
   });
   Calllog.updateCallLog = async function (id, startAt, endAt, isFinish = false, status, isReview, callback) {
