@@ -19,9 +19,9 @@ module.exports = function (Calllog) {
   const minCost = 50
   Calllog.beforeRemote('create', function (context, result, next) {
     let userId = context.args.options.accessToken.userId;
-    Calllog.app.models.User.findById(userId, function (err, user) {
+    Calllog.app.models.User.findById(userId, function (err, mainUser) {
       if (err) return next(err);
-      if (user.status != 'active') {
+      if (mainUser.status != 'active') {
         return next(errors.account.notActive());
       }
 
@@ -29,7 +29,7 @@ module.exports = function (Calllog) {
 
       var isReview = context.req.body.isReview;
       delete context.req.body.isReview
-      if (user.pocketCoins < minCost && isReview == false) {
+      if (mainUser.pocketCoins < minCost && isReview == false) {
         return next(errors.product.youDonotHaveCoins())
       }
       var apn = require('node-apn-http2');
@@ -51,9 +51,9 @@ module.exports = function (Calllog) {
         if (user.phoneType == "IPHONE") {
           var options = {
             token: {
-              key: "server/boot/AuthKey_SC8495N9AY.p8",
-              keyId: "SC8495N9AY",
-              teamId: "U2DR46FA6M"
+              key: "server/boot/AuthKey_3XNRG5WC4J.p8",
+              keyId: "3XNRG5WC4J",
+              teamId: "FPZ9G43T6B"
             },
             production: true,
             hideExperimentalHttp2Warning: true // the http2 module in node is experimental and will log 
@@ -68,7 +68,7 @@ module.exports = function (Calllog) {
           note.alert = "\uD83D\uDCE7 \u2709 You have a new message";
           note.payload = {
             'conversationId': context.req.body.conversationId,
-            'owner': user,
+            'owner': mainUser,
             'callId': callId
           };
           note.topic = "com.yallavideo.Vibo.voip";
@@ -87,7 +87,7 @@ module.exports = function (Calllog) {
             "data": {
               "click_action": "FLUTTER_NOTIFICATION_CLICK",
               'conversationId': context.req.body.conversationId,
-              'username': user.username,
+              'username': mainUser.username,
               'callId': callId
 
             },

@@ -19,5 +19,6 @@ node_modules
 npm-debug.log
 server/boot/serviceAccountKey.json
 server/boot/AuthKey_SC8495N9AY.p8
+server/boot/AuthKey_3XNRG5WC4J.p8
 uploadFiles
 server/boot/logs/log.txt
