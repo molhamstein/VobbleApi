@@ -309,6 +309,13 @@
       "principalType": "ROLE",
       "principalId": "$everyone",
       "permission": "ALLOW",
+      "property": "loginApple"
+    },
+    
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW",
       "property": "loginInstegram"
     },
     {
@@ -432,6 +439,34 @@
         {
           "path": "/export",
           "verb": "get"
+        }
+      ]
+    },
+    "loginApple": {
+      "accepts": [
+        {
+          "arg": "data",
+          "type": "object",
+          "required": true,
+          "description": "",
+          "http": {
+            "source": "body"
+          }
+        }
+      ],
+      "returns": [
+        {
+          "arg": "result",
+          "type": "object",
+          "root": true,
+          "description": ""
+        }
+      ],
+      "description": "",
+      "http": [
+        {
+          "path": "/appleLogin",
+          "verb": "post"
         }
       ]
     },

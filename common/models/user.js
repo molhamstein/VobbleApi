@@ -383,6 +383,197 @@ module.exports = function (User) {
     });
   }
 
+  /**
+ *
+ * @param {string} token
+ * @param {string} name
+ * @param {string} email
+ * @param {Function(Error, object)} callback
+ */
+
+  User.loginApple = function (data, callback) {
+    var deviceId = null
+    User.app.models.Device.cheackDevice(data.deviceName, function (err, device) {
+      if (err)
+        return callback(err)
+      if (device != null) {
+        deviceId = device.id;
+      }
+
+      var socialId = data.socialId;
+      var email = data.email;
+      var name = data.name;
+      var result;
+      // check if user is new or old in the system 
+      User.findOne({
+        where: {
+          "and": [{
+            "or": [{
+              socialId: socialId
+            },
+            {
+              "and": [{
+                username: {
+                  like: name,
+                  options: "i"
+                }
+              }, {
+                email: email
+              }]
+            }
+            ]
+          }, {
+            typeLogIn: "apple"
+          }]
+
+        }
+      }, function (err, oneUser) {
+        if (err)
+          callback(err, null);
+        //console.log("oneUser");
+        //console.log(oneUser);
+        if (oneUser == null) {
+          // cheack if username is userd befor
+          User.findOne({
+            where: {
+              username: name
+            }
+          }, function (err, userByUsername) {
+            if (userByUsername) {
+              var randVal = 100 + (Math.random() * (999 - 100));
+              var x = Math.round(randVal);
+              name = name + "_" + x;
+            }
+
+
+
+            var nextRefillVar = new Date();
+            nextRefillVar.setHours(24, 0, 0, 0);
+
+            var tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            tomorrow.setHours(12)
+
+            User.create({
+              socialId: socialId,
+              dateRechargeReplies: tomorrow,
+              email: email,
+              deviceId: deviceId,
+              username: name,
+              status: "active",
+              nextRefill: nextRefillVar,
+              password: "123",
+              typeLogIn: "apple"
+            }, function (err, newUser) {
+              if (err) {
+                if (err.statusCode == 422)
+                  callback(errors.account.emailAlreadyExistsSN(), null);
+                else
+                  callback(err, null);
+              }
+              // create the token
+              User.app.models.AccessToken.create({
+                ttl: 31536000000,
+                userId: newUser.id
+              }, function (err, newToken) {
+                // get the token with user of new user
+                // User.app.models.AccessToken.findOne({ include: 'user', userId: newUser.id }, function (err, token) {
+                // User.app.models.AccessToken.findOne(, function (err, token) {
+                User.app.models.AccessToken.findOne({
+                  include: {
+                    relation: 'user',
+                    scope: {
+                      include: {
+                        relation: 'country'
+                      }
+                    }
+                  },
+                  where: {
+                    userId: newUser.id
+                  }
+                }, function (err, token) {
+                  if (err)
+                    callback(err, null);
+                  result = token;
+                  result.isNew = true;
+                  makeChat(newUser.id);
+                  callback(null, result);
+                });
+              })
+
+            })
+          })
+          // .catch((err) => {
+          //     //console.log('err', err)
+
+          //     throw err
+          // })
+
+        }
+        // old user
+        else {
+          if (oneUser.status != 'active') {
+            return callback(errors.account.notActive());
+          }
+          oneUser.updateAttributes({
+            "socialId": socialId,
+            "deviceId": deviceId
+          })
+          // get the token with user
+          User.app.models.AccessToken.findOne({
+            include: {
+              relation: 'user',
+              scope: {
+                include: {
+                  relation: 'country'
+                }
+              }
+            },
+            where: {
+              userId: oneUser.id
+            }
+          }, function (err, token) {
+            if (err)
+              callback(err, null);
+            result = token;
+            if (result == null) {
+              User.app.models.AccessToken.create({
+                ttl: 31536000000,
+                userId: oneUser.id
+              }, function (err, newToken) {
+                // get the token with user of new user
+                // User.app.models.AccessToken.findOne({ include: 'user', userId: newUser.id }, function (err, token) {
+                // User.app.models.AccessToken.findOne(, function (err, token) {
+                User.app.models.AccessToken.findOne({
+                  include: {
+                    relation: 'user',
+                    scope: {
+                      include: {
+                        relation: 'country'
+                      }
+                    }
+                  },
+                  where: {
+                    userId: oneUser.id
+                  }
+                }, function (err, token) {
+                  if (err)
+                    callback(err, null);
+                  result = token;
+                  result.isNew = false;
+                  callback(null, result);
+                });
+              })
+            } else {
+              result.isNew = false;
+              callback(null, result);
+            }
+          });
+        }
+      });
+    });
+  }
+
   User.loginInstegram = function (data, callback) {
     var deviceId = null
     User.app.models.Device.cheackDevice(data.deviceName, function (err, device) {
@@ -1800,12 +1991,12 @@ module.exports = function (User) {
         else
           fileName = filePath + "audios" + bottle.file.slice(bottle.file.lastIndexOf("/"))
         // console.log(fileName)
-        if(fs.existsSync(fileName)) {
+        if (fs.existsSync(fileName)) {
           console.log("The file exists.");
           fs.unlinkSync(fileName)
-      } else {
+        } else {
           console.log('The file does not exist.');
-      }
+        }
       })
     })
     // let usersArray = []
