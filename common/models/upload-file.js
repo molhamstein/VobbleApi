@@ -108,12 +108,11 @@ module.exports = function (Uploadfile) {
                         size: size
                       })
                       .on('end', function () {
-                        console.log('Processing finished !');
+                        var filePath = config.filePath;
+                        console.log(filePath + "videos/" + file.name)
+                        var fileName = filePath + "videos/" + file.name
+                        fs.unlinkSync(fileName)
                       });
-                    var filePath = config.filePath;
-                    console.log(filePath + "videos/" + file.name)
-                    var fileName = filePath + "videos/" + file.name
-                    // fs.unlinkSync(fileName)
                   }
                 });
               })
