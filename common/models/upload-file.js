@@ -110,7 +110,7 @@ module.exports = function (Uploadfile) {
                     var filePath = config.filePath;
                     console.log(filePath + "videos/" + file.name)
                     var fileName = filePath + "videos/" + file.name
-                    fs.unlinkSync(fileName)
+                    // fs.unlinkSync(fileName)
                   }
                 });
               })
