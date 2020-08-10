@@ -1,14 +1,15 @@
 {
     "restApiRoot": "/api",
     "host": "0.0.0.0",
-    "domain": "http://localhost:3000",
-    "siteDomain": "http://localhost:3000",
+    "domain": "http://localhost:3005",
+    "siteDomain": "http://localhost:3005",
     "thumbUrl": "C:/FFmpeg/bin/",
+    "filePath": "P:/vibo/VobbleApi/uploadFiles/",
     "programFFmpegName": [
         "ffmpeg.exe",
         "ffprobe.exe"
     ],
-    "port": 3000,
+    "port": 3005,
     "remoting": {
         "context": false,
         "rest": {

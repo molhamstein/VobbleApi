@@ -39,16 +39,15 @@ module.exports = function (Bottle) {
       }
       bottle.status = "deactive";
       bottle.save();
-      if (deleteFile == true) {
-        var filePath = config.filePath;
-        var fileName = ""
-        if (bottle.bottleType = "video")
-          fileName = filePath + "videos" + bottle.file.slice(bottle.file.lastIndexOf("/"))
-        else
-          fileName = filePath + "audios" + bottle.file.slice(bottle.file.lastIndexOf("/"))
-        // console.log(fileName)
-        fs.unlinkSync(fileName)
-      }
+      // if (deleteFile == true) {
+      //   var filePath = config.filePath;
+      //   var fileName = ""
+      //   if (bottle.bottleType = "video")
+      //     fileName = filePath + "videos" + bottle.file.slice(bottle.file.lastIndexOf("/"))
+      //   else
+      //     fileName = filePath + "audios" + bottle.file.slice(bottle.file.lastIndexOf("/"))
+      //   fs.unlinkSync(fileName)
+      // }
       callback(null);
     });
   };

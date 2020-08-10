@@ -9,7 +9,17 @@ const {
   getAudioDurationInSeconds
 } = require('get-audio-duration')
 
+const AWS = require('aws-sdk');
+const fs = require('fs'); // Needed for example below
+var awsJSON = require("../../server/boot/AWS.json");
 
+const spacesEndpoint = new AWS.Endpoint(awsJSON.mainEndpoint);
+const s3 = new AWS.S3({
+  endpoint: awsJSON.endpoint,
+  accessKeyId: awsJSON.accessKeyId,
+  secretAccessKey: awsJSON.secretAccessKey
+});
+var isInAWS = true
 var ffmpeg = require('fluent-ffmpeg');
 var thumb = require('node-thumbnail').thumb;
 
@@ -45,7 +55,7 @@ module.exports = function (Uploadfile) {
         var rotation;
         var size
         ffmpeg.ffprobe(src + "/" + folderName + "/" + file.name, function (err, metadata) {
-          if (err) {} else {
+          if (err) { } else {
             //console.log(metadata);
             metadata['streams'].forEach(function (element) {
               if (element.width) {
@@ -77,14 +87,43 @@ module.exports = function (Uploadfile) {
                 folder: src + '/thumbnail/',
                 size: size
               });
+
           }
         });
 
+        if (isInAWS) {
+          fs.readFile(src + "/" + folderName + "/" + file.name, function (err, dd) {
+            var params = {
+              Bucket: "vobble",
+              Key: file.name,
+              // Body: src + "/" + folderName + "/" + file.name,
+              Body: dd,
+              ACL: "public-read"
+            };
 
-        files.push({
-          'file': urlFileRootSave + file.name,
-          'thumbnail': urlThumbRootSave + file.name.substring(0, file.name.lastIndexOf('.')) + "_thumb.PNG"
-        });
+            s3.putObject(params, function (err, data) {
+              if (err) console.log(err, err.stack);
+              else {
+                console.log(data);
+                var filePath = config.filePath;
+                console.log(filePath + "videos/" + file.name)
+                var fileName = filePath + "videos/" + file.name
+                fs.unlinkSync(fileName)
+
+              }
+            });
+          })
+          files.push({
+            'file': "https://vobble.ams3.digitaloceanspaces.com/" + file.name,
+            'thumbnail': urlThumbRootSave + file.name.substring(0, file.name.lastIndexOf('.')) + "_thumb.PNG"
+          });
+        } else {
+          files.push({
+            'file': urlFileRootSave + file.name,
+            'thumbnail': urlThumbRootSave + file.name.substring(0, file.name.lastIndexOf('.')) + "_thumb.PNG"
+          });
+
+        }
 
       }
       // cheack type of file from folder name request            
@@ -93,7 +132,7 @@ module.exports = function (Uploadfile) {
           source: src + "/" + folderName + "/" + file.name, // could be a filename: dest/path/image.jpg
           destination: src + '/thumbnail/',
           concurrency: 4
-        }, function (files, err, stdout, stderr) {});
+        }, function (files, err, stdout, stderr) { });
         var parts = file.name.split('.');
         var extension = parts[parts.length - 1];
         files.push({
