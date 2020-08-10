@@ -19,7 +19,7 @@ const s3 = new AWS.S3({
   accessKeyId: awsJSON.accessKeyId,
   secretAccessKey: awsJSON.secretAccessKey
 });
-var isInAWS = false
+var isInAWS = true
 var ffmpeg = require('fluent-ffmpeg');
 var thumb = require('node-thumbnail').thumb;
 
@@ -54,8 +54,9 @@ module.exports = function (Uploadfile) {
         var oldHeight = 0;
         var rotation;
         var size
-        ffmpeg.ffprobe(src + "/" + folderName + "/" + file.name, function (err, metadata) {
-          if (err) { } else {
+        // ffmpeg.ffprobe(src + "/" + folderName + "/" + file.name, function (err, metadata) {
+          ffmpeg.ffprobe("P:/vibo/VobbleApi/uploadFiles/videos/5efa41f0-db2a-11ea-b3fb-b7d2915714b61597078561678.mp4", function (err, metadata) {
+          if (err) { console.log(err)} else {
             //console.log(metadata);
             metadata['streams'].forEach(function (element) {
               if (element.width) {
@@ -80,39 +81,53 @@ module.exports = function (Uploadfile) {
               size = newWidth + 'x' + parseInt(newHeight)
             }
             //console.log(size)
-            ffmpeg(src + "/" + folderName + "/" + file.name)
-              .screenshot({
-                count: 1,
-                filename: file.name.substring(0, file.name.lastIndexOf('.')) + "_thumb.PNG",
-                folder: src + '/thumbnail/',
-                size: size
-              });
+            if (isInAWS) {
+              // fs.readFile(src + "/" + folderName + "/" + file.name, function (err, dd) {
+                console.log("data");
 
+                fs.readFile("P:/vibo/VobbleApi/uploadFiles/videos/5efa41f0-db2a-11ea-b3fb-b7d2915714b61597078561678.mp4", function (err, dd) {
+                var params = {
+                  Bucket: "vobble",
+                  Key: file.name,
+                  // Body: src + "/" + folderName + "/" + file.name,
+                  Body: dd,
+                  ACL: "public-read"
+                };
+                console.log("data");
+
+                s3.putObject(params, function (err, data) {
+                  if (err) console.log(err, err.stack);
+                  else {
+                    console.log(data);
+
+                    ffmpeg(src + "/" + folderName + "/" + file.name)
+                      .screenshot({
+                        count: 1,
+                        filename: file.name.substring(0, file.name.lastIndexOf('.')) + "_thumb.PNG",
+                        folder: src + '/thumbnail/',
+                        size: size
+                      });
+                    var filePath = config.filePath;
+                    console.log(filePath + "videos/" + file.name)
+                    var fileName = filePath + "videos/" + file.name
+                    fs.unlinkSync(fileName)
+                  }
+                });
+              })
+            }
+            else {
+              ffmpeg(src + "/" + folderName + "/" + file.name)
+                .screenshot({
+                  count: 1,
+                  filename: file.name.substring(0, file.name.lastIndexOf('.')) + "_thumb.PNG",
+                  folder: src + '/thumbnail/',
+                  size: size
+                });
+            }
           }
         });
 
         if (isInAWS) {
-          fs.readFile(src + "/" + folderName + "/" + file.name, function (err, dd) {
-            var params = {
-              Bucket: "vobble",
-              Key: file.name,
-              // Body: src + "/" + folderName + "/" + file.name,
-              Body: dd,
-              ACL: "public-read"
-            };
-
-            s3.putObject(params, function (err, data) {
-              if (err) console.log(err, err.stack);
-              else {
-                console.log(data);
-                var filePath = config.filePath;
-                console.log(filePath + "videos/" + file.name)
-                var fileName = filePath + "videos/" + file.name
-                fs.unlinkSync(fileName)
-
-              }
-            });
-          })
           files.push({
             'file': "https://vobble.ams3.digitaloceanspaces.com/" + file.name,
             'thumbnail': urlThumbRootSave + file.name.substring(0, file.name.lastIndexOf('.')) + "_thumb.PNG"
