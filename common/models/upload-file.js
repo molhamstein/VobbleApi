@@ -54,8 +54,8 @@ module.exports = function (Uploadfile) {
         var oldHeight = 0;
         var rotation;
         var size
-        // ffmpeg.ffprobe(src + "/" + folderName + "/" + file.name, function (err, metadata) {
-          ffmpeg.ffprobe("P:/vibo/VobbleApi/uploadFiles/videos/5efa41f0-db2a-11ea-b3fb-b7d2915714b61597078561678.mp4", function (err, metadata) {
+        ffmpeg.ffprobe(src + "/" + folderName + "/" + file.name, function (err, metadata) {
+          // ffmpeg.ffprobe("P:/vibo/VobbleApi/uploadFiles/videos/5efa41f0-db2a-11ea-b3fb-b7d2915714b61597078561678.mp4", function (err, metadata) {
           if (err) { console.log(err)} else {
             //console.log(metadata);
             metadata['streams'].forEach(function (element) {
@@ -82,10 +82,10 @@ module.exports = function (Uploadfile) {
             }
             //console.log(size)
             if (isInAWS) {
-              // fs.readFile(src + "/" + folderName + "/" + file.name, function (err, dd) {
+              fs.readFile(src + "/" + folderName + "/" + file.name, function (err, dd) {
                 console.log("data");
 
-                fs.readFile("P:/vibo/VobbleApi/uploadFiles/videos/5efa41f0-db2a-11ea-b3fb-b7d2915714b61597078561678.mp4", function (err, dd) {
+                // fs.readFile("P:/vibo/VobbleApi/uploadFiles/videos/5efa41f0-db2a-11ea-b3fb-b7d2915714b61597078561678.mp4", function (err, dd) {
                 var params = {
                   Bucket: "vobble",
                   Key: file.name,
