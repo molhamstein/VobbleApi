@@ -56,7 +56,7 @@ module.exports = function (Uploadfile) {
         var size
         ffmpeg.ffprobe(src + "/" + folderName + "/" + file.name, function (err, metadata) {
           // ffmpeg.ffprobe("P:/vibo/VobbleApi/uploadFiles/videos/5efa41f0-db2a-11ea-b3fb-b7d2915714b61597078561678.mp4", function (err, metadata) {
-          if (err) { console.log(err)} else {
+          if (err) { console.log(err) } else {
             //console.log(metadata);
             metadata['streams'].forEach(function (element) {
               if (element.width) {
@@ -106,6 +106,9 @@ module.exports = function (Uploadfile) {
                         filename: file.name.substring(0, file.name.lastIndexOf('.')) + "_thumb.PNG",
                         folder: src + '/thumbnail/',
                         size: size
+                      })
+                      .on('end', function () {
+                        console.log('Processing finished !');
                       });
                     var filePath = config.filePath;
                     console.log(filePath + "videos/" + file.name)
