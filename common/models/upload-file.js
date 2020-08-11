@@ -19,7 +19,7 @@ const s3 = new AWS.S3({
   accessKeyId: awsJSON.accessKeyId,
   secretAccessKey: awsJSON.secretAccessKey
 });
-var isInAWS = false
+var isInAWS = true
 var ffmpeg = require('fluent-ffmpeg');
 var thumb = require('node-thumbnail').thumb;
 
