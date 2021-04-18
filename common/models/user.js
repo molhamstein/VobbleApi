@@ -1977,7 +1977,7 @@ module.exports = function(User) {
         var result;
         // TODO
         let count = 0;
-        let deleteDate = new Date("2019-04-25T10:39:20.690Z")
+        let deleteDate = new Date("2019-06-25T10:39:20.690Z")
         User.app.models.Bottle.find({
                 "where": {
                     "createdAt": { lt: deleteDate }
