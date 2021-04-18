@@ -1984,24 +1984,24 @@ module.exports = function(User) {
                     // "status": "deactive"
                 }
             }, function(err, data) {
-                console.log("data.length")
-                console.log(data.length)
-                    // data.forEach(bottle => {
-                    //     var filePath = config.filePath;
-                    //     var fileName = ""
-                    //     if (bottle.bottleType = "video")
-                    //         fileName = filePath + "videos" + bottle.file.slice(bottle.file.lastIndexOf("/"))
-                    //     else
-                    //         fileName = filePath + "audios" + bottle.file.slice(bottle.file.lastIndexOf("/"))
-                    //         // console.log(fileName)
-                    //     if (fs.existsSync(fileName)) {
-                    //         console.log("The file exists.");
-                    //         count++;
-                    //         fs.unlinkSync(fileName)
-                    //     } else {
-                    //         console.log('The file does not exist.');
-                    //     }
-                    // })
+                // console.log("data.length")
+                // console.log(data.length)
+                data.forEach(bottle => {
+                    var filePath = config.filePath;
+                    var fileName = ""
+                    if (bottle.bottleType = "video")
+                        fileName = filePath + "videos" + bottle.file.slice(bottle.file.lastIndexOf("/"))
+                    else
+                        fileName = filePath + "audios" + bottle.file.slice(bottle.file.lastIndexOf("/"))
+                        // console.log(fileName)
+                    if (fs.existsSync(fileName)) {
+                        console.log("The file exists.");
+                        count++;
+                        fs.unlinkSync(fileName)
+                    } else {
+                        console.log('The file does not exist.');
+                    }
+                })
             })
             // let usersArray = []
             // User.app.models.Bottle.find({
