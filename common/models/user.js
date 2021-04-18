@@ -1977,31 +1977,31 @@ module.exports = function(User) {
         var result;
         // TODO
         let count = 0;
-        let deleteDate = new Date("2019-01-25T10:39:20.690Z")
+        let deleteDate = new Date("2019-04-25T10:39:20.690Z")
         User.app.models.Bottle.find({
                 "where": {
                     "createdAt": { lt: deleteDate }
                     // "status": "deactive"
                 }
             }, function(err, data) {
-                // console.log("data.length")
-                // console.log(data.length)
-                data.forEach(bottle => {
-                    var filePath = config.filePath;
-                    var fileName = ""
-                    if (bottle.bottleType = "video")
-                        fileName = filePath + "videos" + bottle.file.slice(bottle.file.lastIndexOf("/"))
-                    else
-                        fileName = filePath + "audios" + bottle.file.slice(bottle.file.lastIndexOf("/"))
-                        // console.log(fileName)
-                    if (fs.existsSync(fileName)) {
-                        console.log("The file exists.");
-                        count++;
-                        fs.unlinkSync(fileName)
-                    } else {
-                        console.log('The file does not exist.');
-                    }
-                })
+                console.log("data.length")
+                console.log(data.length)
+                    // data.forEach(bottle => {
+                    //     var filePath = config.filePath;
+                    //     var fileName = ""
+                    //     if (bottle.bottleType = "video")
+                    //         fileName = filePath + "videos" + bottle.file.slice(bottle.file.lastIndexOf("/"))
+                    //     else
+                    //         fileName = filePath + "audios" + bottle.file.slice(bottle.file.lastIndexOf("/"))
+                    //         // console.log(fileName)
+                    //     if (fs.existsSync(fileName)) {
+                    //         console.log("The file exists.");
+                    //         count++;
+                    //         fs.unlinkSync(fileName)
+                    //     } else {
+                    //         console.log('The file does not exist.');
+                    //     }
+                    // })
             })
             // let usersArray = []
             // User.app.models.Bottle.find({
