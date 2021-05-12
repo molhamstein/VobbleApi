@@ -27,7 +27,7 @@
     "fluent-ffmpeg": "^2.1.2",
     "get-audio-duration": "^1.0.0",
     "googleapis": "^40.0.0",
-    "grpc": "^1.21.1",
+    "grpc": "^1.24.9",
     "helmet": "^3.10.0",
     "image-downloader": "^3.3.0",
     "loopback": "^3.19.0",
