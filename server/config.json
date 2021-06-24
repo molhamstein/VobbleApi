@@ -1,30 +1,30 @@
 {
-  "restApiRoot": "/api",
-  "host": "0.0.0.0",
-  "domain": "http://159.65.202.38:3000",
-  "siteDomain": "http://159.65.202.38/vobbleApp/Vobble-webApp",
-  "thumbUrl": "C:/FFmpeg/bin/",
-  "filePath":"/home/vobbleDev/VobbleApi/uploadFiles/",
-  "programFFmpegName": [
-    "ffmpeg.exe",
-    "ffprobe.exe"
-  ],
-  "port": 3000,
-  "remoting": {
-    "context": false,
-    "rest": {
-      "handleErrors": false,
-      "normalizeHttpPath": false,
-      "xml": false
-    },
-    "json": {
-      "strict": false,
-      "limit": "100kb"
-    },
-    "urlencoded": {
-      "extended": true,
-      "limit": "100kb"
-    },
-    "cors": false
-  }
+    "restApiRoot": "/api",
+    "host": "0.0.0.0",
+    "domain": "http://159.65.202.38:3000",
+    "siteDomain": "http://159.65.202.38/vobbleApp/Vobble-webApp",
+    "thumbUrl": "C:/FFmpeg/bin/",
+    "filePath": "/home/vobbleDev/VobbleApi/uploadFiles/",
+    "programFFmpegName": [
+        "ffmpeg.exe",
+        "ffprobe.exe"
+    ],
+    "port": 3000,
+    "remoting": {
+        "context": false,
+        "rest": {
+            "handleErrors": false,
+            "normalizeHttpPath": false,
+            "xml": false
+        },
+        "json": {
+            "strict": false,
+            "limit": "100kb"
+        },
+        "urlencoded": {
+            "extended": true,
+            "limit": "100kb"
+        },
+        "cors": false
+    }
 }

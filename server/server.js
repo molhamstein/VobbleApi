@@ -16,91 +16,97 @@ console.log("startDate")
 console.log(startDate)
 
 
-app.use(function (req, res, next) {
-  // console("App Use");
-  if (!req.accessToken) return next();
-  //console.log("Token");
-  //console.log(req.accessToken.userId);
-  app.models.User.findById(req.accessToken.userId,
-    function (err, user) {
-      if (err) return next(err);
-      if (!user) return next(errors.account.notFound());
-      res.locals.user = user
-      app.currentUser = user;
-      user.roles.find({}, function (err, roles) {
-        res.locals.rolesNames = roles.map(function (role) {
-          return role.name;
+app.use(function(req, res, next) {
+    // console("App Use");
+    if (!req.accessToken) return next();
+    //console.log("Token");
+    //console.log(req.accessToken.userId);
+    app.models.User.findById(req.accessToken.userId,
+        function(err, user) {
+            if (err) return next(err);
+            if (!user) return next(errors.account.notFound());
+            res.locals.user = user
+            app.currentUser = user;
+            user.roles.find({}, function(err, roles) {
+                res.locals.rolesNames = roles.map(function(role) {
+                    return role.name;
+                });
+                next();
+            });
         });
-        next();
-      });
-    });
 });
 
-function addToLog() {
-  var text = "start at : " + startDate.toString() + "\r\n" + "run at : " + new Date().toString() + "\r\n-----------------------------------------\r\n"
-  // fs.writeFile("server/boot/logs/log.txt", text, (err) => {
-  //   if (err) console.log(err);
-  //   console.log("Successfully Written to File.");
-  // });
+app.use(function(req, res, next) {
+    console.log(req.originalUrl);
+    let currentDate = new Date();
+    addToLog("Request at : " + currentDate.toString() + "\r\n" + "request is : " + req.originalUrl + "\r\n-----------------------------------------\r\n")
+    next();
+})
 
-  fs.appendFile('server/boot/logs/log.txt', text, function (err) {
-    if (err) throw err;
-    console.log('Saved!');
-  });
+
+function addToLog(text) {
+    // var text = "start at : " + startDate.toString() + "\r\n" + "run at : " + new Date().toString() + "\r\n-----------------------------------------\r\n"
+    // fs.writeFile("server/boot/logs/log.txt", text, (err) => {
+    //   if (err) console.log(err);
+    //   console.log("Successfully Written to File.");
+    // });
+
+    fs.appendFile('server/boot/logs/log.txt', text, function(err) {
+        if (err) throw err;
+        console.log('Saved!');
+    });
 
 }
-app.start = function () {
-  // start the web server
-  return app.listen(function () {
-    app.emit('started');
-    var baseUrl = app.get('url').replace(/\/$/, '');
-    console.log('Web server listening at: %s', baseUrl);
-    addToLog()
-    if (app.get('loopback-component-explorer')) {
-      var explorerPath = app.get('loopback-component-explorer').mountPath;
-      console.log('Browse your REST API at %s%s', baseUrl, explorerPath);
-    }
-  });
+app.start = function() {
+    // start the web server
+    return app.listen(function() {
+        app.emit('started');
+        var baseUrl = app.get('url').replace(/\/$/, '');
+        console.log('Web server listening at: %s', baseUrl);
+        addToLog("start at : " + startDate.toString() + "\r\n" + "run at : " + new Date().toString() + "\r\n-----------------------------------------\r\n")
+        if (app.get('loopback-component-explorer')) {
+            var explorerPath = app.get('loopback-component-explorer').mountPath;
+            console.log('Browse your REST API at %s%s', baseUrl, explorerPath);
+        }
+    });
 };
 
 
-var timer = schedule.scheduleJob('1 12 * * *', function () {
-  // var date = new Date();
-  // date = new Date(date.setTime(date.getTime() + 1 * 86400000));
-  var date = new Date();
-  //console.log(date);
-  date.setHours(date.getHours() + 24);
-  //console.log(date);
-  console.log('ssss')
-  app.models.User.getDataSource().connector.connect(function (err, db) {
-    var collection = db.collection('user');
-    collection.updateMany(
-      {},
-      {
-        $set: {
-          'bottlesCount': 1,
-          'nextRefill': date
-        }
-      }
+var timer = schedule.scheduleJob('1 12 * * *', function() {
+    // var date = new Date();
+    // date = new Date(date.setTime(date.getTime() + 1 * 86400000));
+    var date = new Date();
+    //console.log(date);
+    date.setHours(date.getHours() + 24);
+    //console.log(date);
+    console.log('ssss')
+    app.models.User.getDataSource().connector.connect(function(err, db) {
+            var collection = db.collection('user');
+            collection.updateMany({}, {
+                    $set: {
+                        'bottlesCount': 1,
+                        'nextRefill': date
+                    }
+                }
 
-    )
-  })
-  // app.models.User.updateAll({}, {
-  //   'bottlesCount': 1,
-  //   'nextRefill': date
-  // }, function (err, res) {
-  //   if (err)
-  //     console.log(err);
+            )
+        })
+        // app.models.User.updateAll({}, {
+        //   'bottlesCount': 1,
+        //   'nextRefill': date
+        // }, function (err, res) {
+        //   if (err)
+        //     console.log(err);
 
-  // });
+    // });
 });
 
 
 // Bootstrap the application, configure models, datasources and middleware.
 // Sub-apps like REST API are mounted via boot scripts.
-boot(app, __dirname, function (err) {
-  if (err) throw err;
-  // start the server if `$ node server.js`
-  if (require.main === module)
-    app.start();
+boot(app, __dirname, function(err) {
+    if (err) throw err;
+    // start the server if `$ node server.js`
+    if (require.main === module)
+        app.start();
 });
