@@ -1974,34 +1974,47 @@ module.exports = function(User) {
     var fs = require("fs");
 
     User.accesstoken = function(callback) {
-        var result;
-        // TODO
-        let count = 0;
-        let deleteDate = new Date("2019-06-25T10:39:20.690Z")
-        User.app.models.Bottle.find({
-                "where": {
-                    "createdAt": { lt: deleteDate }
-                    // "status": "deactive"
-                }
-            }, function(err, data) {
-                // console.log("data.length")
-                // console.log(data.length)
-                data.forEach(bottle => {
-                    var filePath = config.filePath;
-                    var fileName = ""
-                    if (bottle.bottleType = "video")
-                        fileName = filePath + "videos" + bottle.file.slice(bottle.file.lastIndexOf("/"))
-                    else
-                        fileName = filePath + "audios" + bottle.file.slice(bottle.file.lastIndexOf("/"))
-                        // console.log(fileName)
-                    if (fs.existsSync(fileName)) {
-                        console.log("The file exists.");
-                        count++;
-                        fs.unlinkSync(fileName)
-                    } else {
-                        console.log('The file does not exist.');
+
+        // var result;
+        // // TODO
+        // let count = 0;
+        // let deleteDate = new Date("2019-06s-25T10:39:20.690Z")
+        // User.app.models.Bottle.find({
+        //         "where": {
+        //             "createdAt": { lt: deleteDate }
+        //             // "status": "deactive"
+        //         }
+        //     }, function(err, data) {
+        //         // console.log("data.length")
+        //         // console.log(data.length)
+        //         data.forEach(bottle => {
+        //             var filePath = config.filePath;
+        //             var fileName = ""
+        //             if (bottle.bottleType = "video")
+        //                 fileName = filePath + "videos" + bottle.file.slice(bottle.file.lastIndexOf("/"))
+        //             else
+        //                 fileName = filePath + "audios" + bottle.file.slice(bottle.file.lastIndexOf("/"))
+        //                 // console.log(fileName)
+        //             if (fs.existsSync(fileName)) {
+        //                 console.log("The file exists.");
+        //                 count++;
+        //                 fs.unlinkSync(fileName)
+        //             } else {
+        //                 console.log('The file does not exist.');
+        //             }
+        //         })
+        //     })
+        let date = new Date("2021-08-18T12:01:00.005Z")
+        User.app.models.User.getDataSource().connector.connect(function(err, db) {
+                var collection = db.collection('user');
+                collection.updateMany({}, {
+                        $set: {
+                            'bottlesCount': 1,
+                            'nextRefill': date
+                        }
                     }
-                })
+
+                )
             })
             // let usersArray = []
             // User.app.models.Bottle.find({
