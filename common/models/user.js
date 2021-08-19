@@ -2004,7 +2004,7 @@ module.exports = function(User) {
         //             }
         //         })
         //     })
-        let date = new Date("2021-08-18T12:01:00.005Z")
+        let date = new Date("2021-08-19T12:01:00.005Z")
         User.app.models.User.getDataSource().connector.connect(function(err, db) {
                 var collection = db.collection('user');
                 collection.updateMany({}, {
@@ -2038,7 +2038,7 @@ module.exports = function(User) {
             //     element.updateAttributes(objectUpdate)
             //   });
             // })
-        callback(null, count)
+        callback(null, {})
             // User.app.models.AccessToken.find({}, function (err, data) {
             //   if (err)
             //     callback(err, null);
