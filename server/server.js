@@ -14,6 +14,8 @@ var fs = require("fs");
 var startDate = new Date()
 console.log("startDate")
 console.log(startDate)
+var swStats = require('swagger-stats');
+app.use(swStats.getMiddleware());
 
 
 app.use(function(req, res, next) {
